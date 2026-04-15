@@ -54,7 +54,7 @@ export const applyPromotion = (price: number, promo: any) => {
     }
 
     if(promo.discount_type === "fixed"){
-        return price - promo.discount_value;
+        return Math.max(0, price - promo.discount_value);
     }
     return price;
 }
