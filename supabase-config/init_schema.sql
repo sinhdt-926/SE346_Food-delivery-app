@@ -21,6 +21,7 @@ CREATE TABLE promotions (
 
 CREATE TABLE public.users (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+    email VARCHAR UNIQUE, -- BỔ SUNG THÊM TRƯỜNG EMAIL
     fullname VARCHAR,
     username VARCHAR UNIQUE,
     phone_number VARCHAR,
@@ -103,8 +104,13 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.users (id, fullname)
-  VALUES (new.id, new.raw_user_meta_data->>'fullname');
+  -- CẬP NHẬT THÊM EMAIL VÀO LỆNH INSERT
+  INSERT INTO public.users (id, fullname, email)
+  VALUES (
+    new.id, 
+    new.raw_user_meta_data->>'fullname',
+    new.email
+  );
   RETURN new;
 END;
 $$;
