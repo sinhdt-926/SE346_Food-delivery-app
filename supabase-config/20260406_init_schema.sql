@@ -120,20 +120,15 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
 -- 5. KHAI BÁO POLICY CHO RLS TRÊN SUPABASE
-ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 
--- Tạo Policy cho phép mọi người (public) được Đọc (SELECT)
+-- 5.1 Tạo Policy cho phép mọi người (public) được Đọc (SELECT)
 CREATE POLICY "Cho phép tat ca moi nguoi xem danh muc"
 ON categories
 FOR SELECT
 TO public
-USING (true); 
--- USING(TRUE) cho phép ai cũng được xem danh mục món ăn
+USING (true); -- USING(TRUE) cho phép ai cũng được xem danh mục món ăn
 
--- 1. Bật RLS cho bảng carts
-ALTER TABLE carts ENABLE ROW LEVEL SECURITY;
-
--- 2. Tạo Policy cho phép người dùng đã đăng nhập thao tác (Xem, Thêm, Sửa, Xóa) trên giỏ hàng của họ
+-- 5.2 Tạo Policy cho phép người dùng đã đăng nhập thao tác (Xem, Thêm, Sửa, Xóa) trên giỏ hàng của họ
 CREATE POLICY "Nguoi dung quan ly gio hang cua chinh minh"
 ON carts
 FOR ALL -- Bao gồm SELECT, INSERT, UPDATE, DELETE
