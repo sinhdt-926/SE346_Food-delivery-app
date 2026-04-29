@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 
-//Customer lấy đơn
+// Customer lấy đơn
 export const getMyOrders = async () => {
     const { data, error } = await supabase
         .from("orders")
@@ -21,22 +21,24 @@ export const getMyOrders = async () => {
 
     if (error) throw error;
 
-    return data.map((order) => ({
+    return (data ?? []).map((order) => ({
         id: order.id,
-        created_at: order.created_at,
+        // FIX 1: convert timestamp
+        created_at: new Date(order.created_at),
+
         status: order.status,
         address: order.delivery_address,
 
-        items: order.order_details.map((item: any) => ({
+        items: (order.order_details ?? []).map((item: any) => ({
             name: item.foods?.name,
             quantity: item.quantity,
             price: item.price,
-            subtotal: item.subtotal,
+            subtotal: Number(item.subtotal), // FIX 2
             note: item.note,
         })),
 
-        total: order.order_details.reduce(
-            (sum: number, item: any) => sum + item.subtotal,
+        total: (order.order_details ?? []).reduce(
+            (sum: number, item: any) => sum + Number(item.subtotal), // FIX 2
             0
         ),
     }));
@@ -46,7 +48,8 @@ type User = {
     fullname: string;
     phone_number: string;
 };
-//Owner lấy đơn
+
+// Owner lấy đơn
 export const getOwnerOrders = async () => {
     const { data, error } = await supabase
         .from("orders")
@@ -69,24 +72,27 @@ export const getOwnerOrders = async () => {
     if (error) throw error;
 
     return (data ?? []).map((order) => {
-        const user = order.users?.[0];
+        // FIX 3
+         const user = order.users as unknown as User;
 
         const items = (order.order_details ?? []).map((item: any) => ({
             name: item.foods?.name ?? "",
             quantity: item.quantity,
             price: item.price,
-            subtotal: item.subtotal,
+            subtotal: Number(item.subtotal), // FIX 2
             note: item.note,
         }));
 
         const total = (order.order_details ?? []).reduce(
-            (sum: number, item: any) => sum + item.subtotal,
+            (sum: number, item: any) => sum + Number(item.subtotal), // FIX 2
             0
         );
 
         return {
             id: order.id,
-            created_at: order.created_at,
+            // FIX 1
+            created_at: new Date(order.created_at),
+
             status: order.status,
             address: order.delivery_address,
 
