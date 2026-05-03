@@ -43,7 +43,12 @@ const HomeScreen = () => {
               </TouchableOpacity>
             </View>
           </View>
+        </View>
 
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
           <View style={styles.searchContainer}>
             <View style={styles.searchInputWrapper}>
               <Ionicons name="search" size={20} color="#A0A5BA" />
@@ -57,12 +62,7 @@ const HomeScreen = () => {
               <Ionicons name="options-outline" size={24} color="#FFF" />
             </TouchableOpacity>
           </View>
-        </View>
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>All Categories</Text>
@@ -183,13 +183,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#2C2F3E",
+    backgroundColor: "#ffffff",
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#d1d1d1",
     paddingHorizontal: 15,
     height: 55,
     gap: 10,
   },
-  searchInput: { flex: 1, color: "#FFF", fontSize: 15 },
+  searchInput: { flex: 1, color: "#000000", fontSize: 15 },
   filterBtn: {
     backgroundColor: "#FF7622",
     width: 55,
