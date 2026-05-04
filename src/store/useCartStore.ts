@@ -16,6 +16,7 @@ interface CartState {
   toggleCheck: (cartItemId: number) => void; // Hàm để toggle check/uncheck một món
   // Hàm dùng để tính tổng tiền các món trong giỏ hàng
   getTotalPrice: () => number;
+  resetCartState: () => void;
 }
 
 // Khởi tạo Zustand Store
@@ -113,5 +114,8 @@ export const useCartStore = create<CartState>((set, get) => ({
       .reduce((total, item) => {
         return total + item.quantity * (item.foods?.price ?? 0);
       }, 0);
+  },
+  resetCartState: () => {
+    set({ items: [], checkedIds: [] });
   },
 }));

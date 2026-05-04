@@ -33,7 +33,7 @@ export default function OrderItem({
       case "delivering":
         return { text: "Delivering", colorStyle: styles.textEmerald };
       case "completed":
-        return { text: "Completed", colorStyle: styles.textEmerald };
+        return { text: "Completed", colorStyle: styles.textGreen };
       case "preparing":
         return { text: "Preparing", colorStyle: styles.textOrange };
       case "canceled":
@@ -187,7 +187,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   // Trạng thái màu sắc
-  textEmerald: { color: "#10B981" },
+  textGreen: { color: "#10b93a" },
+  textEmerald: { color: "#07a39b" },
   textOrange: { color: "#FF7622" },
   textRed: { color: "#EF4444" },
   textGray: { color: "#6B7280" },
