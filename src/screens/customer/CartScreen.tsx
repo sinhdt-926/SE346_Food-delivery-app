@@ -14,6 +14,9 @@ import CustomButton from "../../components/CustomButton";
 
 // Import Store
 import { useCartStore } from "../../store/useCartStore";
+// Import Service để gọi API
+import { CheckoutService } from "../../services/checkout.service";
+import { Alert } from "react-native";
 
 const CartScreen = ({ navigation }: any) => {
   const [openedId, setOpenedId] = useState<number | null>(null);
@@ -28,6 +31,7 @@ const CartScreen = ({ navigation }: any) => {
     removeFromCart,
     toggleCheck,
     getTotalPrice,
+    resetCartState,
   } = useCartStore();
 
   // Tự động load giỏ hàng khi vào màn hình
@@ -36,6 +40,26 @@ const CartScreen = ({ navigation }: any) => {
   }, []);
 
   const total = getTotalPrice();
+
+  const handleCheckout = async () => {
+    // Tạm lấy dữ liệu cứng đang có trên UI để test API
+    const address = "120, Yên Lãng, Cao Bằng";
+    const paymentType = "cod"; // Mặc định COD
+
+    // Gọi CheckoutService theo tham số yêu cầu
+    const response = await CheckoutService.processOrder(address, paymentType);
+
+    if (response.success) {
+      resetCartState();
+      Alert.alert(
+        "Thành công",
+        `Đặt hàng thành công! Mã đơn: ${response.data}`,
+      );
+      // Sau này cần thêm navigation.navigate("SuccessScreen") tại đây
+    } else {
+      Alert.alert("Lỗi", response.error || "Có lỗi xảy ra khi thanh toán");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -75,7 +99,6 @@ const CartScreen = ({ navigation }: any) => {
         </ScrollView>
       )}
 
-      {/* Footer (Nên tách thành component riêng: CartFooter) */}
       <View style={styles.footer}>
         <View style={styles.addressSection}>
           <Text style={styles.label}>DELIVERY ADDRESS</Text>
@@ -94,7 +117,7 @@ const CartScreen = ({ navigation }: any) => {
           </View>
           <CustomButton
             title="PLACE ORDER"
-            onPress={() => console.log("Tiến hành đặt hàng")}
+            onPress={handleCheckout}
             buttonStyle={{ width: 160, paddingVertical: 15, borderRadius: 15 }}
             disabled={total === 0 || isLoading}
           />
