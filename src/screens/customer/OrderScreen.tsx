@@ -86,10 +86,10 @@ const OrderScreen = ({ navigation }: any) => {
   };
 
   // Phân loại đơn hàng
-  // ongoing: delivering, preparing
+  // ongoing: pending, delivering, preparing
   // history: completed, canceled
   const ongoingOrders = orders.filter(
-    (order) => order.status === "delivering" || order.status === "preparing",
+    (order) => order.status === "pending" || order.status === "delivering" || order.status === "preparing",
   );
   const historyOrders = orders.filter(
     (order) => order.status === "completed" || order.status === "canceled",
