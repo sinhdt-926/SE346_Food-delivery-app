@@ -1,52 +1,51 @@
-import { View } from "react-native";
-import { useState } from "react";
-import CardFoodComponentSmall from "../components/FoodCardSmall";
-import { CardFood } from "../types/cardfood";
+import { View, ScrollView } from "react-native";
+import FoodCardDetail from "../components/FoodCartDetails";
+import { Food } from "../types/food";
 
 export default function TestScreen() {
-  const fakeData: CardFood[] = [
+  const fakeData: Food[] = [
     {
       id: 1,
-      food: {
-        id: 1,
-        name: "Pizza",
-        image_url: "https://via.placeholder.com/150",
-        price: 100000,
-      },
+      name: "Chicken Thai Biriyani",
+      image_url: "https://via.placeholder.com/150",
+      price: 60,
+      rating: 4.9,
+      category: "Breakfast",
+      is_available: true,
     },
     {
       id: 2,
-      food: {
-        id: 2,
-        name: "Burger",
-        image_url: "https://via.placeholder.com/150",
-        price: 80000,
-      },
+      name: "Buffalo Burgers",
+      image_url: "https://via.placeholder.com/150",
+      price: 75,
+      rating: 4.7,
+      category: "Fast Food",
+      is_available: true,
+    },
+    {
+      id: 3,
+      name: "Pizza Pepperoni",
+      image_url: "https://via.placeholder.com/150",
+      price: 90,
+      rating: 4.8,
+      category: "Dinner",
+      is_available: true,
     },
   ];
 
-  const [foods] = useState<CardFood[]>(fakeData);
-
-  const handleChoose = (item: CardFood) => {
-    console.log("Choose:", item);
+  const handlePress = (item: Food) => {
+    console.log("Pressed:", item);
   };
 
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "space-between",
-        padding: 12,
-      }}
-    >
-      {foods.map((item) => (
-        <CardFoodComponentSmall
+    <ScrollView style={{ padding: 12 }}>
+      {fakeData.map((item) => (
+        <FoodCardDetail
           key={item.id}
           item={item}
-          onChoose={handleChoose}
+          onPress={() => handlePress(item)}
         />
       ))}
-    </View>
+    </ScrollView>
   );
 }
