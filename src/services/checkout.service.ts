@@ -2,39 +2,29 @@ import { supabase } from './supabase';
 import { ServiceResponse } from './cart.service';
 
 export const CheckoutService = {
-  /**
-   * Gọi hàm process_checkout RPC từ Supabase
-   * @param deliveryAddress Địa chỉ giao hàng
-   * @param paymentType Loại thanh toán (vd: 'cod', 'banking')
-   * @param promotionId ID của mã giảm giá (truyền undefined/null nếu không có)
-   */
   async processOrder(
     deliveryAddress: string,
     paymentType: string,
+    checkedItemIds: number[], // Thêm mảng ID để kiểm tra món được tick chọn
     promotionId?: number
   ): Promise<ServiceResponse<number>> {
     try {
+      if (checkedItemIds.length === 0) {
+        throw new Error('Vui lòng chọn ít nhất 1 sản phẩm để thanh toán');
+      }
+
       const { data, error } = await supabase.rpc('process_checkout', {
         p_delivery_address: deliveryAddress,
         p_payment_type: paymentType,
+        p_checked_item_ids: checkedItemIds, // Truyền xuống Supabase
         p_promotion_id: promotionId || null,
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      return { 
-        success: true, 
-        data: data as number, // data trả về chính là order_id từ Postgres
-        message: 'Đặt hàng thành công!' 
-      };
+      return { success: true, data: data as number, message: 'Đặt hàng thành công' };
     } catch (error: any) {
-      console.error('Lỗi khi checkout:', error);
-      return { 
-        success: false, 
-        error: error.message || 'Đã xảy ra lỗi trong quá trình thanh toán' 
-      };
+      return { success: false, error: error.message };
     }
   },
 };
