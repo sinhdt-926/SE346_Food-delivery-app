@@ -1,54 +1,61 @@
 import { View } from "react-native";
 import { useState } from "react";
-import CartItemComponent from "../components/CartItem";
-import { CartItem } from "../types/cartitem";
+import CardFoodComponentSmall from "../components/FoodCardSmall";
+import { CardFood } from "../types/cardfood";
 
 export default function TestScreen() {
-  const fakeItem: CartItem = {
-    id: 1,
-    quantity: 2,
-    food: {
+  const fakeData: CardFood[] = [
+    {
       id: 1,
-      name: "Pizza",
-      image_url: "https://via.placeholder.com/150",
-      price: 100000,
+      food: {
+        id: 1,
+        name: "Pizza",
+        image_url: "https://via.placeholder.com/150",
+        price: 100000,
+      },
     },
-  };
+    {
+      id: 2,
+      food: {
+        id: 2,
+        name: "Burger",
+        image_url: "https://via.placeholder.com/150",
+        price: 80000,
+      },
+    },
+    {
+      id: 3,
+      food: {
+        id: 3,
+        name: "Fried Chicken",
+        image_url: "https://via.placeholder.com/150",
+        price: 90000,
+      },
+    },
+    {
+      id: 4,
+      food: {
+        id: 4,
+        name: "Pasta",
+        image_url: "https://via.placeholder.com/150",
+        price: 120000,
+      },
+    },
+  ];
 
-  const [cart, setCart] = useState<CartItem[]>([fakeItem]);
-
-  const handleIncrease = (id: number) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
-      ),
-    );
-  };
-
-  const handleDecrease = (id: number) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item,
-      ),
-    );
-  };
-
-  const handleDelete = (id: number) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
-  };
+  const [foods] = useState<CardFood[]>(fakeData);
 
   return (
-    <View style={{ padding: 20 }}>
-      {cart.map((item) => (
-        <CartItemComponent
-          key={item.id}
-          item={item}
-          onDelete={handleDelete}
-          onIncrease={handleIncrease}
-          onDecrease={handleDecrease}
-        />
+    <View
+      style={{
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+        padding: 12,
+      }}
+    >
+      {foods.map((item) => (
+        <CardFoodComponentSmall key={item.id} item={item} />
       ))}
     </View>
   );
