@@ -4,9 +4,10 @@ import { Ionicons } from "@expo/vector-icons";
 
 type Props = {
   item: CardFood;
+  onChoose: (id: CardFood) => void;
 };
 
-export default function CardFoodSmallComponent({ item }: Props) {
+export default function CardFoodSmallComponent({ item, onChoose }: Props) {
   return (
     <View style={styles.container}>
       <Image source={{ uri: item.food.image_url ?? "" }} style={styles.image} />

@@ -23,27 +23,13 @@ export default function TestScreen() {
         price: 80000,
       },
     },
-    {
-      id: 3,
-      food: {
-        id: 3,
-        name: "Fried Chicken",
-        image_url: "https://via.placeholder.com/150",
-        price: 90000,
-      },
-    },
-    {
-      id: 4,
-      food: {
-        id: 4,
-        name: "Pasta",
-        image_url: "https://via.placeholder.com/150",
-        price: 120000,
-      },
-    },
   ];
 
   const [foods] = useState<CardFood[]>(fakeData);
+
+  const handleChoose = (item: CardFood) => {
+    console.log("Choose:", item);
+  };
 
   return (
     <View
@@ -55,7 +41,11 @@ export default function TestScreen() {
       }}
     >
       {foods.map((item) => (
-        <CardFoodComponentSmall key={item.id} item={item} />
+        <CardFoodComponentSmall
+          key={item.id}
+          item={item}
+          onChoose={handleChoose}
+        />
       ))}
     </View>
   );

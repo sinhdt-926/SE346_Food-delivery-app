@@ -27,7 +27,7 @@ export default function CartItemComponent({
       >
         <TouchableOpacity
           onPress={() => onDelete(item.id)}
-          style={style.constainDelete}
+          style={style.containerDelete}
         >
           <Ionicons name="trash-outline" size={26} color="white" />
         </TouchableOpacity>
@@ -37,7 +37,7 @@ export default function CartItemComponent({
 
   return (
     <Swipeable renderRightActions={renderRightActions}>
-      <View style={style.constain}>
+      <View style={style.container}>
         {/* Image */}
         <Image
           source={{ uri: item.food.image_url ?? "" }}
@@ -105,7 +105,7 @@ const style = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: "#ccc",
   },
-  constainDelete: {
+  containerDelete: {
     backgroundColor: "#FF3F14",
     justifyContent: "center",
     alignItems: "center",
@@ -114,7 +114,7 @@ const style = StyleSheet.create({
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
   },
-  constain: {
+  container: {
     flexDirection: "row",
     padding: 12,
     backgroundColor: "white",
