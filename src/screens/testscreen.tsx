@@ -1,6 +1,7 @@
 import { View, ScrollView } from "react-native";
 import FoodCardDetail from "../components/FoodCartDetails";
 import { Food } from "../types/food";
+import CustomButton from "../components/CustomButton";
 
 export default function TestScreen() {
   const fakeData: Food[] = [
@@ -37,15 +38,20 @@ export default function TestScreen() {
     console.log("Pressed:", item);
   };
 
+  const handleClick = () => {
+    console.log("Button clicked");
+  };
   return (
-    <ScrollView style={{ padding: 12 }}>
-      {fakeData.map((item) => (
-        <FoodCardDetail
-          key={item.id}
-          item={item}
-          onPress={() => handlePress(item)}
-        />
-      ))}
-    </ScrollView>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <CustomButton title="Small" size="small" onPress={() => {}} />
+      <CustomButton title="Medium" onPress={() => {}} />
+      <CustomButton title="Large" size="large" onPress={() => {}} />
+    </View>
   );
 }
