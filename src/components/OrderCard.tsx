@@ -105,9 +105,9 @@ const styles = StyleSheet.create({
   },
 
   image: {
-    width: 120,
-    height: 120,
-    borderRadius: 28,
+    width: 50,
+    height: 50,
+    borderRadius: 999,
     backgroundColor: "#A8B5C7",
     marginRight: 18,
   },
