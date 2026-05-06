@@ -1,22 +1,16 @@
 import React from "react";
-
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-
-import BackButton from "../../components/BackButton";
-
 import ProfileButton from "../../components/ProfileButton";
 
 export default function OwnerProfileScreen() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* HEADER */}
+      {/* header */}
       <View style={styles.header}>
-        <BackButton />
-
         <Text style={styles.headerTitle}>Profile</Text>
       </View>
 
-      {/* PROFILE + SETTINGS */}
+      {/* profile + settings */}
       <View style={styles.cardGroup}>
         <ProfileButton
           title="Personal Info"
@@ -33,7 +27,7 @@ export default function OwnerProfileScreen() {
         />
       </View>
 
-      {/* HISTORY + ORDERS */}
+      {/* history + orders */}
       <View style={styles.cardGroup}>
         <ProfileButton
           title="Withdrawal History"
@@ -50,7 +44,7 @@ export default function OwnerProfileScreen() {
         />
       </View>
 
-      {/* REVIEWS */}
+      {/* review */}
       <View style={styles.cardGroup}>
         <ProfileButton
           title="User Reviews"
@@ -60,7 +54,7 @@ export default function OwnerProfileScreen() {
         />
       </View>
 
-      {/* LOGOUT */}
+      {/* logout */}
       <View style={styles.cardGroup}>
         <ProfileButton
           title="Log Out"
@@ -76,39 +70,28 @@ export default function OwnerProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
     backgroundColor: "#F8F8F8",
-
     paddingTop: 65,
-
     paddingHorizontal: 24,
   },
 
   header: {
     flexDirection: "row",
-
     alignItems: "center",
-
-    marginBottom: 30,
+    marginBottom: 10,
   },
 
   headerTitle: {
     marginLeft: 18,
-
     fontSize: 24,
-
     fontWeight: "600",
-
     color: "#222",
   },
 
   cardGroup: {
     backgroundColor: "#F2F2F2",
-
     borderRadius: 24,
-
     overflow: "hidden",
-
-    marginBottom: 22,
+    marginBottom: 15,
   },
 });
