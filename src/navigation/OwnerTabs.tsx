@@ -2,6 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import OwnerProfileScreen from "../screens/owner/OwnerProfileScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -52,6 +53,19 @@ export default function CustomerTabs() {
             navigation.getParent()?.navigate("AddEditFood" as never);
           },
         })}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={OwnerProfileScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="person-outline"
+              size={28}
+              color={focused ? "#FF7A1A" : "#999"}
+            />
+          ),
+        }}
       />
     </Tab.Navigator>
   );
