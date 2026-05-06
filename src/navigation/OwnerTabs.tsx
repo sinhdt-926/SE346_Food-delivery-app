@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import OwnerProfileScreen from "../screens/owner/OwnerProfileScreen";
+import ManagerOrdersScreen from "../screens/owner/ManageOrdersScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -53,6 +54,19 @@ export default function CustomerTabs() {
             navigation.getParent()?.navigate("AddEditFood" as never);
           },
         })}
+      />
+      <Tab.Screen
+        name="Orders"
+        component={ManagerOrdersScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="clipboard-outline"
+              size={28}
+              color={focused ? "#FF7A1A" : "#999"}
+            />
+          ),
+        }}
       />
       <Tab.Screen
         name="Profile"
