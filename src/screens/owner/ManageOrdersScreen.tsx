@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import TopTabButton from "../../components/TopTabButton";
 import OrderCard from "../../components/OrderCard";
+import { useNavigation } from "@react-navigation/native";
+
 //test UI
 type OrderStatus =
   | "pending"
@@ -12,57 +14,93 @@ type OrderStatus =
 
 interface Order {
   id: number;
+
   status: OrderStatus;
-  customerName: string;
-  customerId: string;
-  totalPrice: number;
+
   time: string;
+
+  customer: {
+    id: string;
+
+    fullname: string;
+
+    phone_number: string;
+  };
+
+  delivery_address: string;
+
+  order_details: {
+    id: number;
+
+    quantity: number;
+
+    note?: string;
+
+    subtotal: number;
+
+    food: {
+      id: number;
+
+      name: string;
+    };
+  }[];
+
+  payment: {
+    id: number;
+
+    type: string;
+
+    amount: number;
+
+    status: string;
+  };
 }
 
 const initialOrders: Order[] = [
   {
     id: 1,
+
     status: "pending",
-    customerName: "Chicken Thai Biriyani",
-    customerId: "32053",
-    totalPrice: 60,
+
     time: "20 mins ago",
-  },
 
-  {
-    id: 2,
-    status: "preparing",
-    customerName: "Pizza Pepperoni",
-    customerId: "32054",
-    totalPrice: 45,
-    time: "35 mins ago",
-  },
+    customer: {
+      id: "32053",
 
-  {
-    id: 3,
-    status: "delivering",
-    customerName: "Hamburger",
-    customerId: "32055",
-    totalPrice: 30,
-    time: "1 hour ago",
-  },
+      fullname: "John Smith",
 
-  {
-    id: 4,
-    status: "completed",
-    customerName: "Fried Chicken",
-    customerId: "32056",
-    totalPrice: 80,
-    time: "Yesterday",
-  },
+      phone_number: "+84 123456789",
+    },
 
-  {
-    id: 5,
-    status: "cancelled",
-    customerName: "Beef Steak",
-    customerId: "32057",
-    totalPrice: 55,
-    time: "Yesterday",
+    delivery_address: "123 Nguyen Trai, District 1",
+
+    order_details: [
+      {
+        id: 1,
+
+        quantity: 2,
+
+        note: "Extra cheese",
+
+        subtotal: 24,
+
+        food: {
+          id: 1,
+
+          name: "Chicken Burger",
+        },
+      },
+    ],
+
+    payment: {
+      id: 1,
+
+      type: "cash",
+
+      amount: 60,
+
+      status: "paid",
+    },
   },
 ];
 
@@ -70,7 +108,12 @@ export default function ManagerOrdersScreen() {
   const [activeTab, setActiveTab] = useState<OrderStatus>("pending");
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const filteredOrders = orders.filter((item) => item.status === activeTab);
+  const navigation = useNavigation<any>();
+  const [refresh, setRefresh] = useState(false);
 
+  console.log("CURRENT:", navigation.getState());
+
+  console.log("PARENT:", navigation.getParent()?.getState());
   //chuyển trạng thái đơn hàng
   const handleNextState = (id: number) => {
     setOrders((prev) =>
@@ -113,6 +156,10 @@ export default function ManagerOrdersScreen() {
           : item,
       ),
     );
+  };
+  //load lại
+  const forceRefresh = () => {
+    setRefresh((prev) => !prev);
   };
   return (
     <View style={styles.container}>
@@ -158,11 +205,16 @@ export default function ManagerOrdersScreen() {
           <OrderCard
             key={item.id}
             status={item.status}
-            customerName={item.customerName}
-            customerId={item.customerId}
-            totalPrice={item.totalPrice}
+            customerName={item.customer.fullname}
+            customerId={item.customer.id}
+            totalPrice={item.payment.amount}
             time={item.time}
-            onPress={() => console.log("detail order")}
+            onPress={() =>
+              navigation.getParent()?.navigate("OrderDetail", {
+                order: item,
+                onUpdate: forceRefresh,
+              })
+            }
             onActionPress={() => handleNextState(item.id)}
             onCancelPress={() => handleCancelOrder(item.id)}
           />

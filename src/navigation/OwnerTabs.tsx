@@ -8,6 +8,7 @@ import ManagerOrdersScreen from "../screens/owner/ManageOrdersScreen";
 const Tab = createBottomTabNavigator();
 
 export default function CustomerTabs() {
+  console.log("OWNER TABS");
   return (
     <Tab.Navigator
       screenOptions={{
@@ -16,7 +17,7 @@ export default function CustomerTabs() {
 
         tabBarStyle: {
           height: 80,
-          backgroundColor: "#fff",
+          backgroundColor: "#FFFFFF",
           borderTopWidth: 0,
           elevation: 10,
           borderTopLeftRadius: 24,
@@ -55,6 +56,7 @@ export default function CustomerTabs() {
           },
         })}
       />
+      {/* tab managerorder */}
       <Tab.Screen
         name="Orders"
         component={ManagerOrdersScreen}
@@ -68,6 +70,7 @@ export default function CustomerTabs() {
           ),
         }}
       />
+      {/* tab profile */}
       <Tab.Screen
         name="Profile"
         component={OwnerProfileScreen}

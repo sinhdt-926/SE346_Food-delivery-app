@@ -79,11 +79,12 @@ export default function RootNavigation() {
   if (!session || !session.user) {
     return <AuthStack />;
   }
-
+  //test
+  console.log("ROOT OWNER STACK");
   // Owner
-  if (role === "owner") {
-    return <OwnerStack />;
-  }
+  //if (role === "owner") {
+  return <OwnerStack />;
+  //}
 
   // Customer
   return <CustomerTabs />;

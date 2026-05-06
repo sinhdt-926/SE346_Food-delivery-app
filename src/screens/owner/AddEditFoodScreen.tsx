@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import {
   View,
   Text,
@@ -186,11 +185,9 @@ export default function AddEditFoodScreen() {
       {/*tags*/}
       <View style={styles.section}>
         <Text style={styles.label}>TAGS</Text>
-
         <View style={styles.tagsContainer}>
           {tags.map((tag) => {
             const isSelected = selectedTag === tag;
-
             return (
               <TouchableOpacity
                 key={tag}
@@ -211,7 +208,6 @@ export default function AddEditFoodScreen() {
       {/*details*/}
       <View style={styles.section}>
         <Text style={styles.label}>DETAILS</Text>
-
         <TextInput
           value={details}
           onChangeText={setDetails}
@@ -246,7 +242,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-
     marginBottom: 30,
   },
 
@@ -270,26 +265,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
     color: "#555",
-
     marginBottom: 12,
-
     letterSpacing: 1,
   },
 
   input: {
     height: 54,
-
     borderWidth: 1,
     borderColor: "#E5E5E5",
-
     borderRadius: 14,
-
     paddingHorizontal: 16,
-
     backgroundColor: "#FFF",
-
     color: "#222",
-
     fontSize: 14,
   },
 
@@ -304,18 +291,13 @@ const styles = StyleSheet.create({
   previewBox: {
     width: 190,
     height: 190,
-
     borderRadius: 24,
-
     borderWidth: 1.5,
     borderStyle: "dashed",
     borderColor: "#DADADA",
-
     backgroundColor: "#FFF",
-
     justifyContent: "center",
     alignItems: "center",
-
     overflow: "hidden",
   },
 
@@ -332,14 +314,10 @@ const styles = StyleSheet.create({
   uploadIconWrapper: {
     width: 60,
     height: 60,
-
     borderRadius: 30,
-
     backgroundColor: "#F2EEFF",
-
     justifyContent: "center",
     alignItems: "center",
-
     marginBottom: 12,
   },
 
@@ -358,12 +336,9 @@ const styles = StyleSheet.create({
   tagButton: {
     paddingHorizontal: 18,
     paddingVertical: 10,
-
     borderRadius: 999,
-
     borderWidth: 1,
     borderColor: "#B8C1CC",
-
     backgroundColor: "#FFF",
   },
 
@@ -384,30 +359,20 @@ const styles = StyleSheet.create({
 
   detailsInput: {
     height: 120,
-
     borderWidth: 1,
     borderColor: "#E5E5E5",
-
     borderRadius: 14,
-
     backgroundColor: "#FFF",
-
     padding: 16,
-
     fontSize: 14,
-
     color: "#222",
   },
 
   saveButton: {
     marginTop: 40,
-
     height: 58,
-
     borderRadius: 18,
-
     backgroundColor: "#FF7A1A",
-
     justifyContent: "center",
     alignItems: "center",
   },
