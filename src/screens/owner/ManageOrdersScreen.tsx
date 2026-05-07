@@ -3,164 +3,90 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import TopTabButton from "../../components/TopTabButton";
 import OrderCard from "../../components/OrderCard";
 import { useNavigation } from "@react-navigation/native";
-
-//test UI
-type OrderStatus =
-  | "pending"
-  | "preparing"
-  | "delivering"
-  | "completed"
-  | "cancelled";
-
-interface Order {
-  id: number;
-
-  status: OrderStatus;
-
-  time: string;
-
-  customer: {
-    id: string;
-
-    fullname: string;
-
-    phone_number: string;
-  };
-
-  delivery_address: string;
-
-  order_details: {
-    id: number;
-
-    quantity: number;
-
-    note?: string;
-
-    subtotal: number;
-
-    food: {
-      id: number;
-
-      name: string;
-    };
-  }[];
-
-  payment: {
-    id: number;
-
-    type: string;
-
-    amount: number;
-
-    status: string;
-  };
-}
-
-const initialOrders: Order[] = [
-  {
-    id: 1,
-
-    status: "pending",
-
-    time: "20 mins ago",
-
-    customer: {
-      id: "32053",
-
-      fullname: "John Smith",
-
-      phone_number: "+84 123456789",
-    },
-
-    delivery_address: "123 Nguyen Trai, District 1",
-
-    order_details: [
-      {
-        id: 1,
-
-        quantity: 2,
-
-        note: "Extra cheese",
-
-        subtotal: 24,
-
-        food: {
-          id: 1,
-
-          name: "Chicken Burger",
-        },
-      },
-    ],
-
-    payment: {
-      id: 1,
-
-      type: "cash",
-
-      amount: 60,
-
-      status: "paid",
-    },
-  },
-];
+import { useEffect } from "react";
+import {
+  getOwnerOrders,
+  updateOrderStatus,
+} from "../../services/order.service";
+import { Order, OrderStatus } from "../../types/order";
 
 export default function ManagerOrdersScreen() {
   const [activeTab, setActiveTab] = useState<OrderStatus>("pending");
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const filteredOrders = orders.filter((item) => item.status === activeTab);
   const navigation = useNavigation<any>();
-  const [refresh, setRefresh] = useState(false);
 
-  console.log("CURRENT:", navigation.getState());
+  //load data
+  const fetchOrders = async () => {
+    try {
+      const data = await getOwnerOrders();
+      const formattedOrders = data.map((order: any) => ({
+        id: order.id,
+        status: order.status,
+        time: new Date(order.created_at).toLocaleString(),
+        customer: {
+          id: order.customer?.id ?? "",
+          fullname: order.customer?.fullname ?? "",
+          phone_number: order.customer?.phone_number ?? "",
+        },
+        delivery_address: order.address,
+        order_details: order.items.map((item: any, index: number) => ({
+          id: index,
+          quantity: item.quantity,
+          note: item.note,
+          subtotal: item.subtotal,
+          food: {
+            id: index,
+            name: item.name,
+          },
+        })),
 
-  console.log("PARENT:", navigation.getParent()?.getState());
+        payment: {
+          id: order.payment?.id ?? 0,
+          type: order.payment?.type ?? "cash",
+          amount: order.payment?.amount ?? 0,
+          status: order.payment?.status ?? "unpaid",
+        },
+      }));
+      setOrders(formattedOrders);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
   //chuyển trạng thái đơn hàng
-  const handleNextState = (id: number) => {
-    setOrders((prev) =>
-      prev.map((item) => {
-        if (item.id !== id) return item;
-        switch (item.status) {
-          case "pending":
-            return {
-              ...item,
-              status: "preparing",
-            };
+  const handleNextState = async (id: number, currentStatus: OrderStatus) => {
+    let nextStatus: OrderStatus = currentStatus;
+    switch (currentStatus) {
+      case "pending":
+        nextStatus = "preparing";
+        break;
 
-          case "preparing":
-            return {
-              ...item,
-              status: "delivering",
-            };
+      case "preparing":
+        nextStatus = "delivering";
+        break;
 
-          case "delivering":
-            return {
-              ...item,
-              status: "completed",
-            };
-          default:
-            return item;
-        }
-      }),
-    );
+      case "delivering":
+        nextStatus = "completed";
+        break;
+    }
+    try {
+      await updateOrderStatus(id, nextStatus);
+      await fetchOrders();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   //hủy đơn hàng
-  const handleCancelOrder = (id: number) => {
-    setOrders((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              status: "cancelled",
-            }
-          : item,
-      ),
-    );
+  const handleCancelOrder = async (id: number) => {
+    await updateOrderStatus(id, "cancelled");
+    fetchOrders();
   };
-  //load lại
-  const forceRefresh = () => {
-    setRefresh((prev) => !prev);
-  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Orders</Text>
@@ -212,10 +138,9 @@ export default function ManagerOrdersScreen() {
             onPress={() =>
               navigation.getParent()?.navigate("OrderDetail", {
                 order: item,
-                onUpdate: forceRefresh,
               })
             }
-            onActionPress={() => handleNextState(item.id)}
+            onActionPress={() => handleNextState(item.id, item.status)}
             onCancelPress={() => handleCancelOrder(item.id)}
           />
         ))}

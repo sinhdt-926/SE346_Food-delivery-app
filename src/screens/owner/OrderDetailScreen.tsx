@@ -3,62 +3,10 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import BackButton from "../../components/BackButton";
 import CustomButton from "../../components/CustomButton";
 import { useRoute, useNavigation } from "@react-navigation/native";
-
-type OrderStatus =
-  | "pending"
-  | "preparing"
-  | "delivering"
-  | "completed"
-  | "cancelled";
-
-interface Order {
-  id: number;
-
-  created_at: string;
-
-  status: OrderStatus;
-
-  delivery_address: string;
-
-  customer: {
-    id: string;
-
-    fullname: string;
-
-    phone_number: string;
-  };
-
-  order_details: {
-    id: number;
-
-    quantity: number;
-
-    note?: string;
-
-    price: number;
-
-    subtotal: number;
-
-    food: {
-      id: number;
-
-      name: string;
-    };
-  }[];
-
-  payment: {
-    id: number;
-
-    type: string;
-
-    amount: number;
-
-    status: string;
-  };
-}
+import { updateOrderStatus } from "../../services/order.service";
+import { Order, OrderStatus } from "../../types/order";
 
 export default function OrderDetailScreen() {
-  // testUI
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { order } = route.params;
@@ -87,7 +35,7 @@ export default function OrderDetailScreen() {
   }, []);
 
   const getActionTitle = () => {
-    switch (order.status) {
+    switch (currentOrder.status) {
       case "pending":
         return "Confirm";
 
@@ -101,45 +49,46 @@ export default function OrderDetailScreen() {
         return null;
     }
   };
-  const updateParentOrder = (newStatus: OrderStatus) => {
-    route.params.order.status = newStatus;
-  };
+
   //thay đổi trạng thái đơn hàng
-  const handleNextState = () => {
-    setCurrentOrder((prev) => {
-      let nextStatus: OrderStatus = prev.status;
+  const handleNextState = async () => {
+    let nextStatus: OrderStatus = currentOrder.status;
+    switch (currentOrder.status) {
+      case "pending":
+        nextStatus = "preparing";
+        break;
 
-      switch (prev.status) {
-        case "pending":
-          nextStatus = "preparing";
-          break;
+      case "preparing":
+        nextStatus = "delivering";
+        break;
 
-        case "preparing":
-          nextStatus = "delivering";
-          break;
+      case "delivering":
+        nextStatus = "completed";
+        break;
+    }
 
-        case "delivering":
-          nextStatus = "completed";
-          break;
-      }
-
-      route.params.order.status = nextStatus;
-
-      return {
+    try {
+      await updateOrderStatus(currentOrder.id, nextStatus);
+      setCurrentOrder((prev) => ({
         ...prev,
         status: nextStatus,
-      };
-    });
+      }));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   //hủy đơn hàng
-  const handleCancelOrder = () => {
-    route.params.order.status = "cancelled";
-
-    setCurrentOrder((prev) => ({
-      ...prev,
-      status: "cancelled",
-    }));
+  const handleCancelOrder = async () => {
+    try {
+      await updateOrderStatus(currentOrder.id, "cancelled");
+      setCurrentOrder((prev) => ({
+        ...prev,
+        status: "cancelled",
+      }));
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <ScrollView
@@ -170,7 +119,6 @@ export default function OrderDetailScreen() {
         <Text style={styles.sectionTitle}>Customer Information</Text>
         <InfoRow label="Name" value={currentOrder.customer.fullname} />
         <InfoRow label="Phone" value={currentOrder.customer.phone_number} />
-        <InfoRow label="Customer ID" value={currentOrder.customer.id} />
       </View>
 
       {/* address */}
@@ -235,13 +183,18 @@ function InfoRow({ label, value, bold }: any) {
 
 function FoodItem({ name, quantity, price, note }: any) {
   return (
-    <View style={styles.foodItem}>
-      <View>
-        <Text style={styles.foodName}>{name}</Text>
-        <Text style={styles.foodQty}>Qty: {quantity}</Text>
-        {note ? <Text style={styles.note}>Note: {note}</Text> : null}
+    <View style={styles.foodItemContainer}>
+      <View style={styles.foodItemTop}>
+        <View style={styles.foodInfo}>
+          <Text style={styles.foodName}>{name}</Text>
+
+          <Text style={styles.foodQty}>Quantity: {quantity}</Text>
+        </View>
+
+        <Text style={styles.foodPrice}>${price}</Text>
       </View>
-      <Text style={styles.foodPrice}>${price}</Text>
+
+      {note ? <Text style={styles.note}>Note: {note}</Text> : null}
     </View>
   );
 }
@@ -365,6 +318,8 @@ const styles = StyleSheet.create({
   note: {
     color: "#B1B1B1",
     fontSize: 13,
+    marginTop: 6,
+    lineHeight: 18,
   },
 
   foodPrice: {
@@ -396,5 +351,20 @@ const styles = StyleSheet.create({
 
   cancelText: {
     color: "#EF4444",
+  },
+
+  foodItemContainer: {
+    marginBottom: 20,
+  },
+
+  foodItemTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+
+  foodInfo: {
+    flex: 1,
+    paddingRight: 12,
   },
 });

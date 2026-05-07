@@ -16,7 +16,6 @@ interface Props {
 export default function OrderCard({
   status,
   customerName,
-  customerId,
   totalPrice,
   time,
   onPress,
@@ -49,8 +48,7 @@ export default function OrderCard({
         <View style={styles.info}>
           <Text style={styles.time}>{time}</Text>
           <Text style={styles.name}>{customerName}</Text>
-          <Text style={styles.id}>ID: {customerId}</Text>
-          <Text style={styles.price}>{totalPrice}</Text>
+          <Text style={styles.price}>Total: {totalPrice}</Text>
         </View>
       </View>
 
