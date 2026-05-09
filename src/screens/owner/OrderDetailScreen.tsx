@@ -12,13 +12,6 @@ export default function OrderDetailScreen() {
   const { order } = route.params;
   const [currentOrder, setCurrentOrder] = useState<Order>(order);
 
-  useEffect(() => {
-    navigation.getParent()?.setOptions({
-      tabBarStyle: {
-        display: "none",
-      },
-    });
-
     return () => {
       navigation.getParent()?.setOptions({
         tabBarStyle: {
