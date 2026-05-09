@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import TopTabButton from "../../components/TopTabButton";
 import OrderCard from "../../components/OrderCard";
 import { useNavigation } from "@react-navigation/native";
-import { useEffect } from "react";
 import {
   getOwnerOrders,
   updateOrderStatus,
@@ -53,9 +52,6 @@ export default function ManagerOrdersScreen() {
       console.log(error);
     }
   };
-  useEffect(() => {
-    fetchOrders();
-  }, []);
 
   //chuyển trạng thái đơn hàng
   const handleNextState = async (id: number, currentStatus: OrderStatus) => {

@@ -297,12 +297,6 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
 
-  foodItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 18,
-  },
-
   foodName: {
     fontSize: 16,
     fontWeight: "600",
