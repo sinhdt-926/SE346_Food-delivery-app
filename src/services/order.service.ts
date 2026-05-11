@@ -64,7 +64,7 @@ export const getOwnerOrders = async () => {
             created_at,
             status,
             delivery_address,
-            users(id, fullname, phone_number),
+            users(id, fullname, phone_number, avatarUrl),
             order_details(
                 quantity,
                 price,
@@ -92,9 +92,6 @@ export const getOwnerOrders = async () => {
       subtotal: Number(item.subtotal),
       note: item.note,
     }));
-
-    console.log("PAYMENTS:", order.payments);
-
     const total = items.reduce((sum, item) => sum + item.subtotal, 0);
 
     return {
@@ -106,7 +103,7 @@ export const getOwnerOrders = async () => {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
         phone_number: user?.phone_number ?? "",
-        //avatarUrl: user?.avatarUrl ?? "",
+        avatarUrl: user?.avatarUrl ?? "",
       },
       items,
       payment: {
