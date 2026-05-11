@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import TopTabButton from "../../components/TopTabButton";
 import { useNavigation } from "@react-navigation/native";
 import { MenuStatus } from "../../types/cart";
 import { food } from "../../types/cart";
 import FoodCard from "../../components/FoodCard";
+import { getFoods } from "../../services/food.service";
 
 export default function ManagerMenuScreen() {
   const [activeTab, setActiveTab] = useState<MenuStatus>("all");
@@ -13,6 +14,28 @@ export default function ManagerMenuScreen() {
     activeTab === "all"
       ? foods
       : foods.filter((item) => item.type === activeTab);
+
+  const fetchFoods = async () => {
+    try {
+      const data = await getFoods();
+
+      const formattedFoods = data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        price: Number(item.price),
+        image_url: item.image_url,
+        is_available: item.is_available,
+        type: item.categories?.category_name?.toLowerCase() ?? "fastfood",
+      }));
+
+      setFoods(formattedFoods);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchFoods();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -48,7 +71,19 @@ export default function ManagerMenuScreen() {
         contentContainerStyle={{
           paddingBottom: 120,
         }}
-      ></ScrollView>
+      >
+        {filteredFood.map((item) => (
+          <FoodCard
+            key={item.id}
+            id={item.id}
+            name={item.name}
+            type={item.type}
+            price={item.price}
+            image_url={item.image_url}
+            onPress={() => {}}
+          />
+        ))}
+      </ScrollView>
     </View>
   );
 }

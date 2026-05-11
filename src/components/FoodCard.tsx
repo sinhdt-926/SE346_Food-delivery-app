@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { formatCurrency } from "../utils/formatters";
 
 interface Props {
@@ -7,7 +8,7 @@ interface Props {
   name: string;
   id: string;
   price: number;
-  imageUrl?: string;
+  image_url?: string;
   onPress?: () => void;
 }
 
@@ -15,25 +16,55 @@ export default function FoodCard({
   type,
   name,
   price,
-  id,
-  imageUrl,
+  image_url,
   onPress,
 }: Props) {
+  const getTypeLabel = () => {
+    switch (type) {
+      case "fastfood":
+        return "Fastfood";
+
+      case "dessert":
+        return "Dessert";
+
+      case "drink":
+        return "Drink";
+
+      default:
+        return "Food";
+    }
+  };
+
   return (
     <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.card}>
-      <View style={styles.topSection}>
-        <Image
-          source={{
-            uri: imageUrl || "https://i.pravatar.cc/150",
-          }}
-          style={styles.image}
-        />
-        {/* Thông tin món ăn */}
-        <View style={styles.info}>
-          <Text style={styles.name}>{name}</Text>
-          <Text style={styles.price}>
-            Total: {formatCurrency(price, "USD")}
+      {/* image */}
+      <Image
+        source={{
+          uri: image_url || "https://picsum.photos/200",
+        }}
+        style={styles.image}
+      />
+
+      {/* content */}
+      <View style={styles.content}>
+        {/* top row */}
+        <View style={styles.topRow}>
+          <Text numberOfLines={1} style={styles.name}>
+            {name}
           </Text>
+
+          <TouchableOpacity>
+            <Ionicons name="ellipsis-horizontal" size={22} color="#222" />
+          </TouchableOpacity>
+        </View>
+
+        {/* giá và loại */}
+        <View style={styles.bottomRow}>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{getTypeLabel()}</Text>
+          </View>
+
+          <Text style={styles.price}>{formatCurrency(price, "USD")}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -42,42 +73,63 @@ export default function FoodCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFF",
-    borderRadius: 28,
-    padding: 18,
-    marginBottom: 20,
-  },
-
-  topSection: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 16,
+    marginBottom: 18,
     flexDirection: "row",
-  },
-
-  info: {
-    flex: 1,
-    justifyContent: "space-between",
+    alignItems: "center",
   },
 
   image: {
-    width: 50,
-    height: 50,
-    borderRadius: 999,
+    width: 90,
+    height: 90,
+    borderRadius: 24,
     backgroundColor: "#A8B5C7",
-    marginRight: 18,
+    marginRight: 16,
+  },
+
+  content: {
+    flex: 1,
+    height: 96,
+    justifyContent: "space-between",
+  },
+
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
   },
 
   name: {
-    fontSize: 20,
+    flex: 1,
+    fontSize: 22,
     fontWeight: "700",
     color: "#222",
+    marginRight: 12,
   },
 
-  id: {
-    fontSize: 15,
-    color: "#9E9E9E",
+  bottomRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  badge: {
+    backgroundColor: "#FFE8D9",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 999,
+  },
+
+  badgeText: {
+    color: "#FF7622",
+    fontSize: 14,
+    fontWeight: "600",
   },
 
   price: {
-    fontSize: 22,
+    fontSize: 15,
     fontWeight: "700",
     color: "#222",
   },

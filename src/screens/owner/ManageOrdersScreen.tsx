@@ -27,7 +27,7 @@ export default function ManagerOrdersScreen() {
           id: order.customer?.id ?? "",
           fullname: order.customer?.fullname ?? "",
           phone_number: order.customer?.phone_number ?? "",
-          //avatarUrl: order.customer?.avatarUrl ?? "",
+          avatarUrl: order.customer?.avatarUrl ?? "",
         },
         delivery_address: order.address,
         order_details: order.items.map((item: any, index: number) => ({
@@ -133,7 +133,7 @@ export default function ManagerOrdersScreen() {
             customerName={item.customer.fullname}
             customerId={item.customer.id}
             totalPrice={item.payment.amount}
-            //avatarUrl={item.customer.avatarUrl}
+            avatarUrl={item.customer.avatarUrl}
             time={item.time}
             onPress={() =>
               navigation.getParent()?.navigate("OrderDetail", {
