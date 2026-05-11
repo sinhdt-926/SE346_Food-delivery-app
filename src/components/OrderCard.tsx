@@ -54,7 +54,7 @@ export default function OrderCard({
         />
         {/* Thông tin đơn hàng */}
         <View style={styles.info}>
-          <Text style={styles.time}>{formatRelativeTime(time)}</Text>
+          <Text style={styles.time}>{formatRelativeTime(time, false)}</Text>
           <Text style={styles.name}>{customerName}</Text>
           <Text style={styles.price}>
             Total: {formatCurrency(totalPrice, "USD")}

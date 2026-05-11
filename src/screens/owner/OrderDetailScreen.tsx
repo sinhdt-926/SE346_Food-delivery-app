@@ -5,7 +5,7 @@ import CustomButton from "../../components/CustomButton";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { updateOrderStatus } from "../../services/order.service";
 import { Order, OrderStatus } from "../../types/order";
-import { formatCurrency } from "../../utils/formatters";
+import { formatCurrency, formatRelativeTime } from "../../utils/formatters";
 
 export default function OrderDetailScreen() {
   const route = useRoute<any>();
@@ -104,9 +104,15 @@ export default function OrderDetailScreen() {
         <Text style={styles.title}>Order Details</Text>
       </View>
 
-      {/* state */}
+      {/* status */}
       <View style={styles.statusCard}>
-        <Text style={styles.orderId}>Order #{currentOrder.id}</Text>
+        <View>
+          <Text style={styles.orderId}>Order #{currentOrder.id}</Text>
+
+          <Text style={styles.label}>
+            {formatRelativeTime(currentOrder.time, true)}
+          </Text>
+        </View>
 
         <View style={styles.badge}>
           <Text style={styles.badgeText}>
