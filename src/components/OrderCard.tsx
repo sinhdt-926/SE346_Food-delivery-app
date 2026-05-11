@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import CustomButton from "./CustomButton";
+import { formatCurrency } from "../utils/formatters";
 
 interface Props {
   status: "pending" | "preparing" | "delivering" | "completed" | "cancelled";
@@ -55,7 +56,9 @@ export default function OrderCard({
         <View style={styles.info}>
           <Text style={styles.time}>{time}</Text>
           <Text style={styles.name}>{customerName}</Text>
-          <Text style={styles.price}>Total: {totalPrice}</Text>
+          <Text style={styles.price}>
+            Total: {formatCurrency(totalPrice, "USD")}
+          </Text>
         </View>
       </View>
 
@@ -139,7 +142,7 @@ const styles = StyleSheet.create({
   },
 
   price: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "700",
     color: "#222",
   },

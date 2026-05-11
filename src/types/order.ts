@@ -13,6 +13,7 @@ export interface Order {
     id: string;
     fullname: string;
     phone_number: string;
+    //avatarUrl?: string;
   };
   delivery_address: string;
   order_details: {

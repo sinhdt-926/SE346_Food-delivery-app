@@ -51,6 +51,7 @@ type User = {
   id: string;
   fullname: string;
   phone_number: string;
+  avatarUrl: string;
 };
 
 // Admin/Owner lấy toàn bộ danh sách đơn
@@ -82,7 +83,6 @@ export const getOwnerOrders = async () => {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  console.log(JSON.stringify(data, null, 2));
   return (data ?? []).map((order) => {
     const user = order.users as unknown as User;
     const items = (order.order_details ?? []).map((item: any) => ({
@@ -93,11 +93,9 @@ export const getOwnerOrders = async () => {
       note: item.note,
     }));
 
-    // Lấy tổng tiền từ bảng payments thay vì tính tổng bằng vòng lặp reduce
-    const total =
-      order.payments && order.payments.length > 0
-        ? Number(order.payments[0].amount)
-        : 0;
+    console.log("PAYMENTS:", order.payments);
+
+    const total = items.reduce((sum, item) => sum + item.subtotal, 0);
 
     return {
       id: order.id,
@@ -108,6 +106,7 @@ export const getOwnerOrders = async () => {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
         phone_number: user?.phone_number ?? "",
+        //avatarUrl: user?.avatarUrl ?? "",
       },
       items,
       payment: {

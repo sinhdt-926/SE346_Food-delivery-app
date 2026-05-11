@@ -3,13 +3,22 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import TopTabButton from "../../components/TopTabButton";
 import { useNavigation } from "@react-navigation/native";
 import { MenuStatus } from "../../types/cart";
+import { food } from "../../types/cart";
+import FoodCard from "../../components/FoodCard";
 
 export default function ManagerMenuScreen() {
   const [activeTab, setActiveTab] = useState<MenuStatus>("all");
+  const [foods, setFoods] = useState<food[]>([]);
+  const filteredFood =
+    activeTab === "all"
+      ? foods
+      : foods.filter((item) => item.type === activeTab);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Menu</Text>
 
+      {/* tab */}
       <View style={styles.tabs}>
         <TopTabButton
           title="All"
@@ -32,6 +41,14 @@ export default function ManagerMenuScreen() {
           onPress={() => setActiveTab("drink")}
         />
       </View>
+
+      {/* list */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 120,
+        }}
+      ></ScrollView>
     </View>
   );
 }

@@ -5,6 +5,7 @@ import CustomButton from "../../components/CustomButton";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { updateOrderStatus } from "../../services/order.service";
 import { Order, OrderStatus } from "../../types/order";
+import { formatCurrency } from "../../utils/formatters";
 
 export default function OrderDetailScreen() {
   const route = useRoute<any>();
@@ -148,7 +149,11 @@ export default function OrderDetailScreen() {
         <InfoRow label="Payment Type" value={currentOrder.payment.type} />
         <InfoRow label="Payment Status" value={currentOrder.payment.status} />
         <View style={styles.divider} />
-        <InfoRow label="Total" value={`${currentOrder.payment.amount}`} bold />
+        <InfoRow
+          label="Total"
+          value={formatCurrency(currentOrder.payment.amount, "USD")}
+          bold
+        />
       </View>
       {currentOrder.status !== "completed" &&
         currentOrder.status !== "cancelled" && (
@@ -191,7 +196,7 @@ function FoodItem({ name, quantity, price, note }: any) {
           <Text style={styles.foodQty}>Quantity: {quantity}</Text>
         </View>
 
-        <Text style={styles.foodPrice}>${price}</Text>
+        <Text style={styles.foodPrice}>{formatCurrency(price, "USD")}</Text>
       </View>
 
       {note ? <Text style={styles.note}>Note: {note}</Text> : null}
