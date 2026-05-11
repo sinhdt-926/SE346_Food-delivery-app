@@ -12,6 +12,12 @@ export interface food {
   image_url: string;
   is_available: boolean;
   //thêm loại của món ăn
-  type: "fastfood" | "dessert" | "drink";
+  type: "pizza" | "dessert" | "drink" | "burger" | "chicken";
 }
-export type MenuStatus = "all" | "fastfood" | "dessert" | "drink";
+export type MenuStatus =
+  | "all"
+  | "pizza"
+  | "burger"
+  | "chicken"
+  | "dessert"
+  | "drink";

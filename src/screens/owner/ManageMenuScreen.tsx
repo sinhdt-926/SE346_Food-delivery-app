@@ -42,28 +42,51 @@ export default function ManagerMenuScreen() {
       <Text style={styles.title}>Menu</Text>
 
       {/* tab */}
-      <View style={styles.tabs}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabsWrapper}
+        contentContainerStyle={styles.tabs}
+      >
         <TopTabButton
-          title="All"
+          iconName="grid-outline"
           active={activeTab === "all"}
           onPress={() => setActiveTab("all")}
         />
+
         <TopTabButton
-          title="Fastfood"
-          active={activeTab === "fastfood"}
-          onPress={() => setActiveTab("fastfood")}
+          iconName="pizza-outline"
+          active={activeTab === "pizza"}
+          onPress={() => setActiveTab("pizza")}
         />
+
         <TopTabButton
-          title="Dessert"
+          iconName="fast-food-outline"
+          active={activeTab === "burger"}
+          onPress={() => setActiveTab("burger")}
+        />
+
+        <TopTabButton
+          iconName="restaurant-outline"
+          active={activeTab === "chicken"}
+          onPress={() => setActiveTab("chicken")}
+        />
+
+        <TopTabButton
+          iconName="ice-cream-outline"
           active={activeTab === "dessert"}
           onPress={() => setActiveTab("dessert")}
         />
+
         <TopTabButton
-          title="Drink"
+          iconName="wine-outline"
           active={activeTab === "drink"}
           onPress={() => setActiveTab("drink")}
         />
-      </View>
+      </ScrollView>
+
+      {/* tính tổng số món ăn cho từng loại */}
+      <Text style={styles.countText}>{filteredFood.length} items</Text>
 
       {/* list */}
       <ScrollView
@@ -103,10 +126,20 @@ const styles = StyleSheet.create({
   },
 
   tabs: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    paddingBottom: 10,
+    gap: 18,
     borderBottomWidth: 1,
     borderBottomColor: "#ECECEC",
-    marginBottom: 24,
+    marginBottom: 18,
+  },
+
+  countText: {
+    fontSize: 15,
+    color: "#7A7A7A",
+    marginBottom: 18,
+    fontWeight: "500",
+  },
+  tabsWrapper: {
+    maxHeight: 70,
   },
 });

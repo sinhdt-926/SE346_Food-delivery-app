@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { formatCurrency } from "../utils/formatters";
 
 interface Props {
-  type: "fastfood" | "dessert" | "drink";
+  type: "pizza" | "dessert" | "drink" | "burger" | "chicken";
   name: string;
   id: string;
   price: number;
@@ -21,11 +21,17 @@ export default function FoodCard({
 }: Props) {
   const getTypeLabel = () => {
     switch (type) {
-      case "fastfood":
-        return "Fastfood";
+      case "pizza":
+        return "Pizza";
 
-      case "dessert":
-        return "Dessert";
+      case "pizza":
+        return "Pizza";
+
+      case "burger":
+        return "Burger";
+
+      case "chicken":
+        return "Chicken";
 
       case "drink":
         return "Drink";
