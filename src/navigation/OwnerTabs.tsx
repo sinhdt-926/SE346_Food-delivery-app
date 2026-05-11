@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import OwnerProfileScreen from "../screens/owner/OwnerProfileScreen";
 import ManagerOrdersScreen from "../screens/owner/ManageOrdersScreen";
+import ManagerMenuScreen from "../screens/owner/ManageMenuScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -26,6 +27,21 @@ export default function CustomerTabs() {
         },
       }}
     >
+      {/* tab manager menu */}
+      <Tab.Screen
+        name="Menu"
+        component={ManagerMenuScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="menu-outline"
+              size={28}
+              color={focused ? "#FF7A1A" : "#999"}
+            />
+          ),
+        }}
+      />
+
       {/* Nut add new food */}
       <Tab.Screen
         name="AddButton"

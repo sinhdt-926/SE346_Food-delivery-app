@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import CustomButton from "./CustomButton";
 
 interface Props {
@@ -8,6 +8,7 @@ interface Props {
   customerId: string;
   totalPrice: number;
   time: string;
+  avatarUrl?: string;
   onPress?: () => void;
   onActionPress?: () => void;
   onCancelPress?: () => void;
@@ -18,6 +19,7 @@ export default function OrderCard({
   customerName,
   totalPrice,
   time,
+  avatarUrl,
   onPress,
   onActionPress,
   onCancelPress,
@@ -43,7 +45,12 @@ export default function OrderCard({
   return (
     <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.card}>
       <View style={styles.topSection}>
-        <View style={styles.image} />
+        <Image
+          source={{
+            uri: avatarUrl || "https://i.pravatar.cc/150",
+          }}
+          style={styles.image}
+        />
         {/* Thông tin đơn hàng */}
         <View style={styles.info}>
           <Text style={styles.time}>{time}</Text>
