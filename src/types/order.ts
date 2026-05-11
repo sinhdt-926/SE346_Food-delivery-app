@@ -8,7 +8,7 @@ export type OrderStatus =
 export interface Order {
   id: number;
   status: OrderStatus;
-  time: string;
+  time: Date;
   customer: {
     id: string;
     fullname: string;

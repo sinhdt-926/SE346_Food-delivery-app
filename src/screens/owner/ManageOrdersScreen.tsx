@@ -22,7 +22,7 @@ export default function ManagerOrdersScreen() {
       const formattedOrders = data.map((order: any) => ({
         id: order.id,
         status: order.status,
-        time: new Date(order.created_at).toLocaleString(),
+        time: new Date(order.created_at),
         customer: {
           id: order.customer?.id ?? "",
           fullname: order.customer?.fullname ?? "",

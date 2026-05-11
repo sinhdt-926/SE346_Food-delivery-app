@@ -1,14 +1,14 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import CustomButton from "./CustomButton";
-import { formatCurrency } from "../utils/formatters";
+import { formatCurrency, formatRelativeTime } from "../utils/formatters";
 
 interface Props {
   status: "pending" | "preparing" | "delivering" | "completed" | "cancelled";
   customerName: string;
   customerId: string;
   totalPrice: number;
-  time: string;
+  time: Date;
   avatarUrl?: string;
   onPress?: () => void;
   onActionPress?: () => void;
@@ -54,7 +54,7 @@ export default function OrderCard({
         />
         {/* Thông tin đơn hàng */}
         <View style={styles.info}>
-          <Text style={styles.time}>{time}</Text>
+          <Text style={styles.time}>{formatRelativeTime(time)}</Text>
           <Text style={styles.name}>{customerName}</Text>
           <Text style={styles.price}>
             Total: {formatCurrency(totalPrice, "USD")}
