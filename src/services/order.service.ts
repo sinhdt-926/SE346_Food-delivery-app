@@ -29,7 +29,7 @@ export const getMyOrders = async () => {
 
   return (data ?? []).map((order) => ({
     id: order.id,
-    created_at: new Date(order.created_at),
+    created_at: order.created_at,
     status: order.status,
     address: order.delivery_address,
     items: (order.order_details ?? []).map((item: any) => ({
@@ -51,7 +51,7 @@ type User = {
   id: string;
   fullname: string;
   phone_number: string;
-  avatarUrl: string;
+  //avatarUrl: string;
 };
 
 // Admin/Owner lấy toàn bộ danh sách đơn
@@ -64,7 +64,7 @@ export const getOwnerOrders = async () => {
             created_at,
             status,
             delivery_address,
-            users(id, fullname, phone_number, avatarUrl),
+            users(id, fullname, phone_number),
             order_details(
                 quantity,
                 price,
@@ -96,14 +96,14 @@ export const getOwnerOrders = async () => {
 
     return {
       id: order.id,
-      created_at: new Date(order.created_at),
+      created_at: order.created_at,
       status: order.status,
       address: order.delivery_address,
       customer: {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
         phone_number: user?.phone_number ?? "",
-        avatarUrl: user?.avatarUrl ?? "",
+        //avatarUrl: user?.avatarUrl ?? "",
       },
       items,
       payment: {

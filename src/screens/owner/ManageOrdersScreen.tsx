@@ -32,37 +32,8 @@ export default function ManagerOrdersScreen() {
       setLoading(true);
       setError("");
       if (!isFlag) return;
-      const data = await getOwnerOrders();
-      const formattedOrders = data.map((order: any) => ({
-        id: order.id,
-        status: order.status,
-        time: new Date(order.created_at),
-        customer: {
-          id: order.customer?.id ?? "",
-          fullname: order.customer?.fullname ?? "",
-          phone_number: order.customer?.phone_number ?? "",
-          avatarUrl: order.customer?.avatarUrl ?? "",
-        },
-        delivery_address: order.address,
-        order_details: order.items.map((item: any, index: number) => ({
-          id: index,
-          quantity: item.quantity,
-          note: item.note,
-          subtotal: item.subtotal,
-          food: {
-            id: index,
-            name: item.name,
-          },
-        })),
-
-        payment: {
-          id: order.payment?.id ?? 0,
-          type: order.payment?.type ?? "cash",
-          amount: order.payment?.amount ?? 0,
-          status: order.payment?.status ?? "unpaid",
-        },
-      }));
-      setOrders(formattedOrders);
+      const data: Order[] = await getOwnerOrders();
+      setOrders(data);
     } catch (error) {
       if (isFlag) setError("Không thể tải danh sách đơn hàng");
     } finally {
@@ -208,8 +179,8 @@ export default function ManagerOrdersScreen() {
             customerName={item.customer.fullname}
             customerId={item.customer.id}
             totalPrice={item.payment.amount}
-            avatarUrl={item.customer.avatarUrl}
-            time={item.time}
+            //avatarUrl={item.customer.avatarUrl}
+            time={new Date(item.created_at)}
             onPress={() =>
               navigation.getParent()?.navigate("OrderDetail", {
                 order: item,

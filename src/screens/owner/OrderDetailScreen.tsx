@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import BackButton from "../../components/BackButton";
 import CustomButton from "../../components/CustomButton";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -12,6 +19,7 @@ export default function OrderDetailScreen() {
   const navigation = useNavigation<any>();
   const { order } = route.params;
   const [currentOrder, setCurrentOrder] = useState<Order>(order);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     navigation.getParent()?.setOptions({
@@ -69,6 +77,7 @@ export default function OrderDetailScreen() {
     }
 
     try {
+      setActionLoading(true);
       await updateOrderStatus(currentOrder.id, nextStatus);
       setCurrentOrder((prev) => ({
         ...prev,
@@ -76,12 +85,25 @@ export default function OrderDetailScreen() {
       }));
     } catch (error) {
       console.log(error);
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
+        {
+          text: "Thử lại",
+          onPress: () => handleNextState(),
+        },
+        {
+          text: "Đóng",
+          style: "cancel",
+        },
+      ]);
+    } finally {
+      setActionLoading(false);
     }
   };
 
   //hủy đơn hàng
   const handleCancelOrder = async () => {
     try {
+      setActionLoading(true);
       await updateOrderStatus(currentOrder.id, "cancelled");
       setCurrentOrder((prev) => ({
         ...prev,
@@ -89,6 +111,18 @@ export default function OrderDetailScreen() {
       }));
     } catch (error) {
       console.log(error);
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
+        {
+          text: "Thử lại",
+          onPress: () => handleCancelOrder(),
+        },
+        {
+          text: "Đóng",
+          style: "cancel",
+        },
+      ]);
+    } finally {
+      setActionLoading(false);
     }
   };
   return (
@@ -110,7 +144,7 @@ export default function OrderDetailScreen() {
           <Text style={styles.orderId}>Order #{currentOrder.id}</Text>
 
           <Text style={styles.label}>
-            {formatRelativeTime(currentOrder.time, true)}
+            {formatRelativeTime(currentOrder.created_at, true)}
           </Text>
         </View>
 
@@ -131,22 +165,30 @@ export default function OrderDetailScreen() {
       {/* address */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Delivery Address</Text>
-        <Text style={styles.address}>{currentOrder.delivery_address}</Text>
+        <Text style={styles.address}>{currentOrder.address}</Text>
       </View>
 
       {/* items */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Ordered Items</Text>
 
-        {currentOrder.order_details.map((item: any) => (
+        {currentOrder.items.map((item, index) => (
           <FoodItem
-            key={item.id}
-            name={item.food.name}
+            key={index}
+            name={item.name}
             quantity={item.quantity}
             price={item.subtotal}
             note={item.note}
           />
         ))}
+
+        {/*loading*/}
+        {actionLoading && (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color="#FF7622" />
+            <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
+          </View>
+        )}
       </View>
 
       {/* payment */}
@@ -182,7 +224,12 @@ export default function OrderDetailScreen() {
   );
 }
 
-function InfoRow({ label, value, bold }: any) {
+interface InfoRowProps {
+  label: string;
+  value: string | number;
+  bold?: boolean;
+}
+function InfoRow({ label, value, bold }: InfoRowProps) {
   return (
     <View style={styles.infoRow}>
       <Text style={styles.label}>{label}</Text>
@@ -191,8 +238,13 @@ function InfoRow({ label, value, bold }: any) {
     </View>
   );
 }
-
-function FoodItem({ name, quantity, price, note }: any) {
+interface FoodItem {
+  name: string;
+  quantity: number;
+  price: number;
+  note?: string;
+}
+function FoodItem({ name, quantity, price, note }: FoodItem) {
   return (
     <View style={styles.foodItemContainer}>
       <View style={styles.foodItemTop}>
@@ -371,5 +423,19 @@ const styles = StyleSheet.create({
   foodInfo: {
     flex: 1,
     paddingRight: 12,
+  },
+
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+
+  loadingText: {
+    marginTop: 12,
+    fontSize: 15,
+    color: "#111",
+    textAlign: "center",
   },
 });

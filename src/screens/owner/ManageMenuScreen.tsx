@@ -32,7 +32,7 @@ export default function ManagerMenuScreen() {
 
       const data = await getFoods();
       if (!isFlag) return;
-      const formattedFoods = data.map((item: any) => ({
+      const formattedFoods = data.map((item) => ({
         id: item.id,
         name: item.name,
         price: Number(item.price),
