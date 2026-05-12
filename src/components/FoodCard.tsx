@@ -24,14 +24,14 @@ export default function FoodCard({
       case "pizza":
         return "Pizza";
 
-      case "pizza":
-        return "Pizza";
-
       case "burger":
         return "Burger";
 
       case "chicken":
         return "Chicken";
+
+      case "dessert":
+        return "Dessert";
 
       case "drink":
         return "Drink";

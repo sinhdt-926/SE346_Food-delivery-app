@@ -1,15 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import TopTabButton from "../../components/TopTabButton";
 import { useNavigation } from "@react-navigation/native";
 import { MenuStatus } from "../../types/cart";
 import { food } from "../../types/cart";
 import FoodCard from "../../components/FoodCard";
 import { getFoods } from "../../services/food.service";
+import CustomButton from "../../components/CustomButton";
 
 export default function ManagerMenuScreen() {
   const [activeTab, setActiveTab] = useState<MenuStatus>("all");
   const [foods, setFoods] = useState<food[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const filteredFood =
     activeTab === "all"
       ? foods
@@ -17,6 +26,9 @@ export default function ManagerMenuScreen() {
 
   const fetchFoods = async () => {
     try {
+      setLoading(true);
+      setError("");
+
       const data = await getFoods();
 
       const formattedFoods = data.map((item: any) => ({
@@ -25,18 +37,43 @@ export default function ManagerMenuScreen() {
         price: Number(item.price),
         image_url: item.image_url,
         is_available: item.is_available,
-        type: item.categories?.category_name?.toLowerCase() ?? "fastfood",
+        type: item.categories?.category_name?.toLowerCase() ?? "pizza",
       }));
 
       setFoods(formattedFoods);
     } catch (error) {
       console.log(error);
+      setError("Không thể tải danh sách món ăn");
+    } finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
     fetchFoods();
   }, []);
 
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#FF7622" />
+        <Text>Đang tải menu...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>{error}</Text>
+        <CustomButton
+          title="Thử lại"
+          onPress={fetchFoods}
+          buttonStyle={styles.retryButton}
+          textStyle={styles.retryText}
+        />
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Menu</Text>
@@ -141,5 +178,30 @@ const styles = StyleSheet.create({
   },
   tabsWrapper: {
     maxHeight: 70,
+  },
+
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+
+  retryButton: {
+    backgroundColor: "#FF7622",
+    marginTop: 16,
+    width: "50%",
+  },
+
+  retryText: {
+    color: "white",
+    fontSize: 14,
+  },
+
+  errorText: {
+    fontSize: 16,
+    color: "#B1B1B1",
+    textAlign: "center",
+    marginBottom: 16,
   },
 });
