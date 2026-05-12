@@ -1,10 +1,14 @@
 import React from "react";
 import { TouchableOpacity, StyleSheet, View, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+
+//có thể dùng nhiều dạng icon hơn
+type IconType = "ion" | "material" | "feather";
 
 interface Props {
   title?: string;
-  iconName?: keyof typeof Ionicons.glyphMap;
+  iconName?: string;
+  iconType?: IconType;
   active?: boolean;
   onPress?: () => void;
 }
@@ -12,9 +16,31 @@ interface Props {
 export default function TopTabButton({
   title,
   iconName,
+  iconType,
   active = false,
   onPress,
 }: Props) {
+  const iconColor = active ? "#FF7622" : "#B1B1B1";
+  const renderIcon = () => {
+    if (!iconName) return null;
+
+    switch (iconType) {
+      case "material":
+        return (
+          <MaterialCommunityIcons
+            name={iconName as any}
+            size={22}
+            color={iconColor}
+          />
+        );
+
+      case "feather":
+        return <Feather name={iconName as any} size={22} color={iconColor} />;
+
+      default:
+        return <Ionicons name={iconName as any} size={22} color={iconColor} />;
+    }
+  };
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -22,13 +48,7 @@ export default function TopTabButton({
       style={styles.container}
     >
       <View style={styles.content}>
-        {iconName && (
-          <Ionicons
-            name={iconName}
-            size={22}
-            color={active ? "#FF7622" : "#B1B1B1"}
-          />
-        )}
+        {renderIcon()}
         {title && (
           <Text
             style={[
@@ -48,12 +68,11 @@ export default function TopTabButton({
 
 const styles = StyleSheet.create({
   container: {
-    minWidth: 60,
+    width: 52,
     height: 52,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 12,
-    paddingBottom: 10,
+    position: "relative",
   },
 
   content: {

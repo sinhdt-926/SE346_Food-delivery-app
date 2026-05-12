@@ -83,12 +83,7 @@ export default function ManagerMenuScreen() {
       <Text style={styles.title}>Menu</Text>
 
       {/* tab */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.tabsWrapper}
-        contentContainerStyle={styles.tabs}
-      >
+      <View style={styles.tabs}>
         <TopTabButton
           iconName="grid-outline"
           active={activeTab === "all"}
@@ -96,35 +91,37 @@ export default function ManagerMenuScreen() {
         />
 
         <TopTabButton
-          iconName="pizza-outline"
+          iconName="pizza"
           active={activeTab === "pizza"}
           onPress={() => setActiveTab("pizza")}
         />
 
         <TopTabButton
-          iconName="fast-food-outline"
+          iconName="hamburger"
+          iconType="material"
           active={activeTab === "burger"}
           onPress={() => setActiveTab("burger")}
         />
 
         <TopTabButton
-          iconName="restaurant-outline"
+          iconName="food-turkey"
+          iconType="material"
           active={activeTab === "chicken"}
           onPress={() => setActiveTab("chicken")}
         />
 
         <TopTabButton
-          iconName="ice-cream-outline"
+          iconName="ice-cream"
           active={activeTab === "dessert"}
           onPress={() => setActiveTab("dessert")}
         />
 
         <TopTabButton
-          iconName="wine-outline"
+          iconName="wine"
           active={activeTab === "drink"}
           onPress={() => setActiveTab("drink")}
         />
-      </ScrollView>
+      </View>
 
       {/* tính tổng số món ăn cho từng loại */}
       <Text style={styles.countText}>{filteredFood.length} items</Text>
@@ -167,8 +164,10 @@ const styles = StyleSheet.create({
   },
 
   tabs: {
-    paddingBottom: 10,
-    gap: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
     borderBottomWidth: 1,
     borderBottomColor: "#ECECEC",
     marginBottom: 18,
