@@ -19,26 +19,12 @@ export default function FoodCard({
   image_url,
   onPress,
 }: Props) {
-  const getTypeLabel = () => {
-    switch (type) {
-      case "pizza":
-        return "Pizza";
-
-      case "burger":
-        return "Burger";
-
-      case "chicken":
-        return "Chicken";
-
-      case "dessert":
-        return "Dessert";
-
-      case "drink":
-        return "Drink";
-
-      default:
-        return "Food";
-    }
+  const LabelType: Record<string, string> = {
+    burger: "Burger",
+    pizza: "Pizza",
+    chicken: "Chicken",
+    drink: "Drink",
+    dessert: "Dessert",
   };
 
   return (
@@ -67,7 +53,7 @@ export default function FoodCard({
         {/* giá và loại */}
         <View style={styles.bottomRow}>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{getTypeLabel()}</Text>
+            <Text style={styles.badgeText}>{LabelType[type] ?? "Pizza"}</Text>
           </View>
 
           <Text style={styles.price}>{formatCurrency(price, "USD")}</Text>

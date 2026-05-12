@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -19,18 +19,19 @@ export default function ManagerMenuScreen() {
   const [foods, setFoods] = useState<food[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const filteredFood =
-    activeTab === "all"
+  const filteredFood = useMemo(() => {
+    return activeTab === "all"
       ? foods
       : foods.filter((item) => item.type === activeTab);
-
-  const fetchFoods = async () => {
+  }, [foods, activeTab]);
+  //set cờ để kiểm tra người dùng vẫn còn trong màn hình
+  const fetchFoods = async (isFlag = true) => {
     try {
       setLoading(true);
       setError("");
 
       const data = await getFoods();
-
+      if (!isFlag) return;
       const formattedFoods = data.map((item: any) => ({
         id: item.id,
         name: item.name,
@@ -42,14 +43,17 @@ export default function ManagerMenuScreen() {
 
       setFoods(formattedFoods);
     } catch (error) {
-      console.log(error);
-      setError("Không thể tải danh sách món ăn");
+      if (isFlag) setError("Không thể tải danh sách món ăn");
     } finally {
-      setLoading(false);
+      if (isFlag) setLoading(false);
     }
   };
   useEffect(() => {
-    fetchFoods();
+    let isFlag = true;
+    fetchFoods(isFlag);
+    return () => {
+      isFlag = false;
+    };
   }, []);
 
   if (loading) {
@@ -67,7 +71,7 @@ export default function ManagerMenuScreen() {
         <Text style={styles.errorText}>{error}</Text>
         <CustomButton
           title="Thử lại"
-          onPress={fetchFoods}
+          onPress={() => fetchFoods()}
           buttonStyle={styles.retryButton}
           textStyle={styles.retryText}
         />

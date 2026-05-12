@@ -27,10 +27,11 @@ export default function ManagerOrdersScreen() {
   const [actionLoading, setActionLoading] = useState(false);
 
   //load data
-  const fetchOrders = async () => {
+  const fetchOrders = async (isFlag = true) => {
     try {
       setLoading(true);
       setError("");
+      if (!isFlag) return;
       const data = await getOwnerOrders();
       const formattedOrders = data.map((order: any) => ({
         id: order.id,
@@ -63,14 +64,17 @@ export default function ManagerOrdersScreen() {
       }));
       setOrders(formattedOrders);
     } catch (error) {
-      console.log(error);
-      setError("Không thể tải danh sách đơn hàng");
+      if (isFlag) setError("Không thể tải danh sách đơn hàng");
     } finally {
-      setLoading(false);
+      if (isFlag) setLoading(false);
     }
   };
   useEffect(() => {
-    fetchOrders();
+    let isFlag = true;
+    fetchOrders(isFlag);
+    return () => {
+      isFlag = false;
+    };
   }, []);
   //chuyển trạng thái đơn hàng
   const handleNextState = async (id: number, currentStatus: OrderStatus) => {
@@ -126,7 +130,7 @@ export default function ManagerOrdersScreen() {
         <Text style={styles.errorText}>{error}</Text>
         <CustomButton
           title="Thử lại"
-          onPress={fetchOrders}
+          onPress={() => fetchOrders()}
           buttonStyle={styles.retryButton}
           textStyle={styles.retryText}
         />
