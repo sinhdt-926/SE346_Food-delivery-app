@@ -14,7 +14,7 @@ export interface Order {
     id: string;
     fullname: string;
     phone_number: string;
-    //avatarUrl?: string;
+    avatarUrl?: string;
   };
   items: {
     name: string;

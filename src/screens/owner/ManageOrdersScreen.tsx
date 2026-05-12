@@ -179,7 +179,7 @@ export default function ManagerOrdersScreen() {
             customerName={item.customer.fullname}
             customerId={item.customer.id}
             totalPrice={item.payment.amount}
-            //avatarUrl={item.customer.avatarUrl}
+            avatarUrl={item.customer.avatarUrl}
             time={new Date(item.created_at)}
             onPress={() =>
               navigation.getParent()?.navigate("OrderDetail", {
