@@ -25,6 +25,16 @@ export default function OwnerProfileScreen() {
             });
           } catch (error: any) {
             console.log(error);
+            Alert.alert("Lỗi", "Không thể đăng xuất", [
+              {
+                text: "Thử lại",
+                onPress: handleLogout,
+              },
+              {
+                text: "Đóng",
+                style: "cancel",
+              },
+            ]);
           }
         },
       },
