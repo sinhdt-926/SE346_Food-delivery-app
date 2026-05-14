@@ -8,11 +8,10 @@ import {
   Alert,
 } from "react-native";
 import TopTabButton from "../../components/TopTabButton";
-import { useNavigation } from "@react-navigation/native";
-import { MenuStatus } from "../../types/cart";
-import { food } from "../../types/cart";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import { MenuStatus, food } from "../../types/cart";
 import FoodCard from "../../components/FoodCard";
-import { getFoods } from "../../services/food.service";
+import { getAllFoods } from "../../services/food.service";
 import CustomButton from "../../components/CustomButton";
 
 export default function ManagerMenuScreen() {
@@ -21,6 +20,8 @@ export default function ManagerMenuScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const route = useRoute<any>();
+  const navigation = useNavigation<any>();
   const filteredFood = useMemo(() => {
     return activeTab === "all"
       ? foods
@@ -34,14 +35,16 @@ export default function ManagerMenuScreen() {
         setLoading(true);
       }
       setError("");
-      const data = await getFoods();
+      const data = await getAllFoods();
       const formattedFoods = data.map((item) => ({
         id: item.id,
         name: item.name,
         price: Number(item.price),
         image_url: item.image_url,
         is_available: item.is_available,
-        type: item.categories?.category_name?.toLowerCase() ?? "pizza",
+        type:
+          (item.categories?.category_name?.toLowerCase() as food["type"]) ??
+          "pizza",
       }));
 
       if (isFlag.current) {
@@ -89,7 +92,7 @@ export default function ManagerMenuScreen() {
   const handleRefresh = async () => {
     try {
       setRefreshing(true);
-      const data = await getFoods();
+      const data = await getAllFoods();
       const formattedFoods = data.map((item) => ({
         id: item.id,
         name: item.name,
@@ -160,19 +163,30 @@ export default function ManagerMenuScreen() {
       </View>
 
       {/* tính tổng số món ăn cho từng loại */}
-      <View style={styles.refreshContainer}>
+      <View style={styles.subContainer}>
         <Text style={styles.countText}>{filteredFood.length} items</Text>
-        {/* refresh */}
-        <CustomButton
-          iconName="refresh"
-          iconType="ion"
-          iconColor="white"
-          onPress={handleRefresh}
-          isLoading={refreshing}
-          disabled={refreshing}
-          buttonStyle={styles.refreshButton}
-          textStyle={styles.refreshText}
-        />
+        {/* add */}
+        <View style={styles.actionButtons}>
+          {/* add */}
+          <CustomButton
+            iconName="add"
+            iconType="ion"
+            iconColor="white"
+            onPress={() => navigation.navigate("AddEditFood" as never)}
+            buttonStyle={styles.iconButton}
+          />
+
+          {/* refresh */}
+          <CustomButton
+            iconName="refresh"
+            iconType="ion"
+            iconColor="white"
+            onPress={handleRefresh}
+            isLoading={refreshing}
+            disabled={refreshing}
+            buttonStyle={styles.iconButton}
+          />
+        </View>
       </View>
       {/* list */}
       <ScrollView
@@ -189,7 +203,11 @@ export default function ManagerMenuScreen() {
             type={item.type}
             price={item.price}
             image_url={item.image_url}
-            onPress={() => {}}
+            onPress={() =>
+              navigation.navigate("AddEditFood", {
+                food: item,
+              })
+            }
           />
         ))}
       </ScrollView>
@@ -256,20 +274,23 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  refreshContainer: {
+  subContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
   },
 
-  refreshButton: {
-    width: 50,
-    paddingVertical: 10,
-    borderRadius: 14,
+  actionButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
 
-  refreshText: {
-    fontSize: 13,
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    paddingVertical: 0,
   },
 });

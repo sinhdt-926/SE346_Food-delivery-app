@@ -19,7 +19,7 @@ export default function OwnerStack() {
       <Stack.Screen name="OwnerTabs" component={OwnerTabs} />
 
       {/* Add Food */}
-      {/* <Stack.Screen name="AddEditFood" component={AddEditFoodScreen} /> */}
+      <Stack.Screen name="AddEditFood" component={AddEditFoodScreen} />
 
       {/* Manager Orders */}
       <Stack.Screen name="ManagerOrders" component={ManagerOrdersScreen} />
