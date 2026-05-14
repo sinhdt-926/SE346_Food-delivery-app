@@ -92,7 +92,11 @@ export const getOwnerOrders = async () => {
       subtotal: Number(item.subtotal),
       note: item.note,
     }));
-    const total = items.reduce((sum, item) => sum + item.subtotal, 0);
+    // Lấy tổng tiền từ bảng payments thay vì tính tổng bằng vòng lặp reduce
+    const total =
+      order.payments && order.payments.length > 0
+        ? Number(order.payments[0].amount)
+        : 0;
 
     return {
       id: order.id,

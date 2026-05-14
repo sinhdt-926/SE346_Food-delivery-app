@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -25,15 +25,16 @@ export default function ManagerOrdersScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
-
+  const isFlag = useRef(true);
   //load data
-  const fetchOrders = async (isFlag = true) => {
+  const fetchOrders = async () => {
     try {
       setLoading(true);
       setError("");
-      if (!isFlag) return;
       const data: Order[] = await getOwnerOrders();
-      setOrders(data);
+      if (isFlag.current) {
+        setOrders(data);
+      }
     } catch (error) {
       if (isFlag) setError("Không thể tải danh sách đơn hàng");
     } finally {
@@ -41,10 +42,9 @@ export default function ManagerOrdersScreen() {
     }
   };
   useEffect(() => {
-    let isFlag = true;
-    fetchOrders(isFlag);
+    fetchOrders();
     return () => {
-      isFlag = false;
+      isFlag.current = false;
     };
   }, []);
   //chuyển trạng thái đơn hàng

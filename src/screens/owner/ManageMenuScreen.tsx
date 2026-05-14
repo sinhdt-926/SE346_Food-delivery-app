@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -24,14 +24,17 @@ export default function ManagerMenuScreen() {
       ? foods
       : foods.filter((item) => item.type === activeTab);
   }, [foods, activeTab]);
+  const isFlag = useRef(true);
   //set cờ để kiểm tra người dùng vẫn còn trong màn hình
-  const fetchFoods = async (isFlag = true) => {
+  const fetchFoods = async () => {
     try {
       setLoading(true);
       setError("");
 
       const data = await getFoods();
-      if (!isFlag) return;
+      if (isFlag.current) {
+        setFoods(data);
+      }
       const formattedFoods = data.map((item) => ({
         id: item.id,
         name: item.name,
@@ -49,10 +52,9 @@ export default function ManagerMenuScreen() {
     }
   };
   useEffect(() => {
-    let isFlag = true;
-    fetchFoods(isFlag);
+    fetchFoods();
     return () => {
-      isFlag = false;
+      isFlag.current = false;
     };
   }, []);
 
