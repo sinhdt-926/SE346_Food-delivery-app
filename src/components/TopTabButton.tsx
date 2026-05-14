@@ -1,9 +1,7 @@
 import React from "react";
 import { TouchableOpacity, StyleSheet, View, Text } from "react-native";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
-
-//có thể dùng nhiều dạng icon hơn
-type IconType = "ion" | "material" | "feather";
+import { IconType } from "../types/icon";
 
 interface Props {
   title?: string;

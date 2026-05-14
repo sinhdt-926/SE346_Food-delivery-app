@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import TopTabButton from "../../components/TopTabButton";
 import { useNavigation } from "@react-navigation/native";
@@ -19,6 +20,7 @@ export default function ManagerMenuScreen() {
   const [foods, setFoods] = useState<food[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
   const filteredFood = useMemo(() => {
     return activeTab === "all"
       ? foods
@@ -28,13 +30,11 @@ export default function ManagerMenuScreen() {
   //set cờ để kiểm tra người dùng vẫn còn trong màn hình
   const fetchFoods = async () => {
     try {
-      setLoading(true);
-      setError("");
-
-      const data = await getFoods();
-      if (isFlag.current) {
-        setFoods(data);
+      if (foods.length === 0) {
+        setLoading(true);
       }
+      setError("");
+      const data = await getFoods();
       const formattedFoods = data.map((item) => ({
         id: item.id,
         name: item.name,
@@ -44,11 +44,17 @@ export default function ManagerMenuScreen() {
         type: item.categories?.category_name?.toLowerCase() ?? "pizza",
       }));
 
-      setFoods(formattedFoods);
+      if (isFlag.current) {
+        setFoods(formattedFoods);
+      }
     } catch (error) {
-      if (isFlag.current) setError("Không thể tải danh sách món ăn");
+      if (isFlag.current) {
+        setError("Không thể tải danh sách món ăn");
+      }
     } finally {
-      if (isFlag.current) setLoading(false);
+      if (isFlag.current) {
+        setLoading(false);
+      }
     }
   };
   useEffect(() => {
@@ -80,6 +86,34 @@ export default function ManagerMenuScreen() {
       </View>
     );
   }
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      const data = await getFoods();
+      const formattedFoods = data.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: Number(item.price),
+        image_url: item.image_url,
+        is_available: item.is_available,
+        type: item.categories?.category_name?.toLowerCase() ?? "pizza",
+      }));
+      if (isFlag.current) {
+        setFoods(formattedFoods);
+      }
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể tải lại", [
+        {
+          text: "Thử lại",
+          onPress: () => handleRefresh(),
+        },
+      ]);
+    } finally {
+      if (isFlag.current) {
+        setRefreshing(false);
+      }
+    }
+  };
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Menu</Text>
@@ -126,8 +160,20 @@ export default function ManagerMenuScreen() {
       </View>
 
       {/* tính tổng số món ăn cho từng loại */}
-      <Text style={styles.countText}>{filteredFood.length} items</Text>
-
+      <View style={styles.refreshContainer}>
+        <Text style={styles.countText}>{filteredFood.length} items</Text>
+        {/* refresh */}
+        <CustomButton
+          iconName="refresh"
+          iconType="ion"
+          iconColor="white"
+          onPress={handleRefresh}
+          isLoading={refreshing}
+          disabled={refreshing}
+          buttonStyle={styles.refreshButton}
+          textStyle={styles.refreshText}
+        />
+      </View>
       {/* list */}
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -176,11 +222,11 @@ const styles = StyleSheet.create({
   },
 
   countText: {
-    fontSize: 15,
-    color: "#7A7A7A",
-    marginBottom: 18,
-    fontWeight: "500",
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#222",
   },
+
   tabsWrapper: {
     maxHeight: 70,
   },
@@ -208,5 +254,22 @@ const styles = StyleSheet.create({
     color: "#B1B1B1",
     textAlign: "center",
     marginBottom: 16,
+  },
+
+  refreshContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  refreshButton: {
+    width: 50,
+    paddingVertical: 10,
+    borderRadius: 14,
+  },
+
+  refreshText: {
+    fontSize: 13,
   },
 });
