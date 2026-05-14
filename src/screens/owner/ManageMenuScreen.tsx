@@ -46,9 +46,9 @@ export default function ManagerMenuScreen() {
 
       setFoods(formattedFoods);
     } catch (error) {
-      if (isFlag) setError("Không thể tải danh sách món ăn");
+      if (isFlag.current) setError("Không thể tải danh sách món ăn");
     } finally {
-      if (isFlag) setLoading(false);
+      if (isFlag.current) setLoading(false);
     }
   };
   useEffect(() => {

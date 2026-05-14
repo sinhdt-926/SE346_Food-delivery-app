@@ -209,6 +209,7 @@ export default function OrderDetailScreen() {
             <CustomButton
               title={getActionTitle()!}
               onPress={handleNextState}
+              disabled={actionLoading}
               buttonStyle={styles.doneButton}
             />
 
@@ -216,6 +217,7 @@ export default function OrderDetailScreen() {
               title="Cancel"
               buttonStyle={styles.cancelButton}
               onPress={handleCancelOrder}
+              disabled={actionLoading}
               textStyle={styles.cancelText}
             />
           </View>

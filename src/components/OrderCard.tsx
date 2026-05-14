@@ -13,6 +13,7 @@ interface Props {
   onPress?: () => void;
   onActionPress?: () => void;
   onCancelPress?: () => void;
+  actionLoading?: boolean;
 }
 
 export default function OrderCard({
@@ -24,6 +25,7 @@ export default function OrderCard({
   onPress,
   onActionPress,
   onCancelPress,
+  actionLoading,
 }: Props) {
   const getActionTitle = () => {
     switch (status) {
@@ -69,12 +71,16 @@ export default function OrderCard({
             buttonStyle={styles.doneButton}
             textStyle={styles.doneText}
             onPress={onActionPress}
+            disabled={actionLoading}
+            isLoading={actionLoading}
           />
           <CustomButton
             title="Cancel"
             buttonStyle={styles.cancelButton}
             textStyle={styles.cancelText}
             onPress={onCancelPress}
+            disabled={actionLoading}
+            isLoading={actionLoading}
           />
         </View>
       ) : (

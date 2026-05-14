@@ -36,9 +36,9 @@ export default function ManagerOrdersScreen() {
         setOrders(data);
       }
     } catch (error) {
-      if (isFlag) setError("Không thể tải danh sách đơn hàng");
+      if (isFlag.current) setError("Không thể tải danh sách đơn hàng");
     } finally {
-      if (isFlag) setLoading(false);
+      if (isFlag.current) setLoading(false);
     }
   };
   useEffect(() => {
@@ -188,6 +188,7 @@ export default function ManagerOrdersScreen() {
             }
             onActionPress={() => handleNextState(item.id, item.status)}
             onCancelPress={() => handleCancelOrder(item.id)}
+            actionLoading={actionLoading}
           />
         ))}
       </ScrollView>
