@@ -1,8 +1,45 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import ProfileButton from "../../components/ProfileButton";
+import { authService } from "../../services/auth.service";
+import { useNavigation } from "@react-navigation/native";
 
 export default function OwnerProfileScreen() {
+  const navigation = useNavigation();
+  const handleLogout = async () => {
+    Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất không?", [
+      {
+        text: "Hủy",
+        style: "cancel",
+      },
+      {
+        text: "Đăng xuất",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await authService.signOut();
+
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Login" as never }],
+            });
+          } catch (error: any) {
+            console.log(error);
+            Alert.alert("Lỗi", "Không thể đăng xuất", [
+              {
+                text: "Thử lại",
+                onPress: handleLogout,
+              },
+              {
+                text: "Đóng",
+                style: "cancel",
+              },
+            ]);
+          }
+        },
+      },
+    ]);
+  };
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* header */}
@@ -60,7 +97,7 @@ export default function OwnerProfileScreen() {
           title="Log Out"
           iconName="log-out-outline"
           iconColor="#FF4B4B"
-          onPress={() => console.log("Logout")}
+          onPress={handleLogout}
         />
       </View>
     </ScrollView>

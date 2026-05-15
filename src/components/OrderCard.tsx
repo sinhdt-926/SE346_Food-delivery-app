@@ -1,16 +1,19 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import CustomButton from "./CustomButton";
+import { formatCurrency, formatRelativeTime } from "../utils/formatters";
 
 interface Props {
   status: "pending" | "preparing" | "delivering" | "completed" | "cancelled";
   customerName: string;
   customerId: string;
   totalPrice: number;
-  time: string;
+  time: Date;
+  avatarUrl?: string;
   onPress?: () => void;
   onActionPress?: () => void;
   onCancelPress?: () => void;
+  actionLoading?: boolean;
 }
 
 export default function OrderCard({
@@ -18,9 +21,11 @@ export default function OrderCard({
   customerName,
   totalPrice,
   time,
+  avatarUrl,
   onPress,
   onActionPress,
   onCancelPress,
+  actionLoading,
 }: Props) {
   const getActionTitle = () => {
     switch (status) {
@@ -43,12 +48,19 @@ export default function OrderCard({
   return (
     <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.card}>
       <View style={styles.topSection}>
-        <View style={styles.image} />
+        <Image
+          source={{
+            uri: avatarUrl || "https://i.pravatar.cc/150",
+          }}
+          style={styles.image}
+        />
         {/* Thông tin đơn hàng */}
         <View style={styles.info}>
-          <Text style={styles.time}>{time}</Text>
+          <Text style={styles.time}>{formatRelativeTime(time, false)}</Text>
           <Text style={styles.name}>{customerName}</Text>
-          <Text style={styles.price}>Total: {totalPrice}</Text>
+          <Text style={styles.price}>
+            Total: {formatCurrency(totalPrice, "USD")}
+          </Text>
         </View>
       </View>
 
@@ -59,12 +71,16 @@ export default function OrderCard({
             buttonStyle={styles.doneButton}
             textStyle={styles.doneText}
             onPress={onActionPress}
+            disabled={actionLoading}
+            isLoading={actionLoading}
           />
           <CustomButton
             title="Cancel"
             buttonStyle={styles.cancelButton}
             textStyle={styles.cancelText}
             onPress={onCancelPress}
+            disabled={actionLoading}
+            isLoading={actionLoading}
           />
         </View>
       ) : (
@@ -132,7 +148,7 @@ const styles = StyleSheet.create({
   },
 
   price: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "700",
     color: "#222",
   },

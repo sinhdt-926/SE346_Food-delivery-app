@@ -4,6 +4,7 @@ import OwnerTabs from "./OwnerTabs";
 import AddEditFoodScreen from "../screens/owner/AddEditFoodScreen";
 import ManagerOrdersScreen from "../screens/owner/ManageOrdersScreen";
 import OrderDetailScreen from "../screens/owner/OrderDetailScreen";
+import ManagerMenuScreen from "../screens/owner/ManageMenuScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,11 +19,14 @@ export default function OwnerStack() {
       <Stack.Screen name="OwnerTabs" component={OwnerTabs} />
 
       {/* Add Food */}
-      {/* <Stack.Screen name="AddEditFood" component={AddEditFoodScreen} /> */}
+      <Stack.Screen name="AddEditFood" component={AddEditFoodScreen} />
 
       {/* Manager Orders */}
       <Stack.Screen name="ManagerOrders" component={ManagerOrdersScreen} />
       <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+
+      {/* Manager Menu */}
+      <Stack.Screen name="ManagerMenu" component={ManagerMenuScreen} />
     </Stack.Navigator>
   );
 }

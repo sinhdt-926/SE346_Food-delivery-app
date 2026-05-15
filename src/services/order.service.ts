@@ -29,7 +29,7 @@ export const getMyOrders = async () => {
 
   return (data ?? []).map((order) => ({
     id: order.id,
-    created_at: new Date(order.created_at),
+    created_at: order.created_at,
     status: order.status,
     address: order.delivery_address,
     items: (order.order_details ?? []).map((item: any) => ({
@@ -51,6 +51,7 @@ type User = {
   id: string;
   fullname: string;
   phone_number: string;
+  avatarUrl: string;
 };
 
 // Admin/Owner lấy toàn bộ danh sách đơn
@@ -63,7 +64,7 @@ export const getOwnerOrders = async () => {
             created_at,
             status,
             delivery_address,
-            users(id, fullname, phone_number),
+            users(id, fullname, phone_number, avatarUrl),
             order_details(
                 quantity,
                 price,
@@ -82,7 +83,6 @@ export const getOwnerOrders = async () => {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  console.log(JSON.stringify(data, null, 2));
   return (data ?? []).map((order) => {
     const user = order.users as unknown as User;
     const items = (order.order_details ?? []).map((item: any) => ({
@@ -92,7 +92,6 @@ export const getOwnerOrders = async () => {
       subtotal: Number(item.subtotal),
       note: item.note,
     }));
-
     // Lấy tổng tiền từ bảng payments thay vì tính tổng bằng vòng lặp reduce
     const total =
       order.payments && order.payments.length > 0
@@ -101,13 +100,14 @@ export const getOwnerOrders = async () => {
 
     return {
       id: order.id,
-      created_at: new Date(order.created_at),
+      created_at: order.created_at,
       status: order.status,
       address: order.delivery_address,
       customer: {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
         phone_number: user?.phone_number ?? "",
+        avatarUrl: user?.avatarUrl ?? "",
       },
       items,
       payment: {

@@ -7,25 +7,22 @@ export type OrderStatus =
 
 export interface Order {
   id: number;
+  created_at: string;
   status: OrderStatus;
-  time: string;
+  address: string;
   customer: {
     id: string;
     fullname: string;
     phone_number: string;
+    avatarUrl?: string;
   };
-  delivery_address: string;
-  order_details: {
-    id: number;
+  items: {
+    name: string;
     quantity: number;
-    note?: string;
+    price: number;
     subtotal: number;
-    food: {
-      id: number;
-      name: string;
-    };
+    note?: string;
   }[];
-
   payment: {
     id: number;
     type: string;

@@ -1,25 +1,64 @@
 import React from "react";
-import { TouchableOpacity, StyleSheet, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity, StyleSheet, View, Text } from "react-native";
+import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import { IconType } from "../types/icon";
 
 interface Props {
-  iconName: keyof typeof Ionicons.glyphMap;
+  title?: string;
+  iconName?: string;
+  iconType?: IconType;
   active?: boolean;
   onPress?: () => void;
 }
 
-export default function TopTabButton({ iconName, active, onPress }: Props) {
+export default function TopTabButton({
+  title,
+  iconName,
+  iconType,
+  active = false,
+  onPress,
+}: Props) {
+  const iconColor = active ? "#FF7622" : "#B1B1B1";
+  const renderIcon = () => {
+    if (!iconName) return null;
+
+    switch (iconType) {
+      case "material":
+        return (
+          <MaterialCommunityIcons
+            name={iconName as any}
+            size={22}
+            color={iconColor}
+          />
+        );
+
+      case "feather":
+        return <Feather name={iconName as any} size={22} color={iconColor} />;
+
+      default:
+        return <Ionicons name={iconName as any} size={22} color={iconColor} />;
+    }
+  };
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
       style={styles.container}
     >
-      <Ionicons
-        name={iconName}
-        size={24}
-        color={active ? "#FF7622" : "#B1B1B1"}
-      />
+      <View style={styles.content}>
+        {renderIcon()}
+        {title && (
+          <Text
+            style={[
+              styles.text,
+              active && styles.activeText,
+              iconName && styles.textWithIcon,
+            ]}
+          >
+            {title}
+          </Text>
+        )}
+      </View>
       {active && <View style={styles.line} />}
     </TouchableOpacity>
   );
@@ -31,7 +70,28 @@ const styles = StyleSheet.create({
     height: 52,
     alignItems: "center",
     justifyContent: "center",
-    paddingBottom: 10,
+    position: "relative",
+  },
+
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  text: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#B1B1B1",
+  },
+
+  activeText: {
+    color: "#FF7622",
+    fontWeight: "700",
+  },
+
+  textWithIcon: {
+    marginLeft: 6,
   },
 
   line: {

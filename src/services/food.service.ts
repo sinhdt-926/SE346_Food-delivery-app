@@ -133,3 +133,14 @@ export const uploadImage = async (file: any) => {
   const { data } = await supabase.storage.from("images").getPublicUrl(fileName);
   return data.publicUrl;
 };
+//lấy tất cả món
+export const getAllFoods = async () => {
+  const { data, error } = await supabase
+    .from("foods")
+    .select("*, categories(id, category_name)");
+
+  if (error) {
+    throw error;
+  }
+  return data;
+};
