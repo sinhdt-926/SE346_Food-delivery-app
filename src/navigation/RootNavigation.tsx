@@ -4,23 +4,56 @@ import { supabase } from "../services/supabase";
 
 import AuthStack from "./AuthStack";
 import CustomerTabs from "./CustomerTabs";
+import OwnerTabs from "./OwnerTabs";
+import OwnerStack from "./OwnerStack";
 
 export default function RootNavigation() {
   const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [role, setRole] = useState<string | null>(null);
+
+  //lấy role user
+  const fetchUserRole = async (userId: string) => {
+    const { data, error } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.log("role error:", error);
+      return;
+    }
+
+    if (data) {
+      console.log("role:", data.role);
+      setRole(data.role);
+    }
+  };
   useEffect(() => {
     // 1. Kiểm tra ngay khi vừa mở app lên xem có đăng nhập từ trước chưa
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
+
+      if (session?.user) {
+        await fetchUserRole(session.user.id);
+      }
+
       setIsLoading(false);
     });
 
     // 2. Lắng nghe mọi thay đổi (Khi bấm Login, SignUp, Verify OTP thành công, hoặc Đăng xuất)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
+
+      if (session?.user) {
+        await fetchUserRole(session.user.id);
+      } else {
+        setRole(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -41,7 +74,17 @@ export default function RootNavigation() {
       </View>
     );
   }
-
   // 3. QUYẾT ĐỊNH ĐIỀU HƯỚNG: Có session (đã đăng nhập) thì vào app chính, chưa thì ra màn hình Auth
-  return session && session.user ? <CustomerTabs /> : <AuthStack />;
+  //Chưa login
+  if (!session || !session.user) {
+    return <AuthStack />;
+  }
+
+  // Owner
+  if (role === "owner") {
+    return <OwnerStack />;
+  }
+
+  // Customer
+  return <CustomerTabs />;
 }
