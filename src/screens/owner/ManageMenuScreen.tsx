@@ -8,7 +8,11 @@ import {
   Alert,
 } from "react-native";
 import TopTabButton from "../../components/TopTabButton";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import {
+  useRoute,
+  useNavigation,
+  useFocusEffect,
+} from "@react-navigation/native";
 import { MenuStatus, food } from "../../types/cart";
 import FoodCard from "../../components/FoodCard";
 import { getAllFoods } from "../../services/food.service";
@@ -63,12 +67,15 @@ export default function ManagerMenuScreen() {
       }
     }
   };
-  useEffect(() => {
-    fetchFoods();
-    return () => {
-      isFlag.current = false;
-    };
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      isFlag.current = true;
+      fetchFoods();
+      return () => {
+        isFlag.current = false;
+      };
+    }, []),
+  );
 
   if (loading) {
     return (

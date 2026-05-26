@@ -155,14 +155,24 @@ export default function AddEditFoodScreen() {
     }
   };
   const handleReset = () => {
+    // edit
     if (editingFood) {
       setName(editingFood.name);
       setPrice(String(editingFood.price));
       setDetails(editingFood.description ?? "");
-      setImage(editingFood.image_url);
+      setImage(editingFood.image_url ?? null);
       setSelectedCategoryId(editingFood.category_id ?? 1);
-      setIsAvailable(editingFood.is_available);
+      setIsAvailable(editingFood.is_available ?? true);
+      return;
     }
+
+    // add
+    setName("");
+    setPrice("");
+    setDetails("");
+    setImage(null);
+    setSelectedCategoryId(categories[0]?.id ?? 1);
+    setIsAvailable(true);
   };
   const confirmReset = () => {
     Alert.alert("Confirm Reset", "Do you want to reset?", [
