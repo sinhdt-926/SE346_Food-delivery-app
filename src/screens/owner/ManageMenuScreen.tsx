@@ -23,9 +23,12 @@ export default function ManagerMenuScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const filteredFood = useMemo(() => {
-    return activeTab === "all"
-      ? foods
-      : foods.filter((item) => item.type === activeTab);
+    if (activeTab === "all") {
+      return foods;
+    }
+    return foods.filter(
+      (item) => item.category_name?.toLowerCase() === activeTab.toLowerCase(),
+    );
   }, [foods, activeTab]);
   const isFlag = useRef(true);
   //set cờ để kiểm tra người dùng vẫn còn trong màn hình
@@ -42,9 +45,9 @@ export default function ManagerMenuScreen() {
         price: Number(item.price),
         image_url: item.image_url,
         is_available: item.is_available,
-        type:
-          (item.categories?.category_name?.toLowerCase() as food["type"]) ??
-          "pizza",
+        description: item.description,
+        category_id: item.category_id,
+        category_name: item.categories?.category_name ?? "Unknown",
       }));
 
       if (isFlag.current) {
@@ -93,13 +96,16 @@ export default function ManagerMenuScreen() {
     try {
       setRefreshing(true);
       const data = await getAllFoods();
+      console.log(JSON.stringify(data, null, 2));
       const formattedFoods = data.map((item) => ({
         id: item.id,
         name: item.name,
         price: Number(item.price),
         image_url: item.image_url,
         is_available: item.is_available,
-        type: item.categories?.category_name?.toLowerCase() ?? "pizza",
+        description: item.description,
+        category_id: item.category_id,
+        category_name: item.categories?.category_name ?? "Unknown",
       }));
       if (isFlag.current) {
         setFoods(formattedFoods);
@@ -200,9 +206,10 @@ export default function ManagerMenuScreen() {
             key={item.id}
             id={item.id}
             name={item.name}
-            type={item.type}
+            category_name={item.category_name}
             price={item.price}
             image_url={item.image_url}
+            is_available={item.is_available}
             onPress={() =>
               navigation.navigate("AddEditFood", {
                 food: item,

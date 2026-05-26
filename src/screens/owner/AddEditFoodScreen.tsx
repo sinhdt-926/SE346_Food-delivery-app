@@ -22,23 +22,9 @@ import {
   updateFood,
   uploadImage,
   deleteFood,
+  getCategories,
 } from "../../services/food.service";
-import { FOOD_TYPE_LABELS, food, FoodType } from "../../types/cart";
-
-const category_map: Record<FoodType, number> = {
-  pizza: 1,
-  burger: 2,
-  chicken: 3,
-  dessert: 4,
-  drink: 5,
-};
-const food_tags: FoodType[] = [
-  "pizza",
-  "burger",
-  "chicken",
-  "dessert",
-  "drink",
-];
+import { food, Category } from "../../types/cart";
 
 export default function AddEditFoodScreen() {
   const navigation = useNavigation<any>();
@@ -51,19 +37,35 @@ export default function AddEditFoodScreen() {
   const [price, setPrice] = useState("");
   const [details, setDetails] = useState("");
   const [image, setImage] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<FoodType>("pizza");
   const [isAvailable, setIsAvailable] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const allowExitRef = useRef(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number>(1);
   useEffect(() => {
     if (!editingFood) return;
     setName(editingFood.name);
     setPrice(String(editingFood.price));
     setDetails(editingFood.description ?? "");
-    setImage(editingFood.image_url);
-    setSelectedTag(editingFood.type);
+    setImage(editingFood.image_url ?? null);
+    setSelectedCategoryId(editingFood.category_id ?? 1);
     setIsAvailable(editingFood.is_available ?? true);
   }, [editingFood]);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+        // default category
+        if (data.length > 0 && !editingFood) {
+          setSelectedCategoryId(data[0].id);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchCategories();
+  }, []);
   const hasChanges = useMemo(() => {
     if (!editingFood) {
       return (
@@ -71,7 +73,7 @@ export default function AddEditFoodScreen() {
         price.trim() !== "" ||
         details.trim() !== "" ||
         image !== null ||
-        selectedTag !== "pizza" ||
+        selectedCategoryId !== categories[0]?.id ||
         isAvailable !== true
       );
     }
@@ -80,10 +82,19 @@ export default function AddEditFoodScreen() {
       price !== String(editingFood.price) ||
       details !== (editingFood.description ?? "") ||
       image !== editingFood.image_url ||
-      selectedTag !== editingFood.type ||
+      selectedCategoryId !== editingFood.category_id ||
       isAvailable !== (editingFood.is_available ?? true)
     );
-  }, [name, price, details, image, selectedTag, isAvailable, editingFood]);
+  }, [
+    name,
+    price,
+    details,
+    image,
+    selectedCategoryId,
+    isAvailable,
+    editingFood,
+    categories,
+  ]);
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e: any) => {
       if (allowExitRef.current || !hasChanges || isSaving) {
@@ -149,7 +160,7 @@ export default function AddEditFoodScreen() {
       setPrice(String(editingFood.price));
       setDetails(editingFood.description ?? "");
       setImage(editingFood.image_url);
-      setSelectedTag(editingFood.type);
+      setSelectedCategoryId(editingFood.category_id ?? 1);
       setIsAvailable(editingFood.is_available);
     }
   };
@@ -197,7 +208,7 @@ export default function AddEditFoodScreen() {
         price: Number(price),
         description: details.trim(),
         image_url: imageUrl ?? undefined,
-        category_id: category_map[selectedTag],
+        category_id: selectedCategoryId,
         is_available: isAvailable,
       };
       if (isEditMode && editingFood) {
@@ -392,13 +403,14 @@ export default function AddEditFoodScreen() {
           <View style={styles.section}>
             <Text style={styles.label}>CATEGORY</Text>
             <View style={styles.tagsContainer}>
-              {food_tags.map((tag) => {
-                const isSelected = selectedTag === tag;
+              {categories.map((category) => {
+                const isSelected = selectedCategoryId === category.id;
+
                 return (
                   <TouchableOpacity
-                    key={tag}
+                    key={category.id}
                     activeOpacity={0.85}
-                    onPress={() => setSelectedTag(tag)}
+                    onPress={() => setSelectedCategoryId(category.id)}
                     style={[
                       styles.tagButton,
                       isSelected && styles.activeTagButton,
@@ -410,7 +422,7 @@ export default function AddEditFoodScreen() {
                         isSelected && styles.activeTagText,
                       ]}
                     >
-                      {FOOD_TYPE_LABELS[tag]}
+                      {category.category_name}
                     </Text>
                   </TouchableOpacity>
                 );

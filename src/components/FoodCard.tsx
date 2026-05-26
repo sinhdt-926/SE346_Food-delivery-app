@@ -1,32 +1,24 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { formatCurrency } from "../utils/formatters";
 
 interface Props {
-  type: "pizza" | "dessert" | "drink" | "burger" | "chicken";
-  name: string;
   id: string;
+  name: string;
   price: number;
   image_url?: string;
+  is_available: boolean;
+  category_name?: string;
   onPress?: () => void;
 }
-
 export default function FoodCard({
-  type,
   name,
   price,
   image_url,
+  is_available,
+  category_name,
   onPress,
 }: Props) {
-  const LabelType: Record<string, string> = {
-    burger: "Burger",
-    pizza: "Pizza",
-    chicken: "Chicken",
-    drink: "Drink",
-    dessert: "Dessert",
-  };
-
   return (
     <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.card}>
       {/* image */}
@@ -36,7 +28,6 @@ export default function FoodCard({
         }}
         style={styles.image}
       />
-
       {/* content */}
       <View style={styles.content}>
         {/* top row */}
@@ -44,18 +35,20 @@ export default function FoodCard({
           <Text numberOfLines={1} style={styles.name}>
             {name}
           </Text>
-
-          <TouchableOpacity>
-            <Ionicons name="ellipsis-horizontal" size={22} color="#222" />
-          </TouchableOpacity>
+          <View
+            style={[
+              styles.statusDot,
+              {
+                backgroundColor: is_available ? "#22C55E" : "#9CA3AF",
+              },
+            ]}
+          />
         </View>
-
-        {/* giá và loại */}
+        {/* bottom */}
         <View style={styles.bottomRow}>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{LabelType[type] ?? "Pizza"}</Text>
+            <Text style={styles.badgeText}>{category_name ?? "Unknown"}</Text>
           </View>
-
           <Text style={styles.price}>{formatCurrency(price, "USD")}</Text>
         </View>
       </View>
@@ -71,6 +64,15 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     flexDirection: "row",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
 
   image: {
@@ -118,11 +120,19 @@ const styles = StyleSheet.create({
     color: "#FF7622",
     fontSize: 14,
     fontWeight: "600",
+    textTransform: "capitalize",
   },
 
   price: {
     fontSize: 15,
     fontWeight: "700",
     color: "#222",
+  },
+
+  statusDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 999,
+    marginTop: 6,
   },
 });
