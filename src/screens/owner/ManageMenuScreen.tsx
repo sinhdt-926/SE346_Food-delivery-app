@@ -17,6 +17,7 @@ import { MenuStatus, food } from "../../types/cart";
 import FoodCard from "../../components/FoodCard";
 import { getAllFoods } from "../../services/food.service";
 import CustomButton from "../../components/CustomButton";
+import LogoutButton from "../../components/LogoutButton";
 
 export default function ManagerMenuScreen() {
   const [activeTab, setActiveTab] = useState<MenuStatus>("all");
@@ -132,7 +133,10 @@ export default function ManagerMenuScreen() {
   };
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Menu</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Menu</Text>
+        <LogoutButton />
+      </View>
 
       {/* tab */}
       <View style={styles.tabs}>
@@ -232,25 +236,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F8F8",
-    paddingTop: 65,
-    paddingHorizontal: 24,
   },
 
   title: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#111",
-    marginBottom: 24,
+    color: "#FF7622",
   },
 
   tabs: {
+    marginHorizontal: 24,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    width: "100%",
     borderBottomWidth: 1,
     borderBottomColor: "#ECECEC",
-    marginBottom: 18,
+    marginBottom: 15,
   },
 
   countText: {
@@ -289,6 +290,7 @@ const styles = StyleSheet.create({
   },
 
   subContainer: {
+    marginHorizontal: 24,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -306,5 +308,24 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 14,
     paddingVertical: 0,
+  },
+  header: {
+    width: "100%",
+    backgroundColor: "#181C2E",
+    paddingTop: 65,
+    paddingBottom: 28,
+    paddingHorizontal: 24,
+    marginBottom: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 4,
   },
 });

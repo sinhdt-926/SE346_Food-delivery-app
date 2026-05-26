@@ -16,6 +16,7 @@ import {
 } from "../../services/order.service";
 import { Order, OrderStatus } from "../../types/order";
 import CustomButton from "../../components/CustomButton";
+import LogoutButton from "../../components/LogoutButton";
 
 export default function ManagerOrdersScreen() {
   const [activeTab, setActiveTab] = useState<OrderStatus>("pending");
@@ -134,7 +135,10 @@ export default function ManagerOrdersScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Orders</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Menu</Text>
+        <LogoutButton />
+      </View>
 
       {/* tab */}
       <View style={styles.tabs}>
@@ -209,23 +213,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F8F8",
-    paddingTop: 65,
-    paddingHorizontal: 24,
   },
 
   title: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#111",
-    marginBottom: 24,
+    color: "#FF7622",
   },
 
   tabs: {
+    marginHorizontal: 24,
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
     borderBottomColor: "#ECECEC",
-    marginBottom: 24,
+    marginBottom: 15,
   },
 
   center: {
@@ -276,5 +279,24 @@ const styles = StyleSheet.create({
 
   retryText: {
     color: "white",
+  },
+  header: {
+    width: "100%",
+    backgroundColor: "#181C2E",
+    paddingTop: 65,
+    paddingBottom: 28,
+    paddingHorizontal: 24,
+    marginBottom: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 4,
   },
 });
