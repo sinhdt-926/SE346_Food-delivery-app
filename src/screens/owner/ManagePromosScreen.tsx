@@ -12,6 +12,7 @@ import TopTabButton from "../../components/TopTabButton";
 import PromotionCard from "../../components/PromotionCard";
 import { Promotion } from "../../types/promotion";
 import { getAllPromotions } from "../../services/promotion.service";
+import CustomButton from "../../components/CustomButton";
 
 export default function ManagerPromosScreen() {
   const [activeTab, setActiveTab] = useState<"active" | "upcoming" | "expired">(
@@ -89,6 +90,23 @@ export default function ManagerPromosScreen() {
       {/* count */}
       <View style={styles.subContainer}>
         <Text style={styles.countText}>{filteredPromos.length} promos</Text>
+        <View style={styles.actionButtons}>
+          {/* add */}
+          <CustomButton
+            iconName="add"
+            iconType="ion"
+            iconColor="white"
+            buttonStyle={styles.iconButton}
+          />
+
+          {/* refresh */}
+          <CustomButton
+            iconName="refresh"
+            iconType="ion"
+            iconColor="white"
+            buttonStyle={styles.iconButton}
+          />
+        </View>
       </View>
 
       {/* loading */}
@@ -198,5 +216,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#B1B1B1",
     fontWeight: "500",
+  },
+  actionButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    paddingVertical: 0,
   },
 });
