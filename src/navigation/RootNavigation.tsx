@@ -3,7 +3,7 @@ import { View, ActivityIndicator } from "react-native";
 import { supabase } from "../services/supabase";
 
 import AuthStack from "./AuthStack";
-import CustomerTabs from "./CustomerTabs";
+import CustomerProfileStack from "./CustomerProfileStack";
 import OwnerTabs from "./OwnerTabs";
 import OwnerStack from "./OwnerStack";
 
@@ -86,5 +86,5 @@ export default function RootNavigation() {
   }
 
   // Customer
-  return <CustomerTabs />;
+  return <CustomerProfileStack />;
 }

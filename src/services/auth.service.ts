@@ -63,4 +63,27 @@ export const authService = {
       throw new Error(error.message);
     }
   },
+
+  getCurrentUser: async () => {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    return user;
+  },
+
+  // 7. Cập nhật thông tin hồ sơ (full_name, phone, email...)
+  updateProfile: async (profileData: {
+    fullName?: string;
+    phone?: string;
+    email?: string;
+  }) => {
+    const { data, error } = await supabase.auth.updateUser({
+      data: {
+        full_name: profileData.fullName,
+        phone: profileData.phone,
+        email: profileData.email,
+      },
+    });
+    if (error) throw error;
+    return data.user;
+  },
 };

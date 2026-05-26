@@ -1,60 +1,91 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 
 interface CustomHeaderProps {
-    title: string;
-    showBackButton?: boolean;
-    rightActionLabel?: string;
-    onRightActionPress?: () => void;
+  title: string;
+  showBackButton?: boolean;
+  rightActionLabel?: string;
+  onRightActionPress?: () => void;
 }
 
 export default function CustomHeader({
-    title,
-    showBackButton = true,
-    rightActionLabel,
-    onRightActionPress,
+  title,
+  showBackButton = true,
+  rightActionLabel,
+  onRightActionPress,
 }: CustomHeaderProps) {
-    const navigation = useNavigation();
+  const navigation = useNavigation();
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.leftSlot}>
-                {showBackButton && (
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                        <Ionicons name="chevron-back" size={24} color="#1E1E1E" />
-                    </TouchableOpacity>
-                )}
-            </View>
+  return (
+    <View style={styles.container}>
+      {/* Slot Trái (Nút Back) */}
+      <View style={styles.sideSlot}>
+        {showBackButton && (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.iconButton}
+          >
+            <Ionicons name="chevron-back" size={24} color="#1E1E1E" />
+          </TouchableOpacity>
+        )}
+      </View>
 
-            <Text style={styles.title}>{title}</Text>
+      {/* Slot Giữa (Tiêu đề) */}
+      <View style={styles.centerSlot}>
+        <Text style={styles.title} numberOfLines={1}>
+          {title}
+        </Text>
+      </View>
 
-            <View style={styles.rightSlot}>
-                {rightActionLabel && onRightActionPress && (
-                    <TouchableOpacity onPress={onRightActionPress}>
-                        <Text style={styles.rightLabel}>{rightActionLabel}</Text>
-                    </TouchableOpacity>
-                )}
-            </View>
-        </View>
-    );
+      {/* Slot Phải (Nút Edit/Save) */}
+      <View style={[styles.sideSlot, { alignItems: "flex-end" }]}>
+        {rightActionLabel && onRightActionPress && (
+          <TouchableOpacity
+            onPress={onRightActionPress}
+            style={styles.textButton}
+          >
+            <Text style={styles.rightLabel}>{rightActionLabel}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: 56,
-        paddingHorizontal: 16,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#F5F5F5',
-    },
-    leftSlot: { width: 40, alignItems: 'flex-start' },
-    rightSlot: { width: 60, alignItems: 'flex-end' },
-    backButton: { padding: 4 },
-    title: { fontSize: 18, fontWeight: '600', color: '#1E1E1E' },
-    rightLabel: { fontSize: 14, fontWeight: '600', color: '#FF8A00' },
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 56,
+    paddingHorizontal: 16,
+    backgroundColor: "transparent",
+  },
+  sideSlot: {
+    flex: 1, // Hai bên chiếm 1 phần
+    justifyContent: "center",
+  },
+  centerSlot: {
+    flex: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "flex-start",
+  },
+  textButton: {
+    paddingVertical: 8,
+    paddingLeft: 16,
+  },
+  title: { fontSize: 17, fontWeight: "600", color: "#1E1E1E" },
+  rightLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#FF8A00",
+    textTransform: "uppercase",
+  },
 });
