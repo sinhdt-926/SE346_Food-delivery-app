@@ -58,11 +58,13 @@ export default function FoodCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "white",
+    marginHorizontal: 24,
+    marginBottom: 16,
     borderRadius: 24,
-    padding: 16,
-    marginBottom: 18,
+    padding: 20,
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -70,7 +72,7 @@ const styles = StyleSheet.create({
       height: 2,
     },
 
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
   },

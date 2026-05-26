@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderBottomWidth: 1,
     borderBottomColor: "#ECECEC",
-    marginBottom: 15,
+    marginBottom: 20,
   },
 
   countText: {
