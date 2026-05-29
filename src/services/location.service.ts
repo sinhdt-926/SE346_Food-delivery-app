@@ -33,9 +33,9 @@ export const LocationService = {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(lat1 * (Math.PI / 180)) *
-        Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c;
     return d;
@@ -75,22 +75,58 @@ export const LocationService = {
   async getAddressFromCoords(coords: Coordinate): Promise<string> {
     try {
       const geocode = await Location.reverseGeocodeAsync(coords);
+
       if (geocode && geocode.length > 0) {
-        const place = geocode[0];
+        // Ưu tiên dùng formattedAddress từ kết quả đầu tiên nếu có và làm sạch nó (bỏ Plus Code)
+        const firstPlace = geocode[0];
+        if (firstPlace.formattedAddress) {
+          const cleaned = firstPlace.formattedAddress
+            .split(",")
+            .map(part => part.trim())
+            .filter(part => part && !part.includes("+"))
+            .join(", ");
+          if (cleaned) {
+            return cleaned;
+          }
+        }
+
+        // Phương án dự phòng: Hợp nhất các thành phần địa chỉ từ tất cả kết quả trả về
+        let streetNumber = "";
+        let street = "";
+        let district = "";
+        let subregion = "";
+        let city = "";
+        let region = "";
+        let name = "";
+
+        for (const place of geocode) {
+          if (!streetNumber && place.streetNumber) streetNumber = place.streetNumber;
+          if (!street && place.street && !place.street.includes("+")) street = place.street;
+          if (!district && place.district && !place.district.includes("+")) district = place.district;
+          if (!subregion && place.subregion && !place.subregion.includes("+")) subregion = place.subregion;
+          if (!city && place.city) city = place.city;
+          if (!region && place.region) region = place.region;
+          if (!name && place.name && !place.name.includes("+")) name = place.name;
+        }
+
+        const namePart = name && name !== streetNumber ? name : null;
         const formattedAddress = [
-          place.streetNumber,
-          place.street,
-          place.subregion || place.district,
-          place.region || place.city,
+          namePart,
+          streetNumber,
+          street,
+          district,
+          subregion,
+          city || region,
         ]
-          .filter(Boolean)
+          .filter((val, index, self) => val && self.indexOf(val) === index) // Loại bỏ các giá trị rỗng và trùng lặp
           .join(", ");
-        return formattedAddress || "Vị trí đã chọn";
+
+        return formattedAddress || `Toạ độ: ${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
       }
-      return "Vị trí không xác định";
+      return `Toạ độ: ${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
     } catch (error) {
       console.error("Error getting address from coords:", error);
-      return "Vị trí đã chọn";
+      return `Toạ độ: ${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
     }
   },
 };
