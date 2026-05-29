@@ -37,8 +37,27 @@ serve(async (req: Request) => {
       );
     }
 
+    // ✅ FIX: Khởi tạo supabase và fetch order TRƯỚC khi dùng
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const orderId = Number(params.vnp_TxnRef);
+
+    // ✅ FIX: Lấy order kèm payment để kiểm tra status và đối chiếu số tiền
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .select(`
+        id,
+        status,
+        payments ( amount )
+      `)
+      .eq("id", orderId)
+      .single();
+
     // Không tìm thấy order
-    if (!order) {
+    if (orderError || !order) {
       return new Response(
         JSON.stringify({ RspCode: '01', Message: 'Order not found' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -53,12 +72,17 @@ serve(async (req: Request) => {
       );
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    // ✅ FIX: Đối chiếu số tiền VNPay trả về với số tiền trong DB
+    const vnpAmount = Number(params.vnp_Amount) / 100;
+    const expectedAmount = Number(order.payments?.[0]?.amount ?? 0);
 
-    const orderId = Number(params.vnp_TxnRef);
+    if (vnpAmount !== expectedAmount) {
+      return new Response(
+        JSON.stringify({ RspCode: '04', Message: 'Invalid amount' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const isSuccess = params.vnp_ResponseCode === "00";
 
     // Cập nhật payments
@@ -80,13 +104,14 @@ serve(async (req: Request) => {
       .update({ status: isSuccess ? "confirmed" : "cancelled" })
       .eq("id", orderId);
 
-    return new Response(JSON.stringify({ success: isSuccess }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (err: any) {
     return new Response(
       JSON.stringify({ RspCode: '00', Message: 'Confirm Success' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({ RspCode: '99', Message: err.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
