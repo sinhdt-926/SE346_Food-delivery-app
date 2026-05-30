@@ -23,9 +23,11 @@ export default function FoodCard({
     <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.card}>
       {/* image */}
       <Image
-        source={{
-          uri: image_url || "https://picsum.photos/200",
-        }}
+        source={
+          image_url
+            ? { uri: image_url }
+            : require("../../assets/default-food.png")
+        }
         style={styles.image}
       />
       {/* content */}

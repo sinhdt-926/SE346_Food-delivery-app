@@ -9,7 +9,7 @@ interface Props {
   customerId: string;
   totalPrice: number;
   time: Date;
-  //avatarUrl?: string;
+  avatarUrl?: string;
   onPress?: () => void;
   onActionPress?: () => void;
   onCancelPress?: () => void;
@@ -21,7 +21,7 @@ export default function OrderCard({
   customerName,
   totalPrice,
   time,
-  //avatarUrl,
+  avatarUrl,
   onPress,
   onActionPress,
   onCancelPress,
@@ -50,9 +50,9 @@ export default function OrderCard({
       <View style={styles.topSection}>
         <Image
           source={
-            {
-              //uri: avatarUrl || "https://i.pravatar.cc/150",
-            }
+            avatarUrl
+              ? { uri: avatarUrl }
+              : require("../../assets/default-food.png")
           }
           style={styles.image}
         />
@@ -131,11 +131,11 @@ const styles = StyleSheet.create({
   },
 
   image: {
-    width: 50,
-    height: 50,
-    borderRadius: 999,
-    backgroundColor: "#A8B5C7",
+    width: 60,
+    height: 60,
+    borderRadius: 12,
     marginRight: 18,
+    backgroundColor: "#EEE",
   },
 
   info: {

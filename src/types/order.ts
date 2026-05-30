@@ -20,6 +20,7 @@ export interface Order {
     name: string;
     quantity: number;
     price: number;
+    image_url?: string;
     subtotal: number;
     note?: string;
   }[];

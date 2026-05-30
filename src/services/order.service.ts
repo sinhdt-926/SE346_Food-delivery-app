@@ -70,7 +70,7 @@ export const getOwnerOrders = async () => {
                 price,
                 subtotal,
                 note,
-                foods(name)
+                foods(name, image_url)
             ),
             payments(
                 id,
@@ -87,6 +87,7 @@ export const getOwnerOrders = async () => {
     const user = order.users as unknown as User;
     const items = (order.order_details ?? []).map((item: any) => ({
       name: item.foods?.name ?? "",
+      image_url: item.foods?.image_url ?? "",
       quantity: item.quantity,
       price: item.price,
       subtotal: Number(item.subtotal),
