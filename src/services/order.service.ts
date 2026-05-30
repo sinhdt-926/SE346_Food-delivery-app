@@ -127,3 +127,15 @@ export const updateOrderStatus = async (id: number, status: string) => {
 
   if (error) throw error;
 };
+
+export const getPaymentStatus = async (orderId: number) => {
+  const { data, error } = await supabase
+    .from('payments')
+    .select('status, amount, type, paid_at, transaction_no')
+    .eq('order_id', orderId)
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
