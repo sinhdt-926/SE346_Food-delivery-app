@@ -1,21 +1,6 @@
 import * as Location from "expo-location";
-
-export interface Coordinate {
-  latitude: number;
-  longitude: number;
-}
-
-// 1. Tọa độ cửa hàng cố định (Trường ĐH Công nghệ thông tin - UIT)
-export const STORE_COORDINATE: Coordinate = {
-  latitude: 10.8700089,
-  longitude: 106.8030541,
-};
-
-// 2. Tọa độ dự phòng (Nhà Văn hoá Sinh Viên, Đông Hoà, TP.HCM)
-export const FALLBACK_COORDINATE: Coordinate = {
-  latitude: 10.87522,
-  longitude: 106.80074,
-};
+import { Coordinate } from "../types/location";
+import { FALLBACK_COORDINATE } from "../utils/constants";
 
 export const LocationService = {
   /**
@@ -82,8 +67,8 @@ export const LocationService = {
         if (firstPlace.formattedAddress) {
           const cleaned = firstPlace.formattedAddress
             .split(",")
-            .map(part => part.trim())
-            .filter(part => part && !part.includes("+"))
+            .map((part: string) => part.trim())
+            .filter((part: string) => part && !part.includes("+"))
             .join(", ");
           if (cleaned) {
             return cleaned;
