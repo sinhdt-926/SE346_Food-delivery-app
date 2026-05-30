@@ -128,3 +128,27 @@ export const updateOrderStatus = async (id: number, status: string) => {
 
   if (error) throw error;
 };
+//đếm số đơn đang thực hiện
+export const getRunningOrdersCount = async () => {
+  const { count, error } = await supabase
+    .from("orders")
+    .select("*", {
+      count: "exact",
+      head: true,
+    })
+    .in("status", ["pending", "preparing", "delivering"]);
+  if (error) throw error;
+  return count ?? 0;
+};
+//đếm số đơn hàng đang chờ phản hồi
+export const getRequestsCount = async () => {
+  const { count, error } = await supabase
+    .from("orders")
+    .select("*", {
+      count: "exact",
+      head: true,
+    })
+    .eq("status", "pending");
+  if (error) throw error;
+  return count ?? 0;
+};
