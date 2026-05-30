@@ -6,8 +6,11 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Modal,
+  Pressable,
+  TouchableOpacity,
+  FlatList,
 } from "react-native";
-import TopTabButton from "../../components/TopTabButton";
 import {
   useRoute,
   useNavigation,
@@ -18,23 +21,26 @@ import FoodCard from "../../components/FoodCard";
 import { getAllFoods } from "../../services/food.service";
 import CustomButton from "../../components/CustomButton";
 import LogoutButton from "../../components/LogoutButton";
+import { Category } from "../../types/cart";
+import { getCategories } from "../../services/food.service";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ManagerMenuScreen() {
-  const [activeTab, setActiveTab] = useState<MenuStatus>("all");
   const [foods, setFoods] = useState<food[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number>(0);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const filteredFood = useMemo(() => {
-    if (activeTab === "all") {
+    if (selectedCategory === 0) {
       return foods;
     }
-    return foods.filter(
-      (item) => item.category_name?.toLowerCase() === activeTab.toLowerCase(),
-    );
-  }, [foods, activeTab]);
+    return foods.filter((item) => item.category_id === selectedCategory);
+  }, [foods, selectedCategory]);
   const isFlag = useRef(true);
   //set cờ để kiểm tra người dùng vẫn còn trong màn hình
   const fetchFoods = async () => {
@@ -68,10 +74,25 @@ export default function ManagerMenuScreen() {
       }
     }
   };
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories([
+        {
+          id: 0,
+          category_name: "All",
+        },
+        ...data,
+      ]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useFocusEffect(
     React.useCallback(() => {
       isFlag.current = true;
       fetchFoods();
+      fetchCategories();
       return () => {
         isFlag.current = false;
       };
@@ -140,45 +161,56 @@ export default function ManagerMenuScreen() {
 
       {/* tab */}
       <View style={styles.tabs}>
-        <TopTabButton
-          iconName="grid-outline"
-          active={activeTab === "all"}
-          onPress={() => setActiveTab("all")}
-        />
-
-        <TopTabButton
-          iconName="pizza"
-          active={activeTab === "pizza"}
-          onPress={() => setActiveTab("pizza")}
-        />
-
-        <TopTabButton
-          iconName="hamburger"
-          iconType="material"
-          active={activeTab === "burger"}
-          onPress={() => setActiveTab("burger")}
-        />
-
-        <TopTabButton
-          iconName="food-turkey"
-          iconType="material"
-          active={activeTab === "chicken"}
-          onPress={() => setActiveTab("chicken")}
-        />
-
-        <TopTabButton
-          iconName="ice-cream"
-          active={activeTab === "dessert"}
-          onPress={() => setActiveTab("dessert")}
-        />
-
-        <TopTabButton
-          iconName="wine"
-          active={activeTab === "drink"}
-          onPress={() => setActiveTab("drink")}
-        />
+        <TouchableOpacity
+          style={styles.categoryButton}
+          onPress={() => setShowCategoryModal(true)}
+        >
+          <Text style={styles.categoryText}>
+            {categories.find((c) => c.id === selectedCategory)?.category_name}
+          </Text>
+          <Ionicons
+            style={{ marginLeft: "auto" }}
+            name="chevron-down"
+            size={18}
+            color="#333"
+          />
+        </TouchableOpacity>
+        <Modal visible={showCategoryModal} transparent animationType="slide">
+          <Pressable
+            style={styles.overlay}
+            onPress={() => setShowCategoryModal(false)}
+          />
+          <View style={styles.bottomSheet}>
+            <View style={styles.dragBar} />
+            <FlatList
+              data={categories}
+              keyExtractor={(item) => item.id.toString()}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.categoryItem}
+                  onPress={() => {
+                    setSelectedCategory(item.id);
+                    setShowCategoryModal(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.categoryItemText,
+                      selectedCategory === item.id && {
+                        color: "#00B14F",
+                        fontWeight: "700",
+                      },
+                    ]}
+                  >
+                    {item.category_name}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </Modal>
       </View>
-
       {/* tính tổng số món ăn cho từng loại */}
       <View style={styles.subContainer}>
         <Text style={styles.countText}>{filteredFood.length} items</Text>
@@ -245,23 +277,18 @@ const styles = StyleSheet.create({
   },
 
   tabs: {
-    marginHorizontal: 24,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
     borderBottomColor: "#ECECEC",
-    marginBottom: 15,
+    marginBottom: 10,
   },
 
   countText: {
     fontSize: 16,
     fontWeight: "600",
     color: "#222",
-  },
-
-  tabsWrapper: {
-    maxHeight: 70,
   },
 
   center: {
@@ -327,5 +354,64 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 4,
+  },
+  categoryButton: {
+    marginLeft: 20,
+    marginTop: 12,
+    marginBottom: 15,
+    width: 150,
+    height: 56,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    borderRadius: 28,
+    paddingHorizontal: 20,
+  },
+  categoryText: {
+    fontSize: 16,
+    fontWeight: "500",
+    textAlign: "left",
+    color: "#222",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+
+  bottomSheet: {
+    backgroundColor: "#FFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    height: "70%",
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
+  dragBar: {
+    width: 50,
+    height: 5,
+    backgroundColor: "#D9D9D9",
+    borderRadius: 999,
+    alignSelf: "center",
+    marginTop: 12,
+    marginBottom: 20,
+  },
+  categoryItem: {
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F1F1",
+  },
+  categoryItemText: {
+    fontSize: 18,
+    color: "#222",
+  },
+  selectedCategoryItem: {
+    backgroundColor: "#F5FFF8",
+  },
+  selectedCategoryText: {
+    color: "#00B14F",
+    fontWeight: "700",
   },
 });

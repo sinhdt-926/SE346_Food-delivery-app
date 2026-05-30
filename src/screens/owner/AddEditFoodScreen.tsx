@@ -10,6 +10,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,6 +24,7 @@ import {
   uploadImage,
   deleteFood,
   getCategories,
+  createCategory,
 } from "../../services/food.service";
 import { food, Category } from "../../types/cart";
 
@@ -42,6 +44,8 @@ export default function AddEditFoodScreen() {
   const allowExitRef = useRef(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number>(1);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
   useEffect(() => {
     if (!editingFood) return;
     setName(editingFood.name);
@@ -298,6 +302,22 @@ export default function AddEditFoodScreen() {
       ],
     );
   };
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) {
+      Alert.alert("Error", "Please enter the category name");
+      return;
+    }
+    try {
+      const newCategory = await createCategory(newCategoryName.trim());
+      setCategories((prev) => [...prev, newCategory]);
+      setSelectedCategoryId(newCategory.id);
+      setNewCategoryName("");
+      setShowCategoryModal(false);
+      Alert.alert("Success", "Category added");
+    } catch (error) {
+      Alert.alert("Error", "Unable to create category");
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={styles.flex}>
@@ -415,7 +435,6 @@ export default function AddEditFoodScreen() {
             <View style={styles.tagsContainer}>
               {categories.map((category) => {
                 const isSelected = selectedCategoryId === category.id;
-
                 return (
                   <TouchableOpacity
                     key={category.id}
@@ -437,6 +456,12 @@ export default function AddEditFoodScreen() {
                   </TouchableOpacity>
                 );
               })}
+              <TouchableOpacity
+                style={styles.addCategoryButton}
+                onPress={() => setShowCategoryModal(true)}
+              >
+                <Ionicons name="add" size={20} color="#888" />
+              </TouchableOpacity>
             </View>
           </View>
           {/* details */}
@@ -475,6 +500,27 @@ export default function AddEditFoodScreen() {
             )}
           </View>
         </ScrollView>
+        <Modal visible={showCategoryModal} transparent animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Add categories</Text>
+              <TextInput
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+                placeholder="Name of category"
+                style={styles.inputCategory}
+              />
+              <View style={styles.modalActions}>
+                <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
+                  <Text>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleAddCategory}>
+                  <Text style={{ color: "#FF7622" }}>Add</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
         {isSaving && (
           <View style={styles.overlay}>
             <View style={styles.loadingBox}>
@@ -704,10 +750,60 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5E7EB",
   },
-
   deleteButtonText: {
     fontSize: 14,
     fontWeight: "600",
     color: "red",
+  },
+  addCategoryButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#F3F4F6",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 6,
+  },
+  addCategoryShadow: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "85%",
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 16,
+  },
+  inputCategory: {
+    borderWidth: 1,
+    borderColor: "#DDD",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 50,
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 20,
+    marginTop: 20,
   },
 });

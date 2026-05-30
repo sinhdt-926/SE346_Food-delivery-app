@@ -1,12 +1,5 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import LogoutButton from "../../components/LogoutButton";
 import {
   getRequestsCount,
