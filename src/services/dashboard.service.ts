@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import { DashboardStats } from "../types/dashboard";
+import { OrderStatus } from "../types/order";
 
 /**
  * Lấy dữ liệu thống kê doanh thu và đơn hàng cho Chủ cửa hàng (owner).
@@ -33,10 +34,14 @@ export const getDashboardStats = async (
         revenue: Number(item.revenue ?? 0),
         order_count: Number(item.order_count ?? 0),
       })),
-      orders_by_status: (stats.orders_by_status ?? []).map((item: any) => ({
-        status: item.status,
-        count: Number(item.count ?? 0),
-      })),
+      orders_by_status: (stats.orders_by_status ?? []).map((item: any) => {
+        let status = item.status;
+        if (status === "canceled") status = "cancelled";
+        return {
+          status: status as OrderStatus,
+          count: Number(item.count ?? 0),
+        };
+      }),
       top_selling_foods: (stats.top_selling_foods ?? []).map((item: any) => ({
         food_id: Number(item.food_id ?? 0),
         name: item.name ?? "",

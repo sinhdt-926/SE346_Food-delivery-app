@@ -1,3 +1,5 @@
+import { OrderStatus } from "./order";
+
 export interface RevenueByDate {
   date: string;
   revenue: number;
@@ -5,7 +7,7 @@ export interface RevenueByDate {
 }
 
 export interface OrdersByStatus {
-  status: string;
+  status: OrderStatus;
   count: number;
 }
 
