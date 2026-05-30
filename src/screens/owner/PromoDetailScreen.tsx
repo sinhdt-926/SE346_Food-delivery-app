@@ -134,6 +134,10 @@ export default function AddEditPromotionScreen() {
       Alert.alert("Please enter dates");
       return false;
     }
+    if (endDate <= startDate) {
+      Alert.alert("The end date must be after the start date.");
+      return false;
+    }
     return true;
   };
 
@@ -365,7 +369,6 @@ export default function AddEditPromotionScreen() {
             display="default"
             onChange={(event, selectedDate) => {
               setShowEndPicker(false);
-
               if (selectedDate) {
                 setEndDate(selectedDate.toISOString().split("T")[0]);
               }
