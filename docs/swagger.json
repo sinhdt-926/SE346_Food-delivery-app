@@ -384,6 +384,18 @@
             "$ref": "#/parameters/rowFilter.payments.order_id"
           },
           {
+            "$ref": "#/parameters/rowFilter.payments.transaction_no"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.bank_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.secure_hash"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
+          },
+          {
             "$ref": "#/parameters/select"
           },
           {
@@ -465,6 +477,18 @@
             "$ref": "#/parameters/rowFilter.payments.order_id"
           },
           {
+            "$ref": "#/parameters/rowFilter.payments.transaction_no"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.bank_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.secure_hash"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
+          },
+          {
             "$ref": "#/parameters/preferReturn"
           }
         ],
@@ -496,6 +520,18 @@
           },
           {
             "$ref": "#/parameters/rowFilter.payments.order_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.transaction_no"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.bank_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.secure_hash"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
           },
           {
             "$ref": "#/parameters/body.payments"
@@ -1500,6 +1536,46 @@
         ]
       }
     },
+    "/rpc/get_owner_dashboard_stats": {
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "args",
+            "required": true,
+            "schema": {
+              "properties": {
+                "p_end_date": {
+                  "format": "timestamp with time zone",
+                  "type": "string"
+                },
+                "p_start_date": {
+                  "format": "timestamp with time zone",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          {
+            "$ref": "#/parameters/preferParams"
+          }
+        ],
+        "produces": [
+          "application/json",
+          "application/vnd.pgrst.object+json;nulls=stripped",
+          "application/vnd.pgrst.object+json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "(rpc) get_owner_dashboard_stats"
+        ]
+      }
+    },
     "/rpc/process_checkout": {
       "post": {
         "parameters": [
@@ -1700,6 +1776,22 @@
           "description": "Note:\nThis is a Foreign Key to `orders.id`.<fk table='orders' column='id'/>",
           "format": "integer",
           "type": "integer"
+        },
+        "transaction_no": {
+          "format": "character varying",
+          "type": "string"
+        },
+        "bank_code": {
+          "format": "character varying",
+          "type": "string"
+        },
+        "secure_hash": {
+          "format": "text",
+          "type": "string"
+        },
+        "vnp_response_code": {
+          "format": "character varying",
+          "type": "string"
         }
       },
       "type": "object"
@@ -2142,6 +2234,30 @@
     },
     "rowFilter.payments.order_id": {
       "name": "order_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.payments.transaction_no": {
+      "name": "transaction_no",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.payments.bank_code": {
+      "name": "bank_code",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.payments.secure_hash": {
+      "name": "secure_hash",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.payments.vnp_response_code": {
+      "name": "vnp_response_code",
       "required": false,
       "in": "query",
       "type": "string"
