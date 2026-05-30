@@ -8,7 +8,9 @@ export const formatCurrency = (
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
-  }).format(value);
+  })
+    .format(value)
+    .replace(/\s+/g, "");
 };
 
 export const formatRelativeTime = (date: Date | string, inDetail: boolean) => {
