@@ -4,16 +4,18 @@ import CustomerTabs from './CustomerTabs';
 
 import PersonalInfoScreen from '../screens/customer/PersonalInfoScreen';
 import EditProfileScreen from '../screens/customer/EditProfileScreen';
+import FoodDetailScreen from '../screens/customer/FoodDetailScreen';
 
-export type CustomerProfileStackParamList = {
+export type CustomerStackParamList = {
     CustomerTabs: undefined;
     PersonalInfo: undefined;
     EditProfile: undefined;
+    FoodDetail: { id: number };
 };
 
-const Stack = createNativeStackNavigator<CustomerProfileStackParamList>();
+const Stack = createNativeStackNavigator<CustomerStackParamList>();
 
-export default function CustomerProfileStack() {
+export default function CustomerStack() {
     return (
         <Stack.Navigator
             initialRouteName="CustomerTabs"
@@ -25,6 +27,7 @@ export default function CustomerProfileStack() {
             <Stack.Screen name="CustomerTabs" component={CustomerTabs} />
             <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Stack.Screen name="FoodDetail" component={FoodDetailScreen} />
         </Stack.Navigator>
     );
 }

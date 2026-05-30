@@ -48,6 +48,7 @@ export const useCartStore = create<CartState>((set, get) => ({
       await get().fetchCart();
     } else {
       set({ error: response.error || "Lỗi thêm món ăn", isLoading: false });
+      throw new Error(response.error || "Lỗi thêm món ăn");
     }
   },
 

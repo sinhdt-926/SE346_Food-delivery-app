@@ -1,11 +1,11 @@
-import {supabase} from './supabase';
+import { supabase } from './supabase';
 import { CartItem } from '../types/cart'
 // Chuẩn hoá kiểu trả về cho mọi hàm API
 export type ServiceResponse<T = any> = {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
+    success: boolean;
+    data?: T;
+    message?: string;
+    error?: string;
 };
 
 export const CartService = {
@@ -13,31 +13,31 @@ export const CartService = {
     // Hàm helper lấy id giỏ hàng của user hiện tại
     // Nếu user chưa có giỏ hàng, tự động tạo mới
     async getOrCreateCartId(): Promise<number> {
-        const {data: {user}, error: authError} = await supabase.auth.getUser();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        if(authError || !user) {
+        if (authError || !user) {
             throw new Error('Bạn cần đăng nhập để sử dụng tính năng này');
         }
 
-        const {data: cart, error:fetchError } = await supabase
+        const { data: cart, error: fetchError } = await supabase
             .from('carts')
             .select('id')
             .eq('user_id', user.id)
             .single();
 
-        if(cart) return cart.id;
+        if (cart) return cart.id;
 
-        if(fetchError && fetchError.code !== 'PGRST116') { //PGRST116 là lỗi khi không tìm thấy dòng nào
+        if (fetchError && fetchError.code !== 'PGRST116') { //PGRST116 là lỗi khi không tìm thấy dòng nào
             throw fetchError;
         }
 
-        const {data: newCart, error: createError} = await supabase
+        const { data: newCart, error: createError } = await supabase
             .from('carts')
-            .insert([{user_id: user.id}])
+            .insert([{ user_id: user.id }])
             .select('id')
             .single();
 
-        if(createError) throw createError;
+        if (createError) throw createError;
         return newCart.id;
     },
 
@@ -76,7 +76,7 @@ export const CartService = {
             });
             return { success: true, data: transformedData };
         } catch (error: any) {
-        return { success: false, error: error.message };
+            return { success: false, error: error.message };
         }
     },
 
@@ -87,15 +87,36 @@ export const CartService = {
 
             const cartId = await this.getOrCreateCartId();
 
-            const { data, error } = await supabase
-                .rpc('add_to_cart', {
-                    p_cart_id:  cartId,
-                    p_food_id:  foodId,
-                    p_quantity: quantity,
-                });
+            // Thay vì dùng rpc('add_to_cart') gây lỗi Postgres ON CONFLICT có thể do thiếu constraint, FE dùng query thông thường để test thử :))
+            const { data: existingItem, error: findError } = await supabase
+                .from('cart_items')
+                .select('*')
+                .eq('cart_id', cartId)
+                .eq('food_id', foodId)
+                .maybeSingle();
 
-            if (error) throw error;
-            return { success: true, data };
+            if (findError) throw findError;
+
+            if (existingItem) {
+                // Đã có trong giỏ -> Cộng dồn số lượng
+                const { data, error } = await supabase
+                    .from('cart_items')
+                    .update({ quantity: existingItem.quantity + quantity })
+                    .eq('id', existingItem.id)
+                    .select()
+                    .single();
+                if (error) throw error;
+                return { success: true, data };
+            } else {
+                // Chưa có -> Thêm mới
+                const { data, error } = await supabase
+                    .from('cart_items')
+                    .insert([{ cart_id: cartId, food_id: foodId, quantity }])
+                    .select()
+                    .single();
+                if (error) throw error;
+                return { success: true, data };
+            }
         } catch (error: any) {
             return { success: false, error: error.message };
         }
@@ -117,14 +138,14 @@ export const CartService = {
                 .single();
 
             if (error) {
-                if(error.code === 'PGRST116') {
+                if (error.code === 'PGRST116') {
                     throw new Error('Không tìm thấy món ăn trong giỏ hàng của bạn');
                 }
                 throw error;
             }
-            return { success: true, data};
+            return { success: true, data };
         } catch (error: any) {
-        return { success: false, error: error.message };
+            return { success: false, error: error.message };
         }
     },
 
@@ -138,12 +159,12 @@ export const CartService = {
                 .select();
 
             if (error) throw error;
-            if(!data || data.length === 0) {
+            if (!data || data.length === 0) {
                 throw new Error('Không tìm thấy món ăn trong giỏ hàng');
             }
             return { success: true, message: 'Đã xóa khỏi giỏ hàng' };
         } catch (error: any) {
-        return { success: false, error: error.message };
+            return { success: false, error: error.message };
         }
     },
 
@@ -151,7 +172,7 @@ export const CartService = {
     async clearCart(): Promise<ServiceResponse> {
         try {
             const cartId = await this.getOrCreateCartId();
-            
+
             const { error } = await supabase
                 .from('cart_items')
                 .delete()
@@ -160,7 +181,7 @@ export const CartService = {
             if (error) throw error;
             return { success: true, message: 'Đã làm sạch giỏ hàng' };
         } catch (error: any) {
-        return { success: false, error: error.message };
+            return { success: false, error: error.message };
         }
     }
 }

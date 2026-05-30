@@ -49,8 +49,33 @@ export const deleteCategory = async (id: number) => {
 export const getFoods = async () => {
   const { data, error } = await supabase
     .from("foods")
-    .select("*, categories(id, category_name)")
+    .select(`
+      *, 
+      categories(id, category_name),
+      promotion_food(
+        promotions(*)
+      )
+    `)
     .eq("is_available", true);
+
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
+export const getFoodById = async (id: number) => {
+  const { data, error } = await supabase
+    .from("foods")
+    .select(`
+      *, 
+      categories(id, category_name),
+      promotion_food(
+        promotions(*)
+      )
+    `)
+    .eq("id", id)
+    .single();
 
   if (error) {
     throw error;

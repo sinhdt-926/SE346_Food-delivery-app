@@ -44,7 +44,7 @@ const CartScreen = ({ navigation }: any) => {
   const handleCheckout = async () => {
     // Tạm lấy dữ liệu cứng đang có trên UI để test API
     const address = "120, Yên Lãng, Cao Bằng";
-    const paymentType = "cod"; // Mặc định COD
+    const paymentType = "cash"; // Mặc định COD
 
     // Gọi CheckoutService theo tham số yêu cầu
     const response = await CheckoutService.processOrder(
@@ -98,7 +98,7 @@ const CartScreen = ({ navigation }: any) => {
               item={{ ...item, checked: checkedIds.includes(item.id) } as any}
               openedId={openedId}
               setOpenedId={setOpenedId}
-              updateQty={updateQuantity} // Gọi thẳng hàm của Store
+              updateQty={updateQuantity}
               deleteItem={removeFromCart}
               toggleCheck={toggleCheck}
             />
@@ -119,11 +119,11 @@ const CartScreen = ({ navigation }: any) => {
         <View style={styles.bottomRow}>
           <View>
             <Text style={styles.totalLabel}>
-              TOTAL: <Text style={styles.totalValue}>${total}</Text>
+              Tổng tiền: <Text style={styles.totalValue}>₫{total}</Text>
             </Text>
           </View>
           <CustomButton
-            title="PLACE ORDER"
+            title="ĐẶT HÀNG"
             onPress={handleCheckout}
             buttonStyle={{ width: 160, paddingVertical: 15, borderRadius: 15 }}
             disabled={total === 0 || isLoading}
