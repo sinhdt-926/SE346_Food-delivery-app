@@ -22,7 +22,6 @@ import FoodCard from "../../components/FoodCard";
 import { getAllFoods } from "../../services/food.service";
 import CustomButton from "../../components/CustomButton";
 import LogoutButton from "../../components/LogoutButton";
-import { Category } from "../../types/cart";
 import { getCategories } from "../../services/food.service";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -37,6 +36,10 @@ export default function ManagerMenuScreen() {
   const [selectedCategory, setSelectedCategory] = useState<number>(0);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [sortType, setSortType] = useState<
+    "default" | "price_asc" | "price_desc"
+  >("default");
+  const [showSortModal, setShowSortModal] = useState(false);
   const filteredFood = useMemo(() => {
     let result = [...foods];
     // category
@@ -49,8 +52,18 @@ export default function ManagerMenuScreen() {
         item.name.toLowerCase().includes(searchText.toLowerCase()),
       );
     }
+    // sort
+    switch (sortType) {
+      case "price_asc":
+        result.sort((a, b) => a.price - b.price);
+        break;
+
+      case "price_desc":
+        result.sort((a, b) => b.price - a.price);
+        break;
+    }
     return result;
-  }, [foods, selectedCategory, searchText]);
+  }, [foods, selectedCategory, searchText, sortType]);
   const isFlag = useRef(true);
   //set cờ để kiểm tra người dùng vẫn còn trong màn hình
   const fetchFoods = async () => {
@@ -136,6 +149,7 @@ export default function ManagerMenuScreen() {
       setRefreshing(true);
       setSearchText("");
       setSelectedCategory(0);
+      setSortType("default");
       const data = await getAllFoods();
       const formattedFoods = data.map((item) => ({
         id: item.id,
@@ -188,6 +202,7 @@ export default function ManagerMenuScreen() {
       </View>
       {/* tab */}
       <View style={styles.tabs}>
+        {/* Category */}
         <TouchableOpacity
           style={styles.categoryButton}
           onPress={() => setShowCategoryModal(true)}
@@ -202,6 +217,20 @@ export default function ManagerMenuScreen() {
             color="#333"
           />
         </TouchableOpacity>
+        {/* Sort */}
+        <TouchableOpacity
+          style={styles.sortButton}
+          onPress={() => setShowSortModal(true)}
+        >
+          <Text style={styles.sortText}>
+            {sortType === "price_asc"
+              ? "Increase"
+              : sortType === "price_desc"
+                ? "Decrease"
+                : "Default"}
+          </Text>
+        </TouchableOpacity>
+        {/* modal category */}
         <Modal visible={showCategoryModal} transparent animationType="slide">
           <Pressable
             style={styles.overlay}
@@ -235,6 +264,45 @@ export default function ManagerMenuScreen() {
                 </TouchableOpacity>
               )}
             />
+          </View>
+        </Modal>
+        {/* modal sort */}
+        <Modal visible={showSortModal} transparent animationType="slide">
+          <Pressable
+            style={styles.overlay}
+            onPress={() => setShowSortModal(false)}
+          />
+
+          <View style={styles.bottomSheet}>
+            <View style={styles.dragBar} />
+
+            <TouchableOpacity
+              style={styles.categoryItem}
+              onPress={() => {
+                setSortType("default");
+                setShowSortModal(false);
+              }}
+            >
+              <Text style={styles.categoryItemText}>Default</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.categoryItem}
+              onPress={() => {
+                setSortType("price_asc");
+                setShowSortModal(false);
+              }}
+            >
+              <Text style={styles.categoryItemText}>Increase</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.categoryItem}
+              onPress={() => {
+                setSortType("price_desc");
+                setShowSortModal(false);
+              }}
+            >
+              <Text style={styles.categoryItemText}>Decrease</Text>
+            </TouchableOpacity>
           </View>
         </Modal>
       </View>
@@ -457,6 +525,25 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 10,
     fontSize: 16,
+    color: "#222",
+  },
+  sortButton: {
+    marginRight: 20,
+    width: 110,
+    height: 40,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    borderRadius: 28,
+    paddingHorizontal: 15,
+  },
+  sortText: {
+    flex: 1,
+    textAlign: "center",
+    fontWeight: "500",
     color: "#222",
   },
 });
