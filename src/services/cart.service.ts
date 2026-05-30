@@ -1,6 +1,5 @@
 import { supabase } from "./supabase";
 import { CartItem } from "../types/cart";
-import { FoodType } from "../types/cart";
 // Chuẩn hoá kiểu trả về cho mọi hàm API
 export type ServiceResponse<T = any> = {
   success: boolean;
@@ -87,7 +86,7 @@ export const CartService = {
           foods: {
             ...food,
 
-            type: food.categories?.[0]?.name as FoodType,
+            type: food.categories?.[0]?.name,
           },
         };
       });

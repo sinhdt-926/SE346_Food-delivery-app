@@ -1,12 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useRef, useMemo, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
-
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import LogoutButton from "../../components/LogoutButton";
 import TopTabButton from "../../components/TopTabButton";
 import PromotionCard from "../../components/PromotionCard";
@@ -21,22 +22,38 @@ export default function ManagerPromosScreen() {
   const [promos, setPromos] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    fetchPromotions();
-  }, []);
+  const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation<any>();
+  const isFlag = useRef(true);
+  useFocusEffect(
+    React.useCallback(() => {
+      isFlag.current = true;
+      fetchPromotions();
+      return () => {
+        isFlag.current = false;
+      };
+    }, []),
+  );
 
   const fetchPromotions = async () => {
     try {
-      setLoading(true);
+      if (promos.length === 0) {
+        setLoading(true);
+      }
       setError("");
       const data = await getAllPromotions();
-      setPromos(data ?? []);
+      if (isFlag.current) {
+        setPromos(data ?? []);
+      }
     } catch (err) {
       console.log(err);
-      setError("Cannot load promotions");
+      if (isFlag.current) {
+        setError("Cannot load promotions");
+      }
     } finally {
-      setLoading(false);
+      if (isFlag.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -59,6 +76,27 @@ export default function ManagerPromosScreen() {
     // Expired
     return promos.filter((promo) => new Date(promo.end_date) < now);
   }, [promos, activeTab]);
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      const data = await getAllPromotions();
+      if (isFlag.current) {
+        setPromos(data ?? []);
+      }
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể tải lại danh sách khuyến mãi", [
+        {
+          text: "Thử lại",
+          onPress: () => handleRefresh(),
+        },
+      ]);
+    } finally {
+      if (isFlag.current) {
+        setRefreshing(false);
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -96,6 +134,7 @@ export default function ManagerPromosScreen() {
             iconName="add"
             iconType="ion"
             iconColor="white"
+            onPress={() => navigation.navigate("AddEditPromotion" as never)}
             buttonStyle={styles.iconButton}
           />
 
@@ -104,6 +143,9 @@ export default function ManagerPromosScreen() {
             iconName="refresh"
             iconType="ion"
             iconColor="white"
+            onPress={handleRefresh}
+            isLoading={refreshing}
+            disabled={refreshing}
             buttonStyle={styles.iconButton}
           />
         </View>
@@ -131,7 +173,16 @@ export default function ManagerPromosScreen() {
             </View>
           ) : (
             filteredPromos.map((promo) => (
-              <PromotionCard key={promo.id} promo={promo} status={activeTab} />
+              <PromotionCard
+                key={promo.id}
+                promo={promo}
+                status={activeTab}
+                onPress={() =>
+                  navigation.navigate("AddEditPromotion", {
+                    promotion: promo,
+                  })
+                }
+              />
             ))
           )}
         </ScrollView>

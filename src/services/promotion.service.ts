@@ -69,3 +69,40 @@ export const getAllPromotions = async () => {
   }
   return data;
 };
+//cập nhật khuyến mãi
+export const updatePromotion = async (
+  id: number,
+  data: {
+    name: string;
+    discount_type: string;
+    discount_value: number;
+    start_date: string;
+    end_date: string;
+    is_active: boolean;
+  },
+) => {
+  const { data: result, error } = await supabase
+    .from("promotions")
+    .update({
+      name: data.name,
+      discount_type: data.discount_type,
+      discount_value: data.discount_value,
+      start_date: data.start_date,
+      end_date: data.end_date,
+      is_active: data.is_active,
+    })
+    .eq("id", id)
+    .select();
+
+  if (error) {
+    throw error;
+  }
+  return result;
+};
+//xóa khuyến mãi
+export const deletePromotion = async (id: number) => {
+  const { error } = await supabase.from("promotions").delete().eq("id", id);
+  if (error) {
+    throw error;
+  }
+};

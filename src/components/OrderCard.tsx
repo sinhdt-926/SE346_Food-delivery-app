@@ -9,7 +9,7 @@ interface Props {
   customerId: string;
   totalPrice: number;
   time: Date;
-  avatarUrl?: string;
+  //avatarUrl?: string;
   onPress?: () => void;
   onActionPress?: () => void;
   onCancelPress?: () => void;
@@ -21,7 +21,7 @@ export default function OrderCard({
   customerName,
   totalPrice,
   time,
-  avatarUrl,
+  //avatarUrl,
   onPress,
   onActionPress,
   onCancelPress,
@@ -49,9 +49,11 @@ export default function OrderCard({
     <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.card}>
       <View style={styles.topSection}>
         <Image
-          source={{
-            uri: avatarUrl || "https://i.pravatar.cc/150",
-          }}
+          source={
+            {
+              //uri: avatarUrl || "https://i.pravatar.cc/150",
+            }
+          }
           style={styles.image}
         />
         {/* Thông tin đơn hàng */}

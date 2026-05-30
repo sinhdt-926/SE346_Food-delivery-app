@@ -51,7 +51,7 @@ type User = {
   id: string;
   fullname: string;
   phone_number: string;
-  avatarUrl: string;
+  //avatarUrl: string;
 };
 
 // Admin/Owner lấy toàn bộ danh sách đơn
@@ -64,7 +64,7 @@ export const getOwnerOrders = async () => {
             created_at,
             status,
             delivery_address,
-            users(id, fullname, phone_number, avatarUrl),
+            users(id, fullname, phone_number),
             order_details(
                 quantity,
                 price,
@@ -107,7 +107,7 @@ export const getOwnerOrders = async () => {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
         phone_number: user?.phone_number ?? "",
-        avatarUrl: user?.avatarUrl ?? "",
+        //avatarUrl: user?.avatarUrl ?? "",
       },
       items,
       payment: {

@@ -1,31 +1,37 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
+
 import { Promotion } from "../types/promotion";
 import { formatCurrency } from "../utils/formatters";
 
 interface Props {
   promo: Promotion;
-
   status: "active" | "upcoming" | "expired";
+  onPress?: () => void;
 }
-export default function PromotionCard({ promo, status }: Props) {
+
+export default function PromotionCard({ promo, status, onPress }: Props) {
   const renderDiscount = () => {
     if (promo.discount_type === "percent") {
-      return `Percent: ${promo.discount_value}`;
+      return `${promo.discount_value}%`;
     }
-    return `Fixed: ${formatCurrency(promo.discount_value, "USD")}`;
+    return formatCurrency(promo.discount_value, "VND");
   };
 
   return (
-    <View style={styles.card}>
-      <View>
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={onPress}
+      style={styles.card}
+    >
+      <View style={styles.content}>
         <Text style={styles.name}>{promo.name}</Text>
         <Text style={styles.discount}>{renderDiscount()}</Text>
       </View>
       <View style={styles.badge}>
         <Text style={styles.badgeText}>{status.toUpperCase()}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -74,5 +80,9 @@ const styles = StyleSheet.create({
     color: "#FF7622",
     fontWeight: "700",
     fontSize: 12,
+  },
+  content: {
+    flex: 1,
+    justifyContent: "space-between",
   },
 });

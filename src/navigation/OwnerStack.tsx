@@ -6,6 +6,7 @@ import ManagerOrdersScreen from "../screens/owner/ManageOrdersScreen";
 import OrderDetailScreen from "../screens/owner/OrderDetailScreen";
 import ManagerMenuScreen from "../screens/owner/ManageMenuScreen";
 import DashboardScreen from "../screens/owner/DashboardScreen";
+import AddEditPromotionScreen from "../screens/owner/PromoDetailScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +31,10 @@ export default function OwnerStack() {
       <Stack.Screen name="ManagerMenu" component={ManagerMenuScreen} />
       {/* Dashboard */}
       <Stack.Screen name="Dashboard" component={DashboardScreen} />
+      <Stack.Screen
+        name="AddEditPromotion"
+        component={AddEditPromotionScreen}
+      />
     </Stack.Navigator>
   );
 }
