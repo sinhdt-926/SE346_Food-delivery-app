@@ -17,7 +17,31 @@ export default function PromotionCard({ promo, status, onPress }: Props) {
     }
     return formatCurrency(promo.discount_value, "VND");
   };
+  const getBadgeStyle = () => {
+    switch (status) {
+      case "active":
+        return styles.activeBadge;
 
+      case "upcoming":
+        return styles.upcomingBadge;
+
+      case "expired":
+        return styles.expiredBadge;
+    }
+  };
+
+  const getBadgeTextStyle = () => {
+    switch (status) {
+      case "active":
+        return styles.activeText;
+
+      case "upcoming":
+        return styles.upcomingText;
+
+      case "expired":
+        return styles.expiredText;
+    }
+  };
   return (
     <TouchableOpacity
       activeOpacity={0.85}
@@ -28,8 +52,10 @@ export default function PromotionCard({ promo, status, onPress }: Props) {
         <Text style={styles.name}>{promo.name}</Text>
         <Text style={styles.discount}>{renderDiscount()}</Text>
       </View>
-      <View style={styles.badge}>
-        <Text style={styles.badgeText}>{status.toUpperCase()}</Text>
+      <View style={[styles.badge, getBadgeStyle()]}>
+        <Text style={[styles.badgeText, getBadgeTextStyle()]}>
+          {status.toUpperCase()}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -84,5 +110,23 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: "space-between",
+  },
+  activeBadge: {
+    backgroundColor: "#E9FFF0",
+  },
+  upcomingBadge: {
+    backgroundColor: "#FFF1E7",
+  },
+  expiredBadge: {
+    backgroundColor: "#F3F4F6",
+  },
+  activeText: {
+    color: "#22C55E",
+  },
+  upcomingText: {
+    color: "#FF7622",
+  },
+  expiredText: {
+    color: "#9CA3AF",
   },
 });

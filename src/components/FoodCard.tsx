@@ -49,7 +49,7 @@ export default function FoodCard({
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{category_name ?? "Unknown"}</Text>
           </View>
-          <Text style={styles.price}>{formatCurrency(price, "USD")}</Text>
+          <Text style={styles.price}>{formatCurrency(price, "VND")}</Text>
         </View>
       </View>
     </TouchableOpacity>

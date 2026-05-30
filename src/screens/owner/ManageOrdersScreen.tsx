@@ -200,7 +200,6 @@ export default function ManagerOrdersScreen() {
         <View style={styles.overlay}>
           <View style={styles.loadingBox}>
             <ActivityIndicator size="large" color="#FF7622" />
-
             <Text style={styles.loadingText}>Đang cập nhật đơn hàng...</Text>
           </View>
         </View>

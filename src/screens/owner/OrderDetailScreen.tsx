@@ -199,7 +199,7 @@ export default function OrderDetailScreen() {
         <View style={styles.divider} />
         <InfoRow
           label="Total"
-          value={formatCurrency(currentOrder.payment.amount, "USD")}
+          value={formatCurrency(currentOrder.payment.amount, "VND")}
           bold
         />
       </View>
@@ -256,7 +256,7 @@ function FoodItem({ name, quantity, price, note }: FoodItem) {
           <Text style={styles.foodQty}>Quantity: {quantity}</Text>
         </View>
 
-        <Text style={styles.foodPrice}>{formatCurrency(price, "USD")}</Text>
+        <Text style={styles.foodPrice}>{formatCurrency(price, "VND")}</Text>
       </View>
 
       {note ? <Text style={styles.note}>Note: {note}</Text> : null}
