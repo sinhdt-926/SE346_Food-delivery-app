@@ -10,6 +10,7 @@ import {
   Pressable,
   TouchableOpacity,
   FlatList,
+  TextInput,
 } from "react-native";
 import {
   useRoute,
@@ -35,12 +36,21 @@ export default function ManagerMenuScreen() {
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number>(0);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [searchText, setSearchText] = useState("");
   const filteredFood = useMemo(() => {
-    if (selectedCategory === 0) {
-      return foods;
+    let result = [...foods];
+    // category
+    if (selectedCategory !== 0) {
+      result = result.filter((item) => item.category_id === selectedCategory);
     }
-    return foods.filter((item) => item.category_id === selectedCategory);
-  }, [foods, selectedCategory]);
+    // search
+    if (searchText.trim()) {
+      result = result.filter((item) =>
+        item.name.toLowerCase().includes(searchText.toLowerCase()),
+      );
+    }
+    return result;
+  }, [foods, selectedCategory, searchText]);
   const isFlag = useRef(true);
   //set cờ để kiểm tra người dùng vẫn còn trong màn hình
   const fetchFoods = async () => {
@@ -124,8 +134,9 @@ export default function ManagerMenuScreen() {
   const handleRefresh = async () => {
     try {
       setRefreshing(true);
+      setSearchText("");
+      setSelectedCategory(0);
       const data = await getAllFoods();
-      console.log(JSON.stringify(data, null, 2));
       const formattedFoods = data.map((item) => ({
         id: item.id,
         name: item.name,
@@ -158,7 +169,23 @@ export default function ManagerMenuScreen() {
         <Text style={styles.title}>Menu</Text>
         <LogoutButton />
       </View>
+      {/* search */}
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color="#999" />
 
+        <TextInput
+          placeholder="Search food..."
+          value={searchText}
+          onChangeText={setSearchText}
+          style={styles.searchInput}
+        />
+
+        {searchText.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchText("")}>
+            <Ionicons name="close-circle" size={20} color="#999" />
+          </TouchableOpacity>
+        )}
+      </View>
       {/* tab */}
       <View style={styles.tabs}>
         <TouchableOpacity
@@ -357,10 +384,9 @@ const styles = StyleSheet.create({
   },
   categoryButton: {
     marginLeft: 20,
-    marginTop: 12,
     marginBottom: 15,
     width: 150,
-    height: 56,
+    height: 40,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#FFF",
@@ -413,5 +439,24 @@ const styles = StyleSheet.create({
   selectedCategoryText: {
     color: "#00B14F",
     fontWeight: "700",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 20,
+    marginTop: 15,
+    marginBottom: 12,
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    height: 52,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 16,
+    color: "#222",
   },
 });
