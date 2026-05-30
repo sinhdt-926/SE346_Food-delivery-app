@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   sideSlot: {
-    flex: 1, // Hai bên chiếm 1 phần
+    flex: 1,
     justifyContent: "center",
   },
   centerSlot: {

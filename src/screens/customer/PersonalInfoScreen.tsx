@@ -39,25 +39,24 @@ export default function PersonalInfoScreen({ navigation }: any) {
 
       <ScrollView contentContainerStyle={styles.content}>
         <UserHeader
-          name={user?.user_metadata.full_name}
-          bio="I love fast food"
+          name={user?.user_metadata?.full_name || ""}
         />
 
         <View style={styles.card}>
           <InfoRow
             icon="person-outline"
             label="FULL NAME"
-            value={user?.user_metadata.full_name}
+            value={user?.user_metadata?.full_name || ""}
           />
           <InfoRow
             icon="mail-outline"
             label="EMAIL"
-            value={user?.email || "hello@halallab.co"}
+            value={user?.email || ""}
           />
           <InfoRow
             icon="call-outline"
             label="PHONE NUMBER"
-            value={user?.user_metadata.phone}
+            value={user?.user_metadata?.phone || ""}
           />
         </View>
       </ScrollView>

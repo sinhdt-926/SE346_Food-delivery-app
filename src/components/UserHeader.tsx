@@ -4,22 +4,18 @@ import { Ionicons } from "@expo/vector-icons";
 
 interface UserHeaderProps {
   name?: string;
-  bio?: string;
   showEditBadge?: boolean;
 }
 
 export default function UserHeader({
   name,
-  bio,
   showEditBadge = false,
 }: UserHeaderProps) {
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
-        {/* Ảnh giả lập theo thiết kế */}
         <View style={styles.avatarPlaceholder} />
 
-        {/* Nút bút chì Edit (Chỉ hiện ở màn hình Edit Profile) */}
         {showEditBadge && (
           <TouchableOpacity style={styles.editBadge}>
             <Ionicons name="pencil" size={12} color="#FFF" />
@@ -27,7 +23,6 @@ export default function UserHeader({
         )}
       </View>
       <Text style={styles.name}>{name || "Chưa cập nhật"}</Text>
-      <Text style={styles.bio}>{bio || "Chưa có tiểu sử"}</Text>
     </View>
   );
 }

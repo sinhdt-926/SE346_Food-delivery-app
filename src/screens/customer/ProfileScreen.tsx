@@ -20,7 +20,6 @@ export default function ProfileScreen({ navigation }: any) {
         {/* Khối Avatar dùng chung */}
         <UserHeader
           name={user?.user_metadata?.full_name}
-          bio={user?.user_metadata?.bio}
         />
 
         {/* Khối Card 1 */}

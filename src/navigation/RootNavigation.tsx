@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { supabase } from "../services/supabase";
+import { useAuthStore } from "../store/useAuthStore";
 
 import AuthStack from "./AuthStack";
 import CustomerProfileStack from "./CustomerProfileStack";
-import OwnerTabs from "./OwnerTabs";
 import OwnerStack from "./OwnerStack";
 
 export default function RootNavigation() {
-  const [session, setSession] = useState<any>(null);
+  const { user, setUser } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
-
   const [role, setRole] = useState<string | null>(null);
 
-  //lấy role user
+  // Lấy role từ bảng users
   const fetchUserRole = async (userId: string) => {
     const { data, error } = await supabase
       .from("users")
@@ -31,27 +30,40 @@ export default function RootNavigation() {
       setRole(data.role);
     }
   };
+
   useEffect(() => {
-    // 1. Kiểm tra ngay khi vừa mở app lên xem có đăng nhập từ trước chưa
+    // 1. Kiểm tra session ngay khi mở app
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-
       if (session?.user) {
+        setUser(session.user);
         await fetchUserRole(session.user.id);
+      } else {
+        setUser(null);
       }
-
       setIsLoading(false);
     });
 
-    // 2. Lắng nghe mọi thay đổi (Khi bấm Login, SignUp, Verify OTP thành công, hoặc Đăng xuất)
+    // 2. Lắng nghe auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth event:", event);
+
+      // Bỏ qua sự kiện USER_UPDATED để tránh làm gián đoạn luồng updateProfile
+      // Store đã được cập nhật trực tiếp trong useAuthStore.updateProfile
+      if (event === "USER_UPDATED") {
+        console.log("USER_UPDATED event - skipping navigation re-render");
+        return;
+      }
 
       if (session?.user) {
-        await fetchUserRole(session.user.id);
+        setUser(session.user);
+        // Chỉ fetch role khi sign in/sign up, không phải mỗi lần update
+        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+          await fetchUserRole(session.user.id);
+        }
       } else {
+        setUser(null);
         setRole(null);
       }
     });
@@ -59,7 +71,7 @@ export default function RootNavigation() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Màn hình loading chớp qua 0.5s lúc đang check token
+  // Màn hình loading khi đang check token
   if (isLoading) {
     return (
       <View
@@ -74,9 +86,9 @@ export default function RootNavigation() {
       </View>
     );
   }
-  // 3. QUYẾT ĐỊNH ĐIỀU HƯỚNG: Có session (đã đăng nhập) thì vào app chính, chưa thì ra màn hình Auth
-  //Chưa login
-  if (!session || !session.user) {
+
+  // Chưa đăng nhập
+  if (!user) {
     return <AuthStack />;
   }
 

@@ -22,7 +22,7 @@ interface AuthState {
     clearAuth: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
     user: null,
     isLoading: false,
     error: null,
@@ -44,17 +44,18 @@ export const useAuthStore = create<AuthState>((set) => ({
     setUser: (user) => set({ user }),
 
     updateProfile: async (profileData: ProfileData) => {
-        set({ isLoading: true, error: null });
+        // Không set isLoading toàn cục để tránh gây re-render navigation
+        // isLoading riêng được quản lý tại từng màn hình (isSaving state)
+        set({ error: null });
         try {
             const updatedUser = await authService.updateProfile(profileData);
-            // Cập nhật user mới (đã có user_metadata được refresh) vào store
-            set({ user: updatedUser, isLoading: false });
+            // Cập nhật user mới vào store mà KHÔNG trigger navigation re-render
+            set({ user: updatedUser });
         } catch (error: any) {
             set({
                 error: error.message || 'Không thể cập nhật thông tin hồ sơ',
-                isLoading: false,
             });
-            // Ném lại lỗi để màn hình có thể bắt và hiển thị thông báo
+            // Ném lại lỗi để màn hình có thể bắt và hiển thị Toast
             throw error;
         }
     },
