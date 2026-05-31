@@ -61,6 +61,8 @@ export default function ManagerMenuScreen() {
       case "price_desc":
         result.sort((a, b) => b.price - a.price);
         break;
+      case "default":
+        result.sort((a, b) => a.name.localeCompare(b.name));
     }
     return result;
   }, [foods, selectedCategory, searchText, sortType]);
