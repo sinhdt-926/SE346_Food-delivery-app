@@ -390,10 +390,10 @@
             "$ref": "#/parameters/rowFilter.payments.bank_code"
           },
           {
-            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
+            "$ref": "#/parameters/rowFilter.payments.secure_hash"
           },
           {
-            "$ref": "#/parameters/rowFilter.payments.raw_response"
+            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
           },
           {
             "$ref": "#/parameters/select"
@@ -483,10 +483,10 @@
             "$ref": "#/parameters/rowFilter.payments.bank_code"
           },
           {
-            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
+            "$ref": "#/parameters/rowFilter.payments.secure_hash"
           },
           {
-            "$ref": "#/parameters/rowFilter.payments.raw_response"
+            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
           },
           {
             "$ref": "#/parameters/preferReturn"
@@ -528,10 +528,10 @@
             "$ref": "#/parameters/rowFilter.payments.bank_code"
           },
           {
-            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
+            "$ref": "#/parameters/rowFilter.payments.secure_hash"
           },
           {
-            "$ref": "#/parameters/rowFilter.payments.raw_response"
+            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
           },
           {
             "$ref": "#/parameters/body.payments"
@@ -1865,12 +1865,13 @@
           "format": "character varying",
           "type": "string"
         },
+        "secure_hash": {
+          "format": "text",
+          "type": "string"
+        },
         "vnp_response_code": {
           "format": "character varying",
           "type": "string"
-        },
-        "raw_response": {
-          "format": "jsonb"
         }
       },
       "type": "object"
@@ -2329,14 +2330,14 @@
       "in": "query",
       "type": "string"
     },
-    "rowFilter.payments.vnp_response_code": {
-      "name": "vnp_response_code",
+    "rowFilter.payments.secure_hash": {
+      "name": "secure_hash",
       "required": false,
       "in": "query",
       "type": "string"
     },
-    "rowFilter.payments.raw_response": {
-      "name": "raw_response",
+    "rowFilter.payments.vnp_response_code": {
+      "name": "vnp_response_code",
       "required": false,
       "in": "query",
       "type": "string"

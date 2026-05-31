@@ -47,13 +47,17 @@ const CartScreen = ({ navigation }: any) => {
     const paymentType = "cod"; // Mặc định COD
 
     // Gọi CheckoutService theo tham số yêu cầu
-    const response = await CheckoutService.processOrder(address, paymentType, checkedIds);
+    const response = await CheckoutService.processOrder(
+      address,
+      paymentType,
+      checkedIds,
+    );
 
     if (response.success) {
       /* Thay vì dùng resetCartState làm mất luôn các món chưa thanh toán,
          ta gọi fetchCart để đồng bộ lại data từ Supabase */
       await fetchCart();
-      
+
       Alert.alert(
         "Thành công",
         `Đặt hàng thành công! Mã đơn: ${response.data}`,

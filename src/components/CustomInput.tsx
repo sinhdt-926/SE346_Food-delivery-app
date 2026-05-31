@@ -10,10 +10,9 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-// Định nghĩa Props cho Input
 interface CustomInputProps extends TextInputProps {
-  label?: string; // Tiêu đề phía trên ô nhập (ví dụ: "FULL NAME")
-  iconName?: keyof typeof Ionicons.glyphMap; // Tên icon từ thư viện Ionicons
+  label?: string;
+  iconName?: keyof typeof Ionicons.glyphMap;
   containerStyle?: StyleProp<ViewStyle>;
 }
 
