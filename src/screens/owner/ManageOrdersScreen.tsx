@@ -21,7 +21,12 @@ import LogoutButton from "../../components/LogoutButton";
 export default function ManagerOrdersScreen() {
   const [activeTab, setActiveTab] = useState<OrderStatus>("pending");
   const [orders, setOrders] = useState<Order[]>([]);
-  const filteredOrders = orders.filter((item) => item.status === activeTab);
+  const filteredOrders = orders
+    .filter((item) => item.status === activeTab)
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
   const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
