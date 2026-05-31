@@ -6,6 +6,8 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import LogoutButton from "../../components/LogoutButton";
@@ -14,6 +16,7 @@ import PromotionCard from "../../components/PromotionCard";
 import { Promotion } from "../../types/promotion";
 import { getAllPromotions } from "../../services/promotion.service";
 import CustomButton from "../../components/CustomButton";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ManagerPromosScreen() {
   const [activeTab, setActiveTab] = useState<"active" | "upcoming" | "expired">(
@@ -25,6 +28,7 @@ export default function ManagerPromosScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<any>();
   const isFlag = useRef(true);
+  const [searchText, setSearchText] = useState("");
   useFocusEffect(
     React.useCallback(() => {
       isFlag.current = true;
@@ -59,27 +63,35 @@ export default function ManagerPromosScreen() {
 
   const filteredPromos = useMemo(() => {
     const now = new Date();
-
+    let result = [...promos];
+    // Search
+    if (searchText.trim()) {
+      result = result.filter((item) =>
+        item.name.toLowerCase().includes(searchText.toLowerCase()),
+      );
+    }
     // Active
     if (activeTab === "active") {
-      return promos.filter(
+      result = result.filter(
         (promo) =>
           new Date(promo.start_date) <= now && new Date(promo.end_date) >= now,
       );
     }
-
     // Upcoming
-    if (activeTab === "upcoming") {
-      return promos.filter((promo) => new Date(promo.start_date) > now);
+    else if (activeTab === "upcoming") {
+      result = result.filter((promo) => new Date(promo.start_date) > now);
     }
-
     // Expired
-    return promos.filter((promo) => new Date(promo.end_date) < now);
-  }, [promos, activeTab]);
+    else {
+      result = result.filter((promo) => new Date(promo.end_date) < now);
+    }
+    return result;
+  }, [promos, activeTab, searchText]);
 
   const handleRefresh = async () => {
     try {
       setRefreshing(true);
+      setSearchText("");
       const data = await getAllPromotions();
       if (isFlag.current) {
         setPromos(data ?? []);
@@ -104,6 +116,22 @@ export default function ManagerPromosScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Promos</Text>
         <LogoutButton />
+      </View>
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color="#999" />
+
+        <TextInput
+          placeholder="Search promo..."
+          value={searchText}
+          onChangeText={setSearchText}
+          style={styles.searchInput}
+        />
+
+        {searchText.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchText("")}>
+            <Ionicons name="close-circle" size={20} color="#999" />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* tabs */}
@@ -279,5 +307,24 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 14,
     paddingVertical: 0,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 20,
+    marginTop: 15,
+    marginBottom: 12,
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    height: 52,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 16,
+    color: "#222",
   },
 });
