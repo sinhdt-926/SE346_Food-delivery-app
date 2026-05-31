@@ -69,6 +69,20 @@ export const authService = {
   getCurrentUser: async () => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) throw error;
+    
+    if (user) {
+      // Lấy thêm thông tin từ bảng public.users
+      const { data: publicProfile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+        
+      if (publicProfile) {
+        (user as any).publicProfile = publicProfile;
+      }
+    }
+    
     return user;
   },
 
