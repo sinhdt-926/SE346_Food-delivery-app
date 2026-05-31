@@ -68,9 +68,6 @@ export default function ManagerMenuScreen() {
   //set cờ để kiểm tra người dùng vẫn còn trong màn hình
   const fetchFoods = async () => {
     try {
-      if (foods.length === 0) {
-        setLoading(true);
-      }
       setError("");
       const data = await getAllFoods();
       const formattedFoods = data.map((item) => ({
@@ -89,39 +86,55 @@ export default function ManagerMenuScreen() {
       }
     } catch (error) {
       if (isFlag.current) {
-        setError("Không thể tải danh sách món ăn");
+        setError("Unable to load the menu");
       }
+      throw error;
+    }
+  };
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+      if (isFlag.current) {
+        setCategories([
+          {
+            id: 0,
+            category_name: "All",
+          },
+          ...data,
+        ]);
+      }
+    } catch (error) {
+      console.log(error);
+      if (isFlag.current) {
+        setError("Unable to load the menu");
+      }
+      throw error;
+    }
+  };
+  const loadData = async () => {
+    try {
+      if (foods.length === 0) {
+        setLoading(true);
+      }
+      await Promise.all([fetchFoods(), fetchCategories()]);
+    } catch (error) {
+      //đã in ra ở 2 hàm kia
+      console.log(error);
     } finally {
       if (isFlag.current) {
         setLoading(false);
       }
     }
   };
-  const fetchCategories = async () => {
-    try {
-      const data = await getCategories();
-      setCategories([
-        {
-          id: 0,
-          category_name: "All",
-        },
-        ...data,
-      ]);
-    } catch (error) {
-      console.log(error);
-    }
-  };
   useFocusEffect(
     React.useCallback(() => {
       isFlag.current = true;
-      fetchFoods();
-      fetchCategories();
+      loadData();
       return () => {
         isFlag.current = false;
       };
     }, []),
   );
-
   if (loading) {
     return (
       <View style={styles.center}>
