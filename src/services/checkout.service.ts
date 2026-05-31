@@ -25,7 +25,7 @@ export const CheckoutService = {
 
       if (error) throw error;
 
-      if (paymentType === 'VNPAY') {
+      if (paymentType.toUpperCase() === 'VNPAY') {
         // Lấy amount từ bảng payments (đã trừ mã giảm giá)
         const { data: paymentInfo, error: getPaymentError } = await supabase
           .from('payments')

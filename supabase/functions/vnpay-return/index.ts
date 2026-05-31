@@ -39,8 +39,13 @@ serve(async (req: Request) => {
       return sorted;
     };
 
-    const sorted = sortObject(params);
-
+    const vnpParams: any = {};
+    for (const key in params) {
+      if (key.startsWith("vnp_")) {
+        vnpParams[key] = params[key];
+      }
+    }
+    const sorted = sortObject(vnpParams);
     const signData = qs.stringify(sorted, { encode: false });
     const expectedHash = crypto
       .createHmac("sha512", secretKey)

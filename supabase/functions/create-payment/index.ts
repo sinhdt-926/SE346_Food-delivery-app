@@ -27,16 +27,20 @@ serve(async (req: Request) => {
     
     // Sử dụng vnpay-return function làm URL trả về
     // Mặc định url của edge function vnpay-return
-    const returnFunctionUrl = Deno.env.get("VNP_RETURN_URL") || "https://omkcbayujaqdfhbuchjo.supabase.co/functions/v1/vnpay-return";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+    const defaultReturnUrl = supabaseUrl ? `${supabaseUrl}/functions/v1/vnpay-return` : "";
+    const returnFunctionUrl = Deno.env.get("VNP_RETURN_URL") || defaultReturnUrl;
 
     const date = new Date();
+    // Offset cho GMT+7
+    const vnTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
     // Format YYYYMMDDHHmmss theo chuẩn VNPAY
-    const createDate = date.getFullYear().toString() + 
-                       (date.getMonth() + 1).toString().padStart(2, '0') + 
-                       date.getDate().toString().padStart(2, '0') + 
-                       date.getHours().toString().padStart(2, '0') + 
-                       date.getMinutes().toString().padStart(2, '0') + 
-                       date.getSeconds().toString().padStart(2, '0');
+    const createDate = vnTime.getFullYear().toString() + 
+                       (vnTime.getMonth() + 1).toString().padStart(2, '0') + 
+                       vnTime.getDate().toString().padStart(2, '0') + 
+                       vnTime.getHours().toString().padStart(2, '0') + 
+                       vnTime.getMinutes().toString().padStart(2, '0') + 
+                       vnTime.getSeconds().toString().padStart(2, '0');
 
     const params: Record<string, string> = {
       vnp_Version:     "2.1.0",
