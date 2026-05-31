@@ -384,6 +384,18 @@
             "$ref": "#/parameters/rowFilter.payments.order_id"
           },
           {
+            "$ref": "#/parameters/rowFilter.payments.transaction_no"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.bank_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.raw_response"
+          },
+          {
             "$ref": "#/parameters/select"
           },
           {
@@ -465,6 +477,18 @@
             "$ref": "#/parameters/rowFilter.payments.order_id"
           },
           {
+            "$ref": "#/parameters/rowFilter.payments.transaction_no"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.bank_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.raw_response"
+          },
+          {
             "$ref": "#/parameters/preferReturn"
           }
         ],
@@ -496,6 +520,18 @@
           },
           {
             "$ref": "#/parameters/rowFilter.payments.order_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.transaction_no"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.bank_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.vnp_response_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.payments.raw_response"
           },
           {
             "$ref": "#/parameters/body.payments"
@@ -1500,6 +1536,46 @@
         ]
       }
     },
+    "/rpc/get_owner_dashboard_stats": {
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "args",
+            "required": true,
+            "schema": {
+              "properties": {
+                "p_end_date": {
+                  "format": "timestamp with time zone",
+                  "type": "string"
+                },
+                "p_start_date": {
+                  "format": "timestamp with time zone",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          {
+            "$ref": "#/parameters/preferParams"
+          }
+        ],
+        "produces": [
+          "application/json",
+          "application/vnd.pgrst.object+json;nulls=stripped",
+          "application/vnd.pgrst.object+json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "(rpc) get_owner_dashboard_stats"
+        ]
+      }
+    },
     "/rpc/process_checkout": {
       "post": {
         "parameters": [
@@ -1584,6 +1660,86 @@
         "tags": [
           "(rpc) get_current_user_role"
         ]
+      }
+    },
+    "/functions/v1/create-payment": {
+      "post": {
+        "tags": [
+          "Edge Functions"
+        ],
+        "summary": "Tạo URL thanh toán VNPAY",
+        "description": "Gọi Edge Function để tạo URL thanh toán VNPAY cho đơn hàng",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Thông tin đơn hàng",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "orderId": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "number"
+                },
+                "appScheme": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "paymentUrl": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/functions/v1/vnpay-return": {
+      "get": {
+        "tags": [
+          "Edge Functions"
+        ],
+        "summary": "Xử lý kết quả trả về từ VNPAY (IPN/Return)",
+        "description": "Nhận kết quả thanh toán từ VNPAY và cập nhật trạng thái đơn hàng. Sau đó redirect về app.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "vnp_Amount",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "vnp_ResponseCode",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "vnp_TxnRef",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "vnp_SecureHash",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect về app"
+          }
+        }
       }
     }
   },
@@ -1700,6 +1856,21 @@
           "description": "Note:\nThis is a Foreign Key to `orders.id`.<fk table='orders' column='id'/>",
           "format": "integer",
           "type": "integer"
+        },
+        "transaction_no": {
+          "format": "character varying",
+          "type": "string"
+        },
+        "bank_code": {
+          "format": "character varying",
+          "type": "string"
+        },
+        "vnp_response_code": {
+          "format": "character varying",
+          "type": "string"
+        },
+        "raw_response": {
+          "format": "jsonb"
         }
       },
       "type": "object"
@@ -2142,6 +2313,30 @@
     },
     "rowFilter.payments.order_id": {
       "name": "order_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.payments.transaction_no": {
+      "name": "transaction_no",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.payments.bank_code": {
+      "name": "bank_code",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.payments.vnp_response_code": {
+      "name": "vnp_response_code",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.payments.raw_response": {
+      "name": "raw_response",
       "required": false,
       "in": "query",
       "type": "string"
