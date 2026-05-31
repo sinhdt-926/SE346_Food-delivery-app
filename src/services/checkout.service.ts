@@ -1,5 +1,7 @@
 import { supabase } from './supabase';
-import { ServiceResponse } from './cart.service';
+import { CheckoutResponse } from '../types/checkout';
+
+const DEFAULT_APP_SCHEME = process.env.EXPO_PUBLIC_DEFAULT_APP_SCHEME || 'exp://192.168.100.97:8081/--';
 
 export const CheckoutService = {
   async processOrder(
@@ -8,7 +10,7 @@ export const CheckoutService = {
     checkedItemIds: number[],
     promotionId?: number,
     appScheme?: string // Thêm appScheme từ UI (vd: exp://192.168.100.97:8081/--)
-  ): Promise<ServiceResponse<{ orderId: number; paymentUrl?: string }>> {
+  ): Promise<CheckoutResponse> {
     try {
       if (checkedItemIds.length === 0) {
         throw new Error('Vui lòng chọn ít nhất 1 sản phẩm để thanh toán');
@@ -38,7 +40,7 @@ export const CheckoutService = {
           body: {
             orderId: orderId,
             amount: paymentInfo.amount,
-            appScheme: appScheme || 'exp://192.168.100.97:8081/--', // fallback theo yêu cầu
+            appScheme: appScheme || DEFAULT_APP_SCHEME,
           },
         });
 
