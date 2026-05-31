@@ -1,12 +1,6 @@
-import { supabase } from "./supabase";
-import { CartItem } from "../types/cart";
-// Chuẩn hoá kiểu trả về cho mọi hàm API
-export type ServiceResponse<T = any> = {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-};
+import {supabase} from './supabase';
+import { CartItem } from '../types/cart';
+import { ServiceResponse } from '../types/service';
 
 export const CartService = {
   // Hàm helper lấy id giỏ hàng của user hiện tại
