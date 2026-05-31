@@ -23,6 +23,24 @@ export default function DashboardScreen() {
   const [popularFoods, setPopularFoods] = useState<any[]>([]);
   const loadDashboard = async () => {
     try {
+      //lấy số order theo ngày hiện tại
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const endToday = new Date();
+      const todayStats = await getDashboardStats(
+        today.toISOString(),
+        endToday.toISOString(),
+      );
+      setRunningOrders(
+        todayStats.total_orders -
+          todayStats.completed_orders -
+          todayStats.cancelled_orders,
+      );
+      setRequests(
+        todayStats.orders_by_status.find((item) => item.status === "pending")
+          ?.count ?? 0,
+      );
+      //lấy doanh thu theo tuần
       const now = new Date();
       const monday = new Date(now);
       const day = now.getDay();
@@ -35,15 +53,6 @@ export default function DashboardScreen() {
       const currentWeek = await getDashboardStats(
         monday.toISOString(),
         sunday.toISOString(),
-      );
-      setRunningOrders(
-        currentWeek.total_orders -
-          currentWeek.completed_orders -
-          currentWeek.cancelled_orders,
-      );
-      setRequests(
-        currentWeek.orders_by_status.find((item) => item.status === "pending")
-          ?.count ?? 0,
       );
       setTotalRevenue(currentWeek.total_revenue);
       const weekLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -69,6 +78,7 @@ export default function DashboardScreen() {
           },
         ],
       });
+      //top món ăn
       setPopularFoods(currentWeek.top_selling_foods);
     } catch (error) {
       console.log(error);
@@ -109,14 +119,14 @@ export default function DashboardScreen() {
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>This Week</Text>
+              <Text style={styles.badgeText}>Today</Text>
             </View>
             <Text style={styles.statNumber}>{runningOrders}</Text>
             <Text style={styles.statLabel}>RUNNING ORDERS</Text>
           </View>
           <View style={styles.statCard}>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>This Week</Text>
+              <Text style={styles.badgeText}>Today</Text>
             </View>
             <Text style={styles.statNumber}>{requests}</Text>
             <Text style={styles.statLabel}>ORDER REQUESTS</Text>
