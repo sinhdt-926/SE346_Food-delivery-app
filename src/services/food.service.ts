@@ -86,7 +86,14 @@ export const getFoodById = async (id: number) => {
 export const getFoodsByCategory = async (category_id: number) => {
   const { data, error } = await supabase
     .from("foods")
-    .select("*")
+    .select(`
+      *, 
+      categories(id, category_name),
+      promotion_food(
+        promotions(*)
+      )
+    `)
+    //Bổ sung hiển thị khuyến mãi trên từng món cho màn hình phân loại món ăn theo thể loại
     .eq("category_id", category_id)
     .eq("is_available", true);
   if (error) {
