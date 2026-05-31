@@ -111,13 +111,17 @@ const CartScreen = ({ navigation }: any) => {
       <View style={styles.footer}>
         <View style={styles.addressSection}>
           <Text style={styles.label}>ĐỊA CHỈ GIAO HÀNG</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('MyAddress')}>
             <Text style={styles.editLink}>SỬA</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.addressBox}>
+        <TouchableOpacity
+          style={styles.addressBox}
+          onPress={() => navigation.navigate('MyAddress')}
+          activeOpacity={0.75}
+        >
           <Text style={styles.addressText}>{address}</Text>
-        </View>
+        </TouchableOpacity>
         <View style={styles.bottomRow}>
           <View style={{ flex: 1, paddingRight: 10 }}>
             <Text style={styles.totalLabel}>Tổng tiền:</Text>

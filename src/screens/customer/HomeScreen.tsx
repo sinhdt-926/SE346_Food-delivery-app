@@ -123,11 +123,6 @@ const HomeScreen = ({ navigation }: any) => {
     return null;
   };
 
-  // ---------------------------------------------------------
-  // Hiệu ứng Animated Header kiểu ShopeeFood
-  // Chiều cao Address = 45. Chiều cao Search = 60.
-  // Khi cuộn 45px, Header đẩy lên -45px => Giấu Address đi, chỉ chừa lại thanh Search.
-  // ---------------------------------------------------------
   const headerTranslateY = scrollY.interpolate({
     inputRange: [0, 45],
     outputRange: [0, -45],
