@@ -7,11 +7,13 @@ import {
   ActivityIndicator,
   ScrollView,
   Image,
+  TouchableOpacity,
 } from "react-native";
 import LogoutButton from "../../components/LogoutButton";
 import { getDashboardStats } from "../../services/dashboard.service";
 import { formatCurrency } from "../../utils/formatters";
 import { LineChart } from "react-native-chart-kit";
+import { useNavigation } from "@react-navigation/native";
 
 export default function DashboardScreen() {
   const [runningOrders, setRunningOrders] = useState(0);
@@ -21,6 +23,7 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true);
   const [chartWidth, setChartWidth] = useState(0);
   const [popularFoods, setPopularFoods] = useState<any[]>([]);
+  const navigation = useNavigation<any>();
   const loadDashboard = async () => {
     try {
       //lấy số order theo ngày hiện tại
@@ -191,7 +194,11 @@ export default function DashboardScreen() {
           <View style={styles.revenueHeader}>
             <Text style={styles.revenueTitle}>Popular Items</Text>
             <View style={styles.rightSection}>
-              <Text style={styles.detailLink}>See Details</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("PopularItems")}
+              >
+                <Text style={styles.detailLink}>See Details</Text>
+              </TouchableOpacity>
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>This Week</Text>
               </View>
