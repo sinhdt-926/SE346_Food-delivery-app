@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import LogoutButton from "../../components/LogoutButton";
-import {
-  getRequestsCount,
-  getRunningOrdersCount,
-} from "../../services/order.service";
-import {
-  getTodayRevenue,
-  getTodayRevenueChart,
-} from "../../services/revenue.service";
+import { getDashboardStats } from "../../services/revenue.service";
 import { formatCurrency } from "../../utils/formatters";
 import { Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
@@ -16,22 +9,20 @@ import { LineChart } from "react-native-chart-kit";
 export default function DashboardScreen() {
   const [runningOrders, setRunningOrders] = useState(0);
   const [requests, setRequests] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [revenueChart, setRevenueChart] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [chartWidth, setChartWidth] = useState(0);
   const loadDashboard = async () => {
     try {
-      const running = await getRunningOrdersCount();
-      const requests = await getRequestsCount();
-      setRunningOrders(running);
-      setRequests(requests);
-      const revenue = await getTodayRevenue();
-      setTotalRevenue(revenue);
-      const chart = await getTodayRevenueChart();
-      setRevenueChart(chart);
+      const dashboard = await getDashboardStats();
+      setRunningOrders(dashboard.runningOrders);
+      setRequests(dashboard.requests);
+      setTotalRevenue(dashboard.totalRevenue);
+      setRevenueChart(dashboard.revenueChart);
     } catch (error) {
-      Alert.alert("Error", "Failed to load dashboard");
       console.log(error);
+      Alert.alert("Error", "Failed to load dashboard");
     } finally {
       setLoading(false);
     }
@@ -39,6 +30,19 @@ export default function DashboardScreen() {
   useEffect(() => {
     loadDashboard();
   }, []);
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size="large" color="#FF7622" />
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -68,38 +72,43 @@ export default function DashboardScreen() {
           </View>
           <Text style={styles.detailLink}>See Details</Text>
         </View>
-        {revenueChart && (
-          <LineChart
-            data={revenueChart}
-            width={Dimensions.get("window").width - 88}
-            height={220}
-            withDots={true}
-            withShadow={false}
-            withInnerLines={false}
-            withOuterLines={false}
-            withVerticalLines={false}
-            bezier
-            chartConfig={{
-              backgroundGradientFrom: "#FFF",
-              backgroundGradientTo: "#FFF",
-              decimalPlaces: 0,
-
-              color: (opacity = 1) => `rgba(255,118,34,${opacity})`,
-
-              labelColor: () => "#9CA3AF",
-
-              propsForDots: {
-                r: "5",
-                strokeWidth: "2",
-                stroke: "#FF7622",
-              },
-            }}
-            style={{
-              marginTop: 20,
-              borderRadius: 16,
-            }}
-          />
-        )}
+        <View
+          onLayout={(event) => {
+            setChartWidth(event.nativeEvent.layout.width);
+          }}
+        >
+          {revenueChart &&
+            revenueChart.datasets[0].data.length > 0 &&
+            chartWidth > 0 && (
+              <LineChart
+                data={revenueChart}
+                width={chartWidth}
+                height={220}
+                withDots
+                withShadow={false}
+                withInnerLines={false}
+                withOuterLines={false}
+                withVerticalLines={false}
+                bezier
+                chartConfig={{
+                  backgroundGradientFrom: "#FFF",
+                  backgroundGradientTo: "#FFF",
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(255,118,34,${opacity})`,
+                  labelColor: () => "#9CA3AF",
+                  propsForDots: {
+                    r: "5",
+                    strokeWidth: "2",
+                    stroke: "#FF7622",
+                  },
+                }}
+                style={{
+                  marginTop: 20,
+                  borderRadius: 16,
+                }}
+              />
+            )}
+        </View>
       </View>
     </View>
   );
