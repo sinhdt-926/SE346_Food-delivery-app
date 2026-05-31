@@ -6,7 +6,7 @@ import { formatCurrency } from "../utils/formatters";
 
 interface Props {
   promo: Promotion;
-  status: "active" | "upcoming" | "expired";
+  status: "all" | "active" | "upcoming" | "expired";
   onPress?: () => void;
 }
 

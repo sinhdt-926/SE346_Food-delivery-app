@@ -19,9 +19,9 @@ import CustomButton from "../../components/CustomButton";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function ManagerPromosScreen() {
-  const [activeTab, setActiveTab] = useState<"active" | "upcoming" | "expired">(
-    "active",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "all" | "active" | "upcoming" | "expired"
+  >("all");
   const [promos, setPromos] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -82,9 +82,10 @@ export default function ManagerPromosScreen() {
       result = result.filter((promo) => new Date(promo.start_date) > now);
     }
     // Expired
-    else {
+    else if (activeTab === "expired") {
       result = result.filter((promo) => new Date(promo.end_date) < now);
     }
+    result.sort((a, b) => a.name.localeCompare(b.name));
     return result;
   }, [promos, activeTab, searchText]);
 
@@ -109,7 +110,16 @@ export default function ManagerPromosScreen() {
       }
     }
   };
-
+  const getPromoStatus = (promo: Promotion) => {
+    const now = new Date();
+    if (new Date(promo.start_date) <= now && new Date(promo.end_date) >= now) {
+      return "active";
+    }
+    if (new Date(promo.start_date) > now) {
+      return "upcoming";
+    }
+    return "expired";
+  };
   return (
     <View style={styles.container}>
       {/* header */}
@@ -137,12 +147,17 @@ export default function ManagerPromosScreen() {
       {/* tabs */}
       <View style={styles.tabs}>
         <TopTabButton
+          title="All"
+          active={activeTab === "all"}
+          onPress={() => setActiveTab("all")}
+        />
+        <TopTabButton
           title="Active"
           active={activeTab === "active"}
           onPress={() => setActiveTab("active")}
         />
         <TopTabButton
-          title="Upcoming"
+          title="Coming"
           active={activeTab === "upcoming"}
           onPress={() => setActiveTab("upcoming")}
         />
@@ -204,7 +219,7 @@ export default function ManagerPromosScreen() {
               <PromotionCard
                 key={promo.id}
                 promo={promo}
-                status={activeTab}
+                status={getPromoStatus(promo)}
                 onPress={() =>
                   navigation.navigate("AddEditPromotion", {
                     promotion: promo,
@@ -254,7 +269,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#ECECEC",
     marginBottom: 20,
