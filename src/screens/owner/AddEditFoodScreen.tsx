@@ -66,6 +66,7 @@ export default function AddEditFoodScreen() {
         }
       } catch (error) {
         console.log(error);
+        Alert.alert("Error", "Unable to load menu. Please try again.");
       }
     };
     fetchCategories();
