@@ -5,16 +5,19 @@ import Toast from "react-native-toast-message";
 import { toastConfig } from "./src/components/Notification";
 import RootNavigation from "./src/navigation/RootNavigation";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer>
-        <RootNavigation />
-      </NavigationContainer>
-      <Toast config={toastConfig} />
-      <StatusBar style="light" />
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <NavigationContainer>
+          <RootNavigation />
+        </NavigationContainer>
+        <Toast config={toastConfig} />
+        <StatusBar style="auto" />
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 // import { GestureHandlerRootView } from "react-native-gesture-handler";
