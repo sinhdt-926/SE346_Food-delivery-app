@@ -95,7 +95,10 @@ export default function AddLocationScreen({ navigation, route }: Props) {
     // Định vị GPS hiện tại
     const handleLocate = async () => {
         setLocationLoading(true);
-        const { coords } = await LocationService.getCurrentLocation();
+        const { coords, isFallback } = await LocationService.getCurrentLocation();
+        if (isFallback) {
+            Alert.alert('Không thể xác định vị trí', 'Vui lòng cấp quyền GPS hoặc chọn địa chỉ thủ công.');
+        }
         const newRegion: Region = {
             latitude: coords.latitude,
             longitude: coords.longitude,
