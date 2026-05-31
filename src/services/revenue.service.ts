@@ -1,12 +1,17 @@
 import { supabase } from "./supabase";
 
 export const getDashboardStats = async () => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 6);
+  startDate.setHours(0, 0, 0, 0);
+  startDate.setHours(0, 0, 0, 0);
   const { data, error } = await supabase.rpc("get_owner_dashboard_stats", {
-    p_start_date: today.toISOString(),
+    p_start_date: startDate.toISOString(),
     p_end_date: new Date().toISOString(),
   });
+  console.log(data);
+  console.log(startDate.toISOString());
+  console.log(new Date().toISOString());
   if (error) throw error;
   const stats = data?.[0];
   if (!stats) {
