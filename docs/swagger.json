@@ -1661,6 +1661,86 @@
           "(rpc) get_current_user_role"
         ]
       }
+    },
+    "/functions/v1/create-payment": {
+      "post": {
+        "tags": [
+          "Edge Functions"
+        ],
+        "summary": "Tạo URL thanh toán VNPAY",
+        "description": "Gọi Edge Function để tạo URL thanh toán VNPAY cho đơn hàng",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Thông tin đơn hàng",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "orderId": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "number"
+                },
+                "appScheme": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "paymentUrl": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/functions/v1/vnpay-return": {
+      "get": {
+        "tags": [
+          "Edge Functions"
+        ],
+        "summary": "Xử lý kết quả trả về từ VNPAY (IPN/Return)",
+        "description": "Nhận kết quả thanh toán từ VNPAY và cập nhật trạng thái đơn hàng. Sau đó redirect về app.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "vnp_Amount",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "vnp_ResponseCode",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "vnp_TxnRef",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "vnp_SecureHash",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect về app"
+          }
+        }
+      }
     }
   },
   "definitions": {
