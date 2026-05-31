@@ -28,6 +28,18 @@ export default function EditProfileScreen({ navigation }: any) {
     if (isSaving) return;
     setIsSaving(true);
     try {
+      if (!formData.fullName.trim() || !formData.email.trim() || !formData.phone.trim()) {
+        Toast.show({
+          type: "error",
+          text1: "Lỗi",
+          text2: "Vui lòng nhập đầy đủ thông tin",
+          visibilityTime: 2000,
+          topOffset: 60,
+        });
+        setIsSaving(false);
+        return;
+      }
+
       const payload: { fullName: string; phone: string; email?: string } = {
         fullName: formData.fullName.trim(),
         phone: formData.phone.trim(),

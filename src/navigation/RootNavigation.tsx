@@ -58,7 +58,9 @@ export default function RootNavigation() {
         setUser(session.user);
         // Chỉ fetch role khi sign in/sign up, không phải mỗi lần update
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+          setIsLoading(true);
           await fetchUserRole(session.user.id);
+          setIsLoading(false);
         }
       } else {
         setUser(null);

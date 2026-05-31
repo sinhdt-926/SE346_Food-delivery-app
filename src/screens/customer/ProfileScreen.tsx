@@ -12,7 +12,7 @@ export default function ProfileScreen({ navigation }: any) {
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [fetchUser]);
   return (
     <SafeAreaView style={styles.container}>
       <CustomHeader title="Profile" showBackButton={false} />
