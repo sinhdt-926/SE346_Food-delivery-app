@@ -117,7 +117,9 @@ const styles = StyleSheet.create({
   upcomingBadge: {
     backgroundColor: "#FFF1E7",
   },
-  expiredBadge: {},
+  expiredBadge: {
+    backgroundColor: "#F3F4F6",
+  },
   activeText: {
     color: "#22C55E",
   },

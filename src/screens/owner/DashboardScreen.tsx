@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  ScrollView,
+  Image,
+} from "react-native";
 import LogoutButton from "../../components/LogoutButton";
 import { getDashboardStats } from "../../services/dashboard.service";
 import { formatCurrency } from "../../utils/formatters";
-import { Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 
 export default function DashboardScreen() {
@@ -13,6 +20,7 @@ export default function DashboardScreen() {
   const [revenueChart, setRevenueChart] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [chartWidth, setChartWidth] = useState(0);
+  const [popularFoods, setPopularFoods] = useState<any[]>([]);
   const loadDashboard = async () => {
     try {
       const now = new Date();
@@ -61,6 +69,7 @@ export default function DashboardScreen() {
           },
         ],
       });
+      setPopularFoods(currentWeek.top_selling_foods);
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "Failed to load dashboard");
@@ -90,77 +99,117 @@ export default function DashboardScreen() {
         <Text style={styles.title}>Dashboard</Text>
         <LogoutButton />
       </View>
-      {/* count orders */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>This Week</Text>
-          </View>
-          <Text style={styles.statNumber}>{runningOrders}</Text>
-          <Text style={styles.statLabel}>RUNNING ORDERS</Text>
-        </View>
-        <View style={styles.statCard}>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>This Week</Text>
-          </View>
-          <Text style={styles.statNumber}>{requests}</Text>
-          <Text style={styles.statLabel}>ORDER REQUESTS</Text>
-        </View>
-      </View>
-      {/* revenus */}
-      <View style={styles.revenueCard}>
-        <View style={styles.revenueHeader}>
-          <View>
-            <Text style={styles.revenueTitle}>Total Revenue</Text>
-            <Text style={styles.revenueAmount}>
-              {formatCurrency(totalRevenue, "VND").toLocaleString()}
-            </Text>
-          </View>
-          <View style={styles.rightSection}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 120,
+        }}
+      >
+        {/* count orders */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>This Week</Text>
             </View>
-            <Text style={styles.detailLink}>See Details</Text>
+            <Text style={styles.statNumber}>{runningOrders}</Text>
+            <Text style={styles.statLabel}>RUNNING ORDERS</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>This Week</Text>
+            </View>
+            <Text style={styles.statNumber}>{requests}</Text>
+            <Text style={styles.statLabel}>ORDER REQUESTS</Text>
           </View>
         </View>
-        <View
-          onLayout={(event) => {
-            setChartWidth(event.nativeEvent.layout.width);
-          }}
-        >
-          {revenueChart &&
-            revenueChart.datasets[0].data.length > 0 &&
-            chartWidth > 0 && (
-              <LineChart
-                data={revenueChart}
-                width={chartWidth}
-                height={220}
-                withDots
-                withShadow={false}
-                withInnerLines={false}
-                withOuterLines={false}
-                withVerticalLines={false}
-                bezier
-                chartConfig={{
-                  backgroundGradientFrom: "#FFF",
-                  backgroundGradientTo: "#FFF",
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(255,118,34,${opacity})`,
-                  labelColor: () => "#9CA3AF",
-                  propsForDots: {
-                    r: "5",
-                    strokeWidth: "2",
-                    stroke: "#FF7622",
-                  },
-                }}
-                style={{
-                  marginTop: 20,
-                  borderRadius: 16,
-                }}
-              />
-            )}
+        {/* revenus */}
+        <View style={styles.revenueCard}>
+          <View style={styles.revenueHeader}>
+            <View>
+              <Text style={styles.revenueTitle}>Total Revenue</Text>
+              <Text style={styles.revenueAmount}>
+                {formatCurrency(totalRevenue, "VND").toLocaleString()}
+              </Text>
+            </View>
+            <View style={styles.rightSection}>
+              <Text style={styles.detailLink}>See Details</Text>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>This Week</Text>
+              </View>
+            </View>
+          </View>
+          <View
+            onLayout={(event) => {
+              setChartWidth(event.nativeEvent.layout.width);
+            }}
+          >
+            {revenueChart &&
+              revenueChart.datasets[0].data.length > 0 &&
+              chartWidth > 0 && (
+                <LineChart
+                  data={revenueChart}
+                  width={chartWidth}
+                  height={220}
+                  withDots
+                  withShadow={false}
+                  withInnerLines={false}
+                  withOuterLines={false}
+                  withVerticalLines={false}
+                  bezier
+                  chartConfig={{
+                    backgroundGradientFrom: "#FFF",
+                    backgroundGradientTo: "#FFF",
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => `rgba(255,118,34,${opacity})`,
+                    labelColor: () => "#9CA3AF",
+                    propsForDots: {
+                      r: "5",
+                      strokeWidth: "2",
+                      stroke: "#FF7622",
+                    },
+                  }}
+                  style={{
+                    marginTop: 20,
+                    borderRadius: 16,
+                  }}
+                />
+              )}
+          </View>
         </View>
-      </View>
+        {/* popular items */}
+        <View style={styles.revenueCard}>
+          <View style={styles.revenueHeader}>
+            <Text style={styles.revenueTitle}>Popular Items</Text>
+            <View style={styles.rightSection}>
+              <Text style={styles.detailLink}>See Details</Text>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>This Week</Text>
+              </View>
+            </View>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.foodList}
+          >
+            {popularFoods.map((food) => (
+              <View key={food.food_id} style={styles.foodItem}>
+                <Image
+                  source={
+                    food.image_url
+                      ? { uri: food.image_url }
+                      : require("../../../assets/default-food.png")
+                  }
+                  style={styles.foodImage}
+                />
+                <Text numberOfLines={1} style={styles.foodName}>
+                  {food.name}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -265,10 +314,11 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   badge: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "#E9FFF0",
     paddingHorizontal: 5,
     paddingVertical: 5,
     borderRadius: 999,
+    marginTop: 5,
   },
   badgeText: {
     color: "#22C55E",
@@ -280,5 +330,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  foodList: {
+    paddingTop: 20,
+  },
+  foodItem: {
+    width: 110,
+    marginRight: 14,
+  },
+  foodImage: {
+    width: 110,
+    height: 110,
+    borderRadius: 16,
+  },
+  foodName: {
+    marginTop: 8,
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#181C2E",
   },
 });
