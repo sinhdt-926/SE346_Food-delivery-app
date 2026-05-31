@@ -18,6 +18,8 @@ export const authService = {
       password,
       options: {
         data: {
+          // Lưu cả hai key để tương thích trigger (fullname) và UI (full_name)
+          fullname: name,
           full_name: name,
         },
       },
@@ -62,5 +64,64 @@ export const authService = {
     if (error) {
       throw new Error(error.message);
     }
+  },
+
+  getCurrentUser: async () => {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    return user;
+  },
+
+  // 7. Cập nhật thông tin hồ sơ người dùng
+  // Cập nhật đồng thời: auth.users (user_metadata) VÀ public.users (bảng profile)
+  updateProfile: async (profileData: {
+    fullName?: string;
+    phone?: string;
+    email?: string;
+  }) => {
+    // Lấy user hiện tại để có ID
+    const { data: { user: currentUser }, error: getUserError } = await supabase.auth.getUser();
+    if (getUserError) throw getUserError;
+    if (!currentUser) throw new Error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+
+    // BƯỚC 1: Update auth.users (user_metadata) để UI đọc được ngay
+    const authUpdatePayload: Record<string, any> = {
+      data: {
+        full_name: profileData.fullName,
+        fullname: profileData.fullName, // đồng bộ cả hai key
+        phone: profileData.phone,
+      },
+    };
+
+    // Email phải nằm ở top-level, không phải trong data
+    if (profileData.email && profileData.email.trim() !== "") {
+      authUpdatePayload.email = profileData.email.trim();
+    }
+
+    const { data: authData, error: authError } = await supabase.auth.updateUser(authUpdatePayload);
+    if (authError) throw authError;
+
+    // BƯỚC 2: Update public.users (bảng profile riêng) để lưu vào database
+    const publicUpdatePayload: Record<string, any> = {
+      fullname: profileData.fullName,
+      phone_number: profileData.phone,
+    };
+
+    // Chỉ update email trong public.users nếu có thay đổi
+    if (profileData.email && profileData.email.trim() !== "") {
+      publicUpdatePayload.email = profileData.email.trim();
+    }
+
+    const { error: publicError } = await supabase
+      .from("users")
+      .update(publicUpdatePayload)
+      .eq("id", currentUser.id);
+
+    if (publicError) {
+      console.error("Lỗi update public.users:", publicError);
+      throw publicError;
+    }
+
+    return authData.user;
   },
 };

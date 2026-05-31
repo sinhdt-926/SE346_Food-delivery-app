@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import LogoutButton from "../../components/LogoutButton";
-import { getDashboardStats } from "../../services/revenue.service";
+import { getDashboardStats } from "../../services/dashboard.service";
 import { formatCurrency } from "../../utils/formatters";
 import { Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
@@ -15,11 +15,52 @@ export default function DashboardScreen() {
   const [chartWidth, setChartWidth] = useState(0);
   const loadDashboard = async () => {
     try {
-      const dashboard = await getDashboardStats();
-      setRunningOrders(dashboard.runningOrders);
-      setRequests(dashboard.requests);
-      setTotalRevenue(dashboard.totalRevenue);
-      setRevenueChart(dashboard.revenueChart);
+      const now = new Date();
+      const monday = new Date(now);
+      const day = now.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      monday.setDate(now.getDate() + diff);
+      monday.setHours(0, 0, 0, 0);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+      const currentWeek = await getDashboardStats(
+        monday.toISOString(),
+        sunday.toISOString(),
+      );
+      setRunningOrders(
+        currentWeek.total_orders -
+          currentWeek.completed_orders -
+          currentWeek.cancelled_orders,
+      );
+      setRequests(
+        currentWeek.orders_by_status.find((item) => item.status === "pending")
+          ?.count ?? 0,
+      );
+      setTotalRevenue(currentWeek.total_revenue);
+      const weekLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      const revenueMap = new Map();
+      currentWeek.revenue_by_date.forEach((item) => {
+        const date = new Date(item.date);
+        const weekday = date.getDay();
+        revenueMap.set(weekday, item.revenue);
+      });
+      setRevenueChart({
+        labels: weekLabels,
+        datasets: [
+          {
+            data: [
+              revenueMap.get(1) ?? 0,
+              revenueMap.get(2) ?? 0,
+              revenueMap.get(3) ?? 0,
+              revenueMap.get(4) ?? 0,
+              revenueMap.get(5) ?? 0,
+              revenueMap.get(6) ?? 0,
+              revenueMap.get(0) ?? 0,
+            ],
+          },
+        ],
+      });
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "Failed to load dashboard");
@@ -52,10 +93,16 @@ export default function DashboardScreen() {
       {/* count orders */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>This Week</Text>
+          </View>
           <Text style={styles.statNumber}>{runningOrders}</Text>
           <Text style={styles.statLabel}>RUNNING ORDERS</Text>
         </View>
         <View style={styles.statCard}>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>This Week</Text>
+          </View>
           <Text style={styles.statNumber}>{requests}</Text>
           <Text style={styles.statLabel}>ORDER REQUESTS</Text>
         </View>
@@ -65,12 +112,16 @@ export default function DashboardScreen() {
         <View style={styles.revenueHeader}>
           <View>
             <Text style={styles.revenueTitle}>Total Revenue</Text>
-
             <Text style={styles.revenueAmount}>
               {formatCurrency(totalRevenue, "VND").toLocaleString()}
             </Text>
           </View>
-          <Text style={styles.detailLink}>See Details</Text>
+          <View style={styles.rightSection}>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>This Week</Text>
+            </View>
+            <Text style={styles.detailLink}>See Details</Text>
+          </View>
         </View>
         <View
           onLayout={(event) => {
@@ -208,6 +259,26 @@ const styles = StyleSheet.create({
   chartPlaceholder: {
     height: 220,
     justifyContent: "center",
+    alignItems: "center",
+  },
+  rightSection: {
+    alignItems: "flex-end",
+  },
+  badge: {
+    backgroundColor: "#F3F4F6",
+    paddingHorizontal: 5,
+    paddingVertical: 5,
+    borderRadius: 999,
+  },
+  badgeText: {
+    color: "#22C55E",
+    fontWeight: "700",
+    fontSize: 10,
+  },
+  statHeader: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
 });
