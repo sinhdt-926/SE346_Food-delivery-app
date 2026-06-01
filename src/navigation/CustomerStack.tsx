@@ -7,6 +7,8 @@ import EditProfileScreen from '../screens/customer/EditProfileScreen';
 import FoodDetailScreen from '../screens/customer/FoodDetailScreen';
 import MyAddressScreen from '../screens/customer/MyAddressScreen';
 import AddLocationScreen from '../screens/customer/AddLocationScreen';
+import CategoryFoodScreen from '../screens/customer/CategoryFoodScreen';
+import SearchFoodScreen from '../screens/customer/SearchFoodScreen';
 
 export type CustomerStackParamList = {
     CustomerTabs: undefined;
@@ -15,6 +17,8 @@ export type CustomerStackParamList = {
     FoodDetail: { id: number };
     MyAddress: undefined;
     AddLocation: { editData: any | null };
+    CategoryFood: { category_id: number | null; category_name: string };
+    SearchFood: undefined;
 };
 
 const Stack = createNativeStackNavigator<CustomerStackParamList>();
@@ -38,6 +42,8 @@ export default function CustomerStack() {
                 component={AddLocationScreen}
                 options={{ animation: 'slide_from_bottom' }}
             />
+            <Stack.Screen name="CategoryFood" component={CategoryFoodScreen} />
+            <Stack.Screen name="SearchFood" component={SearchFoodScreen} />
         </Stack.Navigator>
     );
 }

@@ -14,12 +14,14 @@ interface CustomInputProps extends TextInputProps {
   label?: string;
   iconName?: keyof typeof Ionicons.glyphMap;
   containerStyle?: StyleProp<ViewStyle>;
+  rightElement?: React.ReactNode;
 }
 
 export default function CustomInput({
   label,
   iconName,
   containerStyle,
+  rightElement,
   ...props
 }: CustomInputProps) {
   return (
@@ -44,6 +46,13 @@ export default function CustomInput({
           placeholderTextColor="#A0A5BA"
           {...props}
         />
+        
+        {/* Hiện Right Element (Ví dụ: Nút xóa, Nút hiển thị mật khẩu) */}
+        {rightElement && (
+          <View style={styles.rightElementContainer}>
+            {rightElement}
+          </View>
+        )}
       </View>
     </View>
   );
@@ -78,4 +87,9 @@ const styles = StyleSheet.create({
     color: "#32343E",
     height: "100%",
   },
+  rightElementContainer: {
+    marginLeft: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });

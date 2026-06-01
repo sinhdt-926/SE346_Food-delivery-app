@@ -19,19 +19,21 @@ import { getFoods, getCategories } from "../../services/food.service";
 import { getValidPromotions, applyPromotion } from "../../services/promotion.service";
 import { LocationService } from "../../services/location.service";
 import Toast from "react-native-toast-message";
+import HomeFoodCard from "../../components/HomeFoodCard";
 
 const { width } = Dimensions.get("window");
 
 const getCategoryIcon = (name: string) => {
   const lowerName = name.toLowerCase();
-  if (lowerName.includes("pizza")) return "🍕";
-  if (lowerName.includes("burger")) return "🍔";
-  if (lowerName.includes("drink") || lowerName.includes("nước") || lowerName.includes("uống")) return "🥤";
-  if (lowerName.includes("chicken") || lowerName.includes("gà")) return "🍗";
-  if (lowerName.includes("cơm")) return "🍛";
-  if (lowerName.includes("phở") || lowerName.includes("bún")) return "🍜";
-  if (lowerName.includes("tráng miệng") || lowerName.includes("bánh")) return "🍰";
-  return "🍽️";
+  if (lowerName.includes("pizza")) return { name: "pizza-outline", color: "#FF7622", bgColor: "#FFF0E6" };
+  if (lowerName.includes("burger")) return { name: "fast-food-outline", color: "#FF9800", bgColor: "#FFF3E0" };
+  if (lowerName.includes("drink") || lowerName.includes("nước") || lowerName.includes("uống")) return { name: "beer-outline", color: "#00BCD4", bgColor: "#E0F7FA" };
+  if (lowerName.includes("chicken") || lowerName.includes("gà")) return { name: "restaurant-outline", color: "#E91E63", bgColor: "#FCE4EC" };
+  if (lowerName.includes("cơm")) return { name: "nutrition-outline", color: "#4CAF50", bgColor: "#E8F5E9" };
+  if (lowerName.includes("phở") || lowerName.includes("bún")) return { name: "cafe-outline", color: "#795548", bgColor: "#EFEBE9" };
+  if (lowerName.includes("tráng miệng") || lowerName.includes("bánh")) return { name: "ice-cream-outline", color: "#9C27B0", bgColor: "#F3E5F5" };
+  if (lowerName.includes("tất cả") || lowerName.includes("all")) return { name: "grid-outline", color: "#32343E", bgColor: "#F0F0F0" };
+  return { name: "restaurant-outline", color: "#607D8B", bgColor: "#ECEFF1" };
 };
 
 const HomeScreen = ({ navigation }: any) => {
@@ -186,14 +188,16 @@ const HomeScreen = ({ navigation }: any) => {
 
         {/* Dòng 2: Thanh tìm kiếm (Sẽ giữ nguyên (sticky) khi cuộn) */}
         <View style={styles.searchRow}>
-          <View style={styles.searchInputWrapper}>
+          <TouchableOpacity 
+            style={styles.searchInputWrapper}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate("SearchFood")}
+          >
             <Ionicons name="search" size={20} color="#A0A5BA" />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Tìm kiếm món ăn..."
-              placeholderTextColor="#A0A5BA"
-            />
-          </View>
+            <Text style={styles.searchInputPlaceholder}>
+              Tìm kiếm món ăn...
+            </Text>
+          </TouchableOpacity>
         </View>
       </Animated.View>
 
@@ -229,24 +233,28 @@ const HomeScreen = ({ navigation }: any) => {
             <Text style={styles.sectionTitle}>Danh Mục</Text>
           </View>
           <FlatList
-            data={categories}
+            data={[{ id: null, category_name: 'Tất cả' }, ...categories]}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={{ gap: 15, paddingHorizontal: 15 }}
-            renderItem={({ item }) => (
-              <Pressable
-                style={({ pressed }) => [
-                  styles.categoryItem,
-                  { transform: [{ scale: pressed ? 0.95 : 1 }] }
-                ]}
-              >
-                <View style={styles.categoryIconBox}>
-                  <Text style={styles.categoryEmoji}>{getCategoryIcon(item.category_name)}</Text>
-                </View>
-                <Text style={styles.categoryText}>{item.category_name}</Text>
-              </Pressable>
-            )}
+            keyExtractor={(item) => item.id ? item.id.toString() : 'all'}
+            contentContainerStyle={{ gap: 12, paddingHorizontal: 15 }}
+            renderItem={({ item }) => {
+              const iconData = getCategoryIcon(item.category_name);
+              return (
+                <Pressable
+                  onPress={() => navigation.navigate("CategoryFood", { category_id: item.id, category_name: item.category_name })}
+                  style={({ pressed }) => [
+                    styles.categoryPill,
+                    { transform: [{ scale: pressed ? 0.95 : 1 }] }
+                  ]}
+                >
+                  <View style={[styles.categoryPillIcon, { backgroundColor: iconData.bgColor }]}>
+                    <Ionicons name={iconData.name as any} size={18} color={iconData.color} />
+                  </View>
+                  <Text style={styles.categoryPillText}>{item.category_name}</Text>
+                </Pressable>
+              );
+            }}
           />
         </View>
 
@@ -259,57 +267,15 @@ const HomeScreen = ({ navigation }: any) => {
               const finalPrice = promo ? applyPromotion(food.price, promo) : food.price;
 
               return (
-                <TouchableOpacity
+                <HomeFoodCard
                   key={food.id}
-                  style={styles.foodCard}
-                  activeOpacity={0.9}
+                  food={food}
+                  finalPrice={finalPrice}
+                  promo={promo}
+                  addingId={addingId}
                   onPress={() => navigation.navigate("FoodDetail", { id: food.id })}
-                >
-                  <View style={styles.foodImgContainer}>
-                    <Image
-                      source={{ uri: food.image_url || "https://via.placeholder.com/200" }}
-                      style={styles.foodImg}
-                    />
-                    {!food.is_available && (
-                      <View style={styles.overlayUnavailable}>
-                        <Text style={styles.unavailableText}>HẾT MÓN</Text>
-                      </View>
-                    )}
-                    {promo && (
-                      <View style={styles.promoTag}>
-                        <Text style={styles.promoTagText}>
-                          {promo.discount_type === 'percent' ? `-${promo.discount_value}%` : `-${promo.discount_value / 1000}k`}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <View style={styles.foodInfo}>
-                    <Text style={styles.foodName} numberOfLines={1}>{food.name}</Text>
-                    <Text style={styles.foodCategory}>{food.categories?.category_name}</Text>
-
-                    <View style={styles.priceRow}>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.foodPrice}>{finalPrice.toLocaleString()}đ</Text>
-                        {promo && (
-                          <Text style={styles.foodOriginalPrice}>{food.price.toLocaleString()}đ</Text>
-                        )}
-                      </View>
-
-                      <TouchableOpacity
-                        style={[styles.addBtn, !food.is_available && { backgroundColor: "#BDBDBD" }]}
-                        onPress={() => handleAddToCart(food)}
-                        disabled={!food.is_available || addingId === food.id}
-                      >
-                        {addingId === food.id ? (
-                          <ActivityIndicator size="small" color="#FFF" />
-                        ) : (
-                          <Ionicons name="add" size={20} color="#FFF" />
-                        )}
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </TouchableOpacity>
+                  onAddToCart={handleAddToCart}
+                />
               );
             })}
           </View>
@@ -357,7 +323,7 @@ const styles = StyleSheet.create({
     height: 45,
     gap: 8,
   },
-  searchInput: { flex: 1, color: "#32343E", fontSize: 14 },
+  searchInputPlaceholder: { flex: 1, color: "#A0A5BA", fontSize: 14 },
 
   // Promo Banner
   promoSection: { marginTop: 15 },
@@ -381,70 +347,35 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: "bold", color: "#32343E" },
 
   // Categories
-  categoryItem: { alignItems: "center", gap: 6 },
-  categoryIconBox: {
+  categoryPill: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#FFF",
-    width: 60,
-    height: 60,
+    borderRadius: 24,
+    padding: 6,
+    paddingRight: 16,
+    gap: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  categoryPillIcon: {
+    width: 36,
+    height: 36,
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
   },
-  categoryEmoji: { fontSize: 28 },
-  categoryText: { fontWeight: "600", color: "#646982", fontSize: 12 },
-
+  categoryPillText: {
+    fontWeight: "700",
+    color: "#32343E",
+    fontSize: 13,
+  },
+  
   // Food Grid
   foodGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  foodCard: {
-    width: (width - 40) / 2,
-    backgroundColor: "#FFF",
-    borderRadius: 12,
-    overflow: "hidden",
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  foodImgContainer: { width: "100%", height: 110, position: "relative" },
-  foodImg: { width: "100%", height: "100%", resizeMode: "cover" },
-  overlayUnavailable: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  unavailableText: { color: "#FFF", fontWeight: "bold", fontSize: 12, letterSpacing: 1 },
-  promoTag: {
-    position: "absolute",
-    top: 6,
-    left: 6,
-    backgroundColor: "#EB5757",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  promoTagText: { color: "#FFF", fontSize: 10, fontWeight: "bold" },
-  foodInfo: { padding: 10 },
-  foodName: { fontSize: 14, fontWeight: "bold", color: "#32343E", marginBottom: 2 },
-  foodCategory: { color: "#A0A5BA", fontSize: 11, marginBottom: 6 },
-  priceRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  foodPrice: { fontSize: 14, fontWeight: "bold", color: "#FF7622" },
-  foodOriginalPrice: { fontSize: 11, color: "#A0A5BA", textDecorationLine: "line-through" },
-  addBtn: {
-    backgroundColor: "#FF7622",
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-  },
 });
 
 export default HomeScreen;
