@@ -61,6 +61,8 @@ export default function ManagerMenuScreen() {
       case "price_desc":
         result.sort((a, b) => b.price - a.price);
         break;
+      case "default":
+        result.sort((a, b) => a.name.localeCompare(b.name));
     }
     return result;
   }, [foods, selectedCategory, searchText, sortType]);
@@ -285,10 +287,8 @@ export default function ManagerMenuScreen() {
             style={styles.overlay}
             onPress={() => setShowSortModal(false)}
           />
-
           <View style={styles.bottomSheet}>
             <View style={styles.dragBar} />
-
             <TouchableOpacity
               style={styles.categoryItem}
               onPress={() => {
@@ -542,16 +542,16 @@ const styles = StyleSheet.create({
   },
   sortButton: {
     marginRight: 20,
+    marginBottom: 15,
     width: 110,
     height: 40,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     backgroundColor: "#FFF",
     borderWidth: 1,
     borderColor: "#E5E5E5",
     borderRadius: 28,
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
   },
   sortText: {
     flex: 1,
