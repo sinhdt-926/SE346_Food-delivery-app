@@ -14,12 +14,15 @@ import CustomButton from "../../components/CustomButton";
 
 // Import Store
 import { useCartStore } from "../../store/useCartStore";
+import { useAuthStore } from "../../store/useAuthStore";
 // Import Service để gọi API
 import { CheckoutService } from "../../services/checkout.service";
 import { Alert } from "react-native";
 
 const CartScreen = ({ navigation }: any) => {
   const [openedId, setOpenedId] = useState<number | null>(null);
+  const { user } = useAuthStore();
+  const address = user?.publicProfile?.address || "Chưa cập nhật địa chỉ";
 
   // Lấy dữ liệu và hàm từ Zustand Store
   const {
@@ -43,8 +46,7 @@ const CartScreen = ({ navigation }: any) => {
 
   const handleCheckout = async () => {
     // Tạm lấy dữ liệu cứng đang có trên UI để test API
-    const address = "120, Yên Lãng, Cao Bằng";
-    const paymentType = "cod"; // Mặc định COD
+    const paymentType = "cash"; // Mặc định COD
 
     // Gọi CheckoutService theo tham số yêu cầu
     const response = await CheckoutService.processOrder(
@@ -72,9 +74,9 @@ const CartScreen = ({ navigation }: any) => {
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
         <BackButton onPress={() => navigation?.goBack()} />
-        <Text style={styles.headerTitle}>Cart</Text>
+        <Text style={styles.headerTitle}>Giỏ hàng</Text>
         <TouchableOpacity>
-          <Text style={styles.editBtnText}>EDIT ITEMS</Text>
+          <Text style={styles.editBtnText}>SỬA</Text>
         </TouchableOpacity>
       </View>
 
@@ -98,7 +100,7 @@ const CartScreen = ({ navigation }: any) => {
               item={{ ...item, checked: checkedIds.includes(item.id) } as any}
               openedId={openedId}
               setOpenedId={setOpenedId}
-              updateQty={updateQuantity} // Gọi thẳng hàm của Store
+              updateQty={updateQuantity}
               deleteItem={removeFromCart}
               toggleCheck={toggleCheck}
             />
@@ -108,24 +110,29 @@ const CartScreen = ({ navigation }: any) => {
 
       <View style={styles.footer}>
         <View style={styles.addressSection}>
-          <Text style={styles.label}>DELIVERY ADDRESS</Text>
-          <TouchableOpacity>
-            <Text style={styles.editLink}>EDIT</Text>
+          <Text style={styles.label}>ĐỊA CHỈ GIAO HÀNG</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('MyAddress')}>
+            <Text style={styles.editLink}>SỬA</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.addressBox}>
-          <Text style={styles.addressText}>120, Yên Lãng, Cao Bằng</Text>
-        </View>
+        <TouchableOpacity
+          style={styles.addressBox}
+          onPress={() => navigation.navigate('MyAddress')}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.addressText}>{address}</Text>
+        </TouchableOpacity>
         <View style={styles.bottomRow}>
-          <View>
-            <Text style={styles.totalLabel}>
-              TOTAL: <Text style={styles.totalValue}>${total}</Text>
+          <View style={{ flex: 1, paddingRight: 10 }}>
+            <Text style={styles.totalLabel}>Tổng tiền:</Text>
+            <Text style={styles.totalValue} numberOfLines={1} adjustsFontSizeToFit>
+              {total.toLocaleString()}đ
             </Text>
           </View>
           <CustomButton
-            title="PLACE ORDER"
+            title="ĐẶT HÀNG"
             onPress={handleCheckout}
-            buttonStyle={{ width: 160, paddingVertical: 15, borderRadius: 15 }}
+            buttonStyle={{ width: 140, paddingVertical: 15, borderRadius: 15 }}
             disabled={total === 0 || isLoading}
           />
         </View>
@@ -208,7 +215,7 @@ const styles = StyleSheet.create({
     color: "#A0A5BA",
   },
   totalValue: {
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#181C2E",
   },

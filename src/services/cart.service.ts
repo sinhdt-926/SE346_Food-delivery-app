@@ -7,31 +7,31 @@ export const CartService = {
     // Hàm helper lấy id giỏ hàng của user hiện tại
     // Nếu user chưa có giỏ hàng, tự động tạo mới
     async getOrCreateCartId(): Promise<number> {
-        const {data: {user}, error: authError} = await supabase.auth.getUser();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        if(authError || !user) {
+        if (authError || !user) {
             throw new Error('Bạn cần đăng nhập để sử dụng tính năng này');
         }
 
-        const {data: cart, error:fetchError } = await supabase
+        const { data: cart, error: fetchError } = await supabase
             .from('carts')
             .select('id')
             .eq('user_id', user.id)
             .single();
 
-        if(cart) return cart.id;
+        if (cart) return cart.id;
 
-        if(fetchError && fetchError.code !== 'PGRST116') { //PGRST116 là lỗi khi không tìm thấy dòng nào
+        if (fetchError && fetchError.code !== 'PGRST116') { //PGRST116 là lỗi khi không tìm thấy dòng nào
             throw fetchError;
         }
 
-        const {data: newCart, error: createError} = await supabase
+        const { data: newCart, error: createError } = await supabase
             .from('carts')
-            .insert([{user_id: user.id}])
+            .insert([{ user_id: user.id }])
             .select('id')
             .single();
 
-        if(createError) throw createError;
+        if (createError) throw createError;
         return newCart.id;
     },
 
@@ -70,7 +70,7 @@ export const CartService = {
             });
             return { success: true, data: transformedData };
         } catch (error: any) {
-        return { success: false, error: error.message };
+            return { success: false, error: error.message };
         }
     },
 
@@ -94,7 +94,7 @@ export const CartService = {
             return { success: false, error: error.message };
         }
     },
-
+  
     // Cập nhật số lượng món ăn (Tăng/Giảm trực tiếp)
     async updateQuantity(cartItemId: number, newQuantity: number): Promise<ServiceResponse> {
         try {
@@ -111,14 +111,14 @@ export const CartService = {
                 .single();
 
             if (error) {
-                if(error.code === 'PGRST116') {
+                if (error.code === 'PGRST116') {
                     throw new Error('Không tìm thấy món ăn trong giỏ hàng của bạn');
                 }
                 throw error;
             }
-            return { success: true, data};
+            return { success: true, data };
         } catch (error: any) {
-        return { success: false, error: error.message };
+            return { success: false, error: error.message };
         }
     },
 
@@ -132,12 +132,12 @@ export const CartService = {
                 .select();
 
             if (error) throw error;
-            if(!data || data.length === 0) {
+            if (!data || data.length === 0) {
                 throw new Error('Không tìm thấy món ăn trong giỏ hàng');
             }
             return { success: true, message: 'Đã xóa khỏi giỏ hàng' };
         } catch (error: any) {
-        return { success: false, error: error.message };
+            return { success: false, error: error.message };
         }
     },
 
@@ -145,7 +145,7 @@ export const CartService = {
     async clearCart(): Promise<ServiceResponse> {
         try {
             const cartId = await this.getOrCreateCartId();
-            
+
             const { error } = await supabase
                 .from('cart_items')
                 .delete()
@@ -154,7 +154,7 @@ export const CartService = {
             if (error) throw error;
             return { success: true, message: 'Đã làm sạch giỏ hàng' };
         } catch (error: any) {
-        return { success: false, error: error.message };
+            return { success: false, error: error.message };
         }
     }
 }

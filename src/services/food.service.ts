@@ -49,8 +49,33 @@ export const deleteCategory = async (id: number) => {
 export const getFoods = async () => {
   const { data, error } = await supabase
     .from("foods")
-    .select("*, categories(id, category_name)")
+    .select(`
+      *, 
+      categories(id, category_name),
+      promotion_food(
+        promotions(*)
+      )
+    `)
     .eq("is_available", true);
+
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
+export const getFoodById = async (id: number) => {
+  const { data, error } = await supabase
+    .from("foods")
+    .select(`
+      *, 
+      categories(id, category_name),
+      promotion_food(
+        promotions(*)
+      )
+    `)
+    .eq("id", id)
+    .single();
 
   if (error) {
     throw error;
@@ -61,7 +86,14 @@ export const getFoods = async () => {
 export const getFoodsByCategory = async (category_id: number) => {
   const { data, error } = await supabase
     .from("foods")
-    .select("*")
+    .select(`
+      *, 
+      categories(id, category_name),
+      promotion_food(
+        promotions(*)
+      )
+    `)
+    //Bổ sung hiển thị khuyến mãi trên từng món cho màn hình phân loại món ăn theo thể loại
     .eq("category_id", category_id)
     .eq("is_available", true);
   if (error) {
@@ -137,7 +169,33 @@ export const uploadImage = async (file: any) => {
 export const getAllFoods = async () => {
   const { data, error } = await supabase
     .from("foods")
-    .select("*, categories(id, category_name)");
+    .select(`
+      *, 
+      categories(id, category_name),
+      promotion_food(
+        promotions(*)
+      )
+    `);
+
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
+// tìm kiếm món ăn
+export const searchFoods = async (searchQuery: string) => {
+  const { data, error } = await supabase
+    .from("foods")
+    .select(`
+      *, 
+      categories(id, category_name),
+      promotion_food(
+        promotions(*)
+      )
+    `)
+    .eq("is_available", true)
+    .ilike("name", `%${searchQuery}%`);
 
   if (error) {
     throw error;

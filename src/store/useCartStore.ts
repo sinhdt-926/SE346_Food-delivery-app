@@ -19,7 +19,9 @@ interface CartState {
   resetCartState: () => void;
 }
 
-// Khởi tạo Zustand Store
+// Thêm một object để quản lý các timeout chống spam click
+const updateTimeouts: Record<number, NodeJS.Timeout> = {};
+
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
   isLoading: false,
@@ -48,22 +50,39 @@ export const useCartStore = create<CartState>((set, get) => ({
       await get().fetchCart();
     } else {
       set({ error: response.error || "Lỗi thêm món ăn", isLoading: false });
+      throw new Error(response.error || "Lỗi thêm món ăn");
     }
   },
 
-  // Cập nhật số lượng
+  // Cập nhật số lượng (Debounce + Optimistic Update)
   updateQuantity: async (cartItemId: number, newQuantity: number) => {
-    set({ isLoading: true, error: null });
-    const response = await CartService.updateQuantity(cartItemId, newQuantity);
+    // 1. Cập nhật ngay trên giao diện mà không chờ API
+    const originalItems = get().items;
+    
+    const optimisticItems = newQuantity <= 0 
+      ? originalItems.filter(item => item.id !== cartItemId)
+      : originalItems.map(item => item.id === cartItemId ? { ...item, quantity: newQuantity } : item);
+      
+    set({ items: optimisticItems, error: null });
 
-    if (response.success) {
-      await get().fetchCart();
-    } else {
-      set({
-        error: response.error || "Lỗi cập nhật số lượng",
-        isLoading: false,
-      });
+    // 2. Chống spam click (Debounce): Xóa lệnh gọi API cũ nếu user click quá nhanh
+    if (updateTimeouts[cartItemId]) {
+      clearTimeout(updateTimeouts[cartItemId]);
     }
+
+    // 3. Chờ 400ms không có click mới thì mới gửi API xuống Database
+    updateTimeouts[cartItemId] = setTimeout(async () => {
+      const response = await CartService.updateQuantity(cartItemId, newQuantity);
+
+      if (!response.success) {
+        // Nếu API lỗi, tải lại giỏ hàng chuẩn từ Database để rollback
+        set({ error: response.error || "Lỗi cập nhật số lượng" });
+        await get().fetchCart();
+      }
+      
+      // Xoá timeout khỏi bộ nhớ
+      delete updateTimeouts[cartItemId];
+    }, 400);
   },
 
   // Xóa một món
