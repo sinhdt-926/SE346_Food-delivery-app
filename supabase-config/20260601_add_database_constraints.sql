@@ -3,7 +3,7 @@
 -- Bảng users
 ALTER TABLE users ADD CONSTRAINT check_user_role CHECK (role IN ('customer', 'owner')); -- Ràng buộc role là customer (khách hàng) hoặc owner (chủ cửa hàng)
 ALTER TABLE users ADD CONSTRAINT check_email_format CHECK (email ~* '^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'); -- Ràng buộc định dạng email cơ bản
-ALTER TABLE users ADD CONSTRAINT check_phone_format CHECK (phone_number ~ '^[0-9]{9,15}$'); -- Ràng buộc định dạng số điện thoại cơ bản (9-15 chữ số)
+ALTER TABLE users ADD CONSTRAINT check_phone_format CHECK (phone_number ~ '^(0|84|[+]84)(3|5|7|8|9)[0-9]{8}$'); -- Ràng buộc định dạng số điện thoại Việt Nam
 
 -- Bảng foods
 ALTER TABLE foods ADD CONSTRAINT check_food_name_not_empty CHECK (TRIM(name) <> ''); -- Ràng buộc tên món không được rỗng
