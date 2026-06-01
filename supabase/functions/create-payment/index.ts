@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/mod.ts";
 import crypto from "node:crypto";
 import qs from "npm:qs";
+import { Buffer } from "node:buffer";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,20 +9,38 @@ const corsHeaders = {
 };
 
 serve(async (req: Request) => {
+  // Bỏ qua preflight request
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const { orderId, amount } = await req.json();
+    const { orderId, amount, appScheme } = await req.json();
 
-    const tmnCode    = Deno.env.get("VNP_TMN_CODE")!;
-    const secretKey  = Deno.env.get("VNP_HASH_SECRET")!;
-    const vnpUrl     = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    const returnUrl  = Deno.env.get("VNP_RETURN_URL")!; // URL app của bạn
+    if (!orderId || !amount) {
+      throw new Error("Missing orderId or amount");
+    }
+
+    const tmnCode    = Deno.env.get("vnp_TmnCode")!;
+    const secretKey  = Deno.env.get("vnp_HashSecret")!;
+    const vnpUrl     = Deno.env.get("vnp_Url") || "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    
+    // Sử dụng vnpay-return function làm URL trả về
+    // Mặc định url của edge function vnpay-return
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+    const defaultReturnUrl = supabaseUrl ? `${supabaseUrl}/functions/v1/vnpay-return` : "";
+    const returnFunctionUrl = Deno.env.get("VNP_RETURN_URL") || defaultReturnUrl;
 
     const date = new Date();
-    const createDate = date.toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
+    // Offset cho GMT+7
+    const vnTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+    // Format YYYYMMDDHHmmss theo chuẩn VNPAY
+    const createDate = vnTime.getFullYear().toString() + 
+                       (vnTime.getMonth() + 1).toString().padStart(2, '0') + 
+                       vnTime.getDate().toString().padStart(2, '0') + 
+                       vnTime.getHours().toString().padStart(2, '0') + 
+                       vnTime.getMinutes().toString().padStart(2, '0') + 
+                       vnTime.getSeconds().toString().padStart(2, '0');
 
     const params: Record<string, string> = {
       vnp_Version:     "2.1.0",
@@ -34,15 +53,27 @@ serve(async (req: Request) => {
       vnp_Locale:      "vn",
       vnp_OrderInfo:   `Thanh toan don hang ${orderId}`,
       vnp_OrderType:   "other",
-      vnp_ReturnUrl:   returnUrl,
+      vnp_ReturnUrl:   appScheme ? `${returnFunctionUrl}?appScheme=${encodeURIComponent(appScheme)}` : returnFunctionUrl,
       vnp_TxnRef:      String(orderId),
     };
 
-    // Ký theo thứ tự alphabet
-    const sorted = Object.keys(params).sort().reduce((acc: any, key) => {
-      acc[key] = params[key];
-      return acc;
-    }, {});
+    // Hàm sortObject chuẩn của VNPAY
+    const sortObject = (obj: any) => {
+      const sorted: any = {};
+      const str = [];
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          str.push(encodeURIComponent(key));
+        }
+      }
+      str.sort();
+      for (let key = 0; key < str.length; key++) {
+        sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, "+");
+      }
+      return sorted;
+    };
+
+    const sorted = sortObject(params);
 
     const signData = qs.stringify(sorted, { encode: false });
     const secureHash = crypto
@@ -50,7 +81,7 @@ serve(async (req: Request) => {
       .update(Buffer.from(signData, "utf-8"))
       .digest("hex");
 
-    const paymentUrl = `${vnpUrl}?${signData}&vnp_SecureHash=${secureHash}`;
+    const paymentUrl = `${vnpUrl}?${qs.stringify(sorted, { encode: false })}&vnp_SecureHash=${secureHash}`;
 
     return new Response(JSON.stringify({ paymentUrl }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

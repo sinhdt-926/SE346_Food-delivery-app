@@ -46,7 +46,10 @@ BEGIN
     IF NEW.is_default = TRUE THEN
         UPDATE user_addresses
         SET is_default = FALSE
-        WHERE user_id = NEW.user_id AND id != NEW.id;
+        WHERE user_id = NEW.user_id 
+            AND id != NEW.id 
+            AND is_default = TRUE; -- Chỉ update cái nào đang TRUE
+
 
         -- Đồng bộ địa chỉ mặc định vào cột address của bảng users
         UPDATE users
@@ -59,4 +62,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER trigger_ensure_single_default_address
 AFTER INSERT OR UPDATE ON user_addresses
-FOR EACH ROW EXECUTE FUNCTION ensure_single_default_address();
+FOR EACH ROW 
+WHEN (NEW.is_default = TRUE) -- Chỉ gọi hàm nếu địa chỉ này là mặc định
+EXECUTE FUNCTION ensure_single_default_address();
