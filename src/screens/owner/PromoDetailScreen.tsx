@@ -23,6 +23,7 @@ import {
 import { Promotion } from "../../types/promotion";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
+import { getLocalDateString } from "../../utils/date";
 
 export default function AddEditPromotionScreen() {
   const navigation = useNavigation<any>();
@@ -39,12 +40,8 @@ export default function AddEditPromotionScreen() {
   const allowExitRef = useRef(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  const [startDate, setStartDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
-  const [endDate, setEndDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
+  const [startDate, setStartDate] = useState(getLocalDateString());
+  const [endDate, setEndDate] = useState(getLocalDateString());
 
   useEffect(() => {
     if (!editingPromotion) return;

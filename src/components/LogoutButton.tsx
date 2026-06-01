@@ -7,14 +7,14 @@ import { Ionicons } from "@expo/vector-icons";
 export default function LogoutButton() {
   const navigation = useNavigation<any>();
   const handleLogout = async () => {
-    Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất không?", [
+    Alert.alert("Log out", "Are you sure you want to log out?", [
       {
-        text: "Hủy",
+        text: "Cancel",
 
         style: "cancel",
       },
       {
-        text: "Đăng xuất",
+        text: "Log out",
         style: "destructive",
         onPress: async () => {
           try {
@@ -28,8 +28,7 @@ export default function LogoutButton() {
               ],
             });
           } catch (error) {
-            console.log(error);
-            Alert.alert("Lỗi", "Không thể đăng xuất");
+            Alert.alert("Error", "Unable to log out");
           }
         },
       },
