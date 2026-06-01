@@ -5,13 +5,14 @@ import CustomHeader from "../../components/CustomHeader";
 import MenuItem from "../../components/MenuItem";
 import UserHeader from "../../components/UserHeader";
 import { useAuthStore } from "../../store/useAuthStore";
+import { authService } from "../../services/auth.service";
 
 export default function ProfileScreen({ navigation }: any) {
   const { user, fetchUser } = useAuthStore();
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [fetchUser]);
   return (
     <SafeAreaView style={styles.container}>
       <CustomHeader title="Profile" showBackButton={false} />
@@ -57,7 +58,7 @@ export default function ProfileScreen({ navigation }: any) {
             iconName="log-out-outline"
             label="Log Out"
             showChevron={true}
-            onPress={() => console.log("Logout")}
+            onPress={() => authService.signOut()}
           />
         </View>
       </ScrollView>

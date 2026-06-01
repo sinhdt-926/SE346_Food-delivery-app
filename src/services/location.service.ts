@@ -130,4 +130,47 @@ export const LocationService = {
       return `Toạ độ: ${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
     }
   },
+
+  /**
+   * Tìm kiếm gợi ý địa điểm (Sử dụng API Nominatim của OpenStreetMap - miễn phí)
+   * @param query
+   */
+  async searchPlaces(query: string): Promise<{ name: string; address: string; fullAddress: string; lat: number; lon: number }[]> {
+    if (!query || query.trim().length < 2) return [];
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+        query
+      )}&format=json&addressdetails=1&limit=5&countrycodes=vn`;
+
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "FoodDeliveryApp/1.0",
+        },
+      });
+      const data = await response.json();
+
+      return data.map((item: any) => {
+        // Tách name và address ra từ display_name để UI hiển thị đẹp hơn
+        const parts = item.display_name.split(",").map((p: string) => p.trim());
+        const name = item.name || parts[0];
+        const address = parts.length > 1 ? parts.slice(1).join(", ") : item.display_name;
+        // Địa chỉ đầy đủ: tạo ra bằng cách kết hợp name + các phần phí
+        // Nếu name đã có trong address thì dùng display_name làm sạch
+        const fullAddress = name && address && !address.startsWith(name)
+          ? `${name}, ${address}`
+          : item.display_name;
+
+        return {
+          name,
+          address,
+          fullAddress,
+          lat: parseFloat(item.lat),
+          lon: parseFloat(item.lon),
+        };
+      });
+    } catch (error) {
+      console.error("Error searching places:", error);
+      return [];
+    }
+  },
 };

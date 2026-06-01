@@ -2,6 +2,11 @@ import { create } from 'zustand';
 import { User } from '@supabase/supabase-js';
 import { authService } from '../services/auth.service';
 
+// Định nghĩa kiểu dữ liệu User mở rộng thêm trường publicProfile từ bảng users
+export interface AppUser extends User {
+    publicProfile?: any;
+}
+
 interface ProfileData {
     fullName?: string;
     email?: string;
@@ -9,13 +14,13 @@ interface ProfileData {
 }
 
 interface AuthState {
-    user: User | null;
+    user: AppUser | null;
     isLoading: boolean;
     error: string | null;
     // Lấy thông tin user từ Supabase và lưu vào store
     fetchUser: () => Promise<void>;
     // Set user trực tiếp (ví dụ: ngay sau khi login thành công)
-    setUser: (user: User | null) => void;
+    setUser: (user: AppUser | null) => void;
     // Cập nhật thông tin hồ sơ người dùng
     updateProfile: (profileData: ProfileData) => Promise<void>;
     // Xóa thông tin user khi đăng xuất

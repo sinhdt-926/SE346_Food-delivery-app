@@ -4,7 +4,7 @@ import { supabase } from "../services/supabase";
 import { useAuthStore } from "../store/useAuthStore";
 
 import AuthStack from "./AuthStack";
-import CustomerProfileStack from "./CustomerProfileStack";
+import CustomerStack from "./CustomerStack";
 import OwnerStack from "./OwnerStack";
 
 export default function RootNavigation() {
@@ -49,8 +49,6 @@ export default function RootNavigation() {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth event:", event);
 
-      // Bỏ qua sự kiện USER_UPDATED để tránh làm gián đoạn luồng updateProfile
-      // Store đã được cập nhật trực tiếp trong useAuthStore.updateProfile
       if (event === "USER_UPDATED") {
         console.log("USER_UPDATED event - skipping navigation re-render");
         return;
@@ -60,7 +58,9 @@ export default function RootNavigation() {
         setUser(session.user);
         // Chỉ fetch role khi sign in/sign up, không phải mỗi lần update
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+          setIsLoading(true);
           await fetchUserRole(session.user.id);
+          setIsLoading(false);
         }
       } else {
         setUser(null);
@@ -98,5 +98,5 @@ export default function RootNavigation() {
   }
 
   // Customer
-  return <CustomerProfileStack />;
+  return <CustomerStack />;
 }
