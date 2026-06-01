@@ -169,7 +169,33 @@ export const uploadImage = async (file: any) => {
 export const getAllFoods = async () => {
   const { data, error } = await supabase
     .from("foods")
-    .select("*, categories(id, category_name)");
+    .select(`
+      *, 
+      categories(id, category_name),
+      promotion_food(
+        promotions(*)
+      )
+    `);
+
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
+// tìm kiếm món ăn
+export const searchFoods = async (searchQuery: string) => {
+  const { data, error } = await supabase
+    .from("foods")
+    .select(`
+      *, 
+      categories(id, category_name),
+      promotion_food(
+        promotions(*)
+      )
+    `)
+    .eq("is_available", true)
+    .ilike("name", `%${searchQuery}%`);
 
   if (error) {
     throw error;
