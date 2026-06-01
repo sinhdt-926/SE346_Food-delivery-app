@@ -42,7 +42,7 @@ export default function ManagerOrdersScreen() {
         setOrders(data);
       }
     } catch (error) {
-      if (isFlag.current) setError("Không thể tải danh sách đơn hàng");
+      if (isFlag.current) setError("Unable to load the order list");
     } finally {
       if (isFlag.current) setLoading(false);
     }
