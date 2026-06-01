@@ -51,7 +51,6 @@ type User = {
   id: string;
   fullname: string;
   phone_number: string;
-  //avatarUrl: string;
 };
 
 // Admin/Owner lấy toàn bộ danh sách đơn
@@ -108,7 +107,6 @@ export const getOwnerOrders = async () => {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
         phone_number: user?.phone_number ?? "",
-        //avatarUrl: user?.avatarUrl ?? "",
       },
       items,
       payment: {
@@ -155,9 +153,9 @@ export const getRequestsCount = async () => {
 
 export const getPaymentStatus = async (orderId: number) => {
   const { data, error } = await supabase
-    .from('payments')
-    .select('status, amount, type, paid_at, transaction_no')
-    .eq('order_id', orderId)
+    .from("payments")
+    .select("status, amount, type, paid_at, transaction_no")
+    .eq("order_id", orderId)
     .single();
 
   if (error) throw error;
