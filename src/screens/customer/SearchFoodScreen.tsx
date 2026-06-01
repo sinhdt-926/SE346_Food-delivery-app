@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import BackButton from "../../components/BackButton";
 import CustomInput from "../../components/CustomInput";
 import HomeFoodCard from "../../components/HomeFoodCard";
-import { getAllFoods } from "../../services/food.service";
+import { searchFoods } from "../../services/food.service";
 import { getValidPromotions, applyPromotion } from "../../services/promotion.service";
 import { useCartStore } from "../../store/useCartStore";
 import Toast from "react-native-toast-message";
@@ -22,28 +22,9 @@ import Toast from "react-native-toast-message";
 export default function SearchFoodScreen({ navigation }: any) {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [foods, setFoods] = useState<any[]>([]);
   const [filteredFoods, setFilteredFoods] = useState<any[]>([]);
   const [addingId, setAddingId] = useState<number | null>(null);
   const { addToCart } = useCartStore();
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const data = await getAllFoods();
-      // Lọc các món đang có sẵn
-      const availableFoods = (data || []).filter((f: any) => f.is_available);
-      setFoods(availableFoods);
-    } catch (error) {
-      console.log("Error fetching all foods:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Dùng useRef + setTimeout để tự implement debounce, không cần thư viện ngoài
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -56,19 +37,22 @@ export default function SearchFoodScreen({ navigation }: any) {
     // Xóa timer cũ nếu có
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     // Đặt timer mới 400ms
-    debounceTimerRef.current = setTimeout(() => {
-      const lowerQuery = searchQuery.toLowerCase();
-      const results = foods.filter((f: any) =>
-        f.name.toLowerCase().includes(lowerQuery) ||
-        (f.description && f.description.toLowerCase().includes(lowerQuery))
-      );
-      setFilteredFoods(results);
+    debounceTimerRef.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const results = await searchFoods(searchQuery.trim());
+        setFilteredFoods(results || []);
+      } catch (error) {
+        console.log("Lỗi khi tìm kiếm món ăn:", error);
+      } finally {
+        setLoading(false);
+      }
     }, 400);
 
     return () => {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
-  }, [searchQuery, foods]);
+  }, [searchQuery]);
 
   const handleAddToCart = async (food: any) => {
     setAddingId(food.id);
