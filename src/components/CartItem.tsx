@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   itemName: { fontSize: 13, fontWeight: "600", color: "#32343E" },
   priceText: {
     fontSize: 13,
-    fontWeight: "semibold",
+    fontWeight: "600",
     color: "#2b2424ff",
     marginTop: 5,
   },
