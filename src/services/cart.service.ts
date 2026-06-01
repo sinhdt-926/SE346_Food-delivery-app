@@ -1,12 +1,6 @@
-import { supabase } from './supabase';
-import { CartItem } from '../types/cart'
-// Chuẩn hoá kiểu trả về cho mọi hàm API
-export type ServiceResponse<T = any> = {
-    success: boolean;
-    data?: T;
-    message?: string;
-    error?: string;
-};
+import {supabase} from './supabase';
+import { CartItem } from '../types/cart';
+import { ServiceResponse } from '../types/service';
 
 export const CartService = {
 
@@ -87,41 +81,20 @@ export const CartService = {
 
             const cartId = await this.getOrCreateCartId();
 
-            // Thay vì dùng rpc('add_to_cart') gây lỗi Postgres ON CONFLICT có thể do thiếu constraint, FE dùng query thông thường để test thử :))
-            const { data: existingItem, error: findError } = await supabase
-                .from('cart_items')
-                .select('*')
-                .eq('cart_id', cartId)
-                .eq('food_id', foodId)
-                .maybeSingle();
+            const { data, error } = await supabase
+                .rpc('add_to_cart', {
+                    p_cart_id:  cartId,
+                    p_food_id:  foodId,
+                    p_quantity: quantity,
+                });
 
-            if (findError) throw findError;
-
-            if (existingItem) {
-                // Đã có trong giỏ -> Cộng dồn số lượng
-                const { data, error } = await supabase
-                    .from('cart_items')
-                    .update({ quantity: existingItem.quantity + quantity })
-                    .eq('id', existingItem.id)
-                    .select()
-                    .single();
-                if (error) throw error;
-                return { success: true, data };
-            } else {
-                // Chưa có -> Thêm mới
-                const { data, error } = await supabase
-                    .from('cart_items')
-                    .insert([{ cart_id: cartId, food_id: foodId, quantity }])
-                    .select()
-                    .single();
-                if (error) throw error;
-                return { success: true, data };
-            }
+            if (error) throw error;
+            return { success: true, data };
         } catch (error: any) {
             return { success: false, error: error.message };
         }
     },
-
+  
     // Cập nhật số lượng món ăn (Tăng/Giảm trực tiếp)
     async updateQuantity(cartItemId: number, newQuantity: number): Promise<ServiceResponse> {
         try {
