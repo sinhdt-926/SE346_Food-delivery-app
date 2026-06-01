@@ -21,7 +21,12 @@ import LogoutButton from "../../components/LogoutButton";
 export default function ManagerOrdersScreen() {
   const [activeTab, setActiveTab] = useState<OrderStatus>("pending");
   const [orders, setOrders] = useState<Order[]>([]);
-  const filteredOrders = orders.filter((item) => item.status === activeTab);
+  const filteredOrders = orders
+    .filter((item) => item.status === activeTab)
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
   const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -71,14 +76,13 @@ export default function ManagerOrdersScreen() {
       await updateOrderStatus(id, nextStatus);
       await fetchOrders();
     } catch (error) {
-      console.log(error);
-      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
+      Alert.alert("Error", "Unable to update order status", [
         {
-          text: "Thử lại",
+          text: "Retry",
           onPress: () => handleNextState(id, currentStatus),
         },
         {
-          text: "Đóng",
+          text: "Close",
           style: "cancel",
         },
       ]);
@@ -91,7 +95,7 @@ export default function ManagerOrdersScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#FF7622" />
-        <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
+        <Text style={styles.loadingText}>Loading orders...</Text>
       </View>
     );
   }
@@ -117,14 +121,13 @@ export default function ManagerOrdersScreen() {
       await updateOrderStatus(id, "cancelled");
       await fetchOrders();
     } catch (error) {
-      console.log(error);
-      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
+      Alert.alert("Error", "Unable to update order status", [
         {
-          text: "Thử lại",
+          text: "Retry",
           onPress: () => handleCancelOrder(id),
         },
         {
-          text: "Đóng",
+          text: "Close",
           style: "cancel",
         },
       ]);
@@ -200,7 +203,7 @@ export default function ManagerOrdersScreen() {
         <View style={styles.overlay}>
           <View style={styles.loadingBox}>
             <ActivityIndicator size="large" color="#FF7622" />
-            <Text style={styles.loadingText}>Đang cập nhật đơn hàng...</Text>
+            <Text style={styles.loadingText}>Updating the order...</Text>
           </View>
         </View>
       )}

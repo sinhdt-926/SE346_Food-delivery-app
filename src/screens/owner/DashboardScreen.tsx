@@ -14,6 +14,7 @@ import { getDashboardStats } from "../../services/dashboard.service";
 import { formatCurrency } from "../../utils/formatters";
 import { LineChart } from "react-native-chart-kit";
 import { useNavigation } from "@react-navigation/native";
+import { buildRevenueChart, getCurrentWeekRange } from "../../utils/chart";
 
 export default function DashboardScreen() {
   const [runningOrders, setRunningOrders] = useState(0);
@@ -44,47 +45,12 @@ export default function DashboardScreen() {
           ?.count ?? 0,
       );
       //lấy doanh thu theo tuần
-      const now = new Date();
-      const monday = new Date(now);
-      const day = now.getDay();
-      const diff = day === 0 ? -6 : 1 - day;
-      monday.setDate(now.getDate() + diff);
-      monday.setHours(0, 0, 0, 0);
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
-      sunday.setHours(23, 59, 59, 999);
-      const currentWeek = await getDashboardStats(
-        monday.toISOString(),
-        sunday.toISOString(),
-      );
-      setTotalRevenue(currentWeek.total_revenue);
-      const weekLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-      const revenueMap = new Map();
-      currentWeek.revenue_by_date.forEach((item) => {
-        const date = new Date(item.date);
-        const weekday = date.getDay();
-        revenueMap.set(weekday, item.revenue);
-      });
-      setRevenueChart({
-        labels: weekLabels,
-        datasets: [
-          {
-            data: [
-              revenueMap.get(1) ?? 0,
-              revenueMap.get(2) ?? 0,
-              revenueMap.get(3) ?? 0,
-              revenueMap.get(4) ?? 0,
-              revenueMap.get(5) ?? 0,
-              revenueMap.get(6) ?? 0,
-              revenueMap.get(0) ?? 0,
-            ],
-          },
-        ],
-      });
+      const { startDate, endDate } = getCurrentWeekRange();
+      const currentWeek = await getDashboardStats(startDate, endDate);
+      setRevenueChart(buildRevenueChart(currentWeek.revenue_by_date, "week"));
       //top món ăn
       setPopularFoods(currentWeek.top_selling_foods);
     } catch (error) {
-      console.log(error);
       Alert.alert("Error", "Failed to load dashboard");
     } finally {
       setLoading(false);
@@ -145,7 +111,11 @@ export default function DashboardScreen() {
               </Text>
             </View>
             <View style={styles.rightSection}>
-              <Text style={styles.detailLink}>See Details</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("RevenusMonth")}
+              >
+                <Text style={styles.detailLink}>See Details</Text>
+              </TouchableOpacity>
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>This Week</Text>
               </View>
@@ -341,12 +311,6 @@ const styles = StyleSheet.create({
     color: "#22C55E",
     fontWeight: "700",
     fontSize: 10,
-  },
-  statHeader: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
   },
   foodList: {
     paddingTop: 20,

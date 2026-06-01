@@ -30,6 +30,7 @@
     },
     "plugins": [
       "@react-native-community/datetimepicker"
+      "expo-web-browser"
     ]
   }
 }

@@ -65,7 +65,6 @@ export default function AddEditFoodScreen() {
           setSelectedCategoryId(data[0].id);
         }
       } catch (error) {
-        console.log(error);
         Alert.alert("Error", "Unable to load menu. Please try again.");
       }
     };
@@ -155,7 +154,6 @@ export default function AddEditFoodScreen() {
         setImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.log(error);
       Alert.alert("Error", "Cannot pick image");
     }
   };
@@ -237,7 +235,6 @@ export default function AddEditFoodScreen() {
       );
       return true;
     } catch (error) {
-      console.log(error);
       Alert.alert(
         "Error",
         isEditMode ? "Failed to update food" : "Failed to add food",
@@ -278,7 +275,6 @@ export default function AddEditFoodScreen() {
       Alert.alert("Success", "Food deleted successfully");
       navigation.goBack();
     } catch (error) {
-      console.log(error);
       Alert.alert("Error", "Failed to delete food");
     } finally {
       setIsSaving(false);

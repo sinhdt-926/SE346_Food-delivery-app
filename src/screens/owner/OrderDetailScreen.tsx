@@ -84,14 +84,13 @@ export default function OrderDetailScreen() {
         status: nextStatus,
       }));
     } catch (error) {
-      console.log(error);
-      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
+      Alert.alert("Error", "Unable to update order status", [
         {
-          text: "Thử lại",
+          text: "Retry",
           onPress: () => handleNextState(),
         },
         {
-          text: "Đóng",
+          text: "Close",
           style: "cancel",
         },
       ]);
@@ -110,14 +109,13 @@ export default function OrderDetailScreen() {
         status: "cancelled",
       }));
     } catch (error) {
-      console.log(error);
-      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
+      Alert.alert("Error", "Unable to update order status", [
         {
-          text: "Thử lại",
+          text: "Retry",
           onPress: () => handleCancelOrder(),
         },
         {
-          text: "Đóng",
+          text: "Close",
           style: "cancel",
         },
       ]);
@@ -186,7 +184,7 @@ export default function OrderDetailScreen() {
         {actionLoading && (
           <View style={styles.center}>
             <ActivityIndicator size="large" color="#FF7622" />
-            <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
+            <Text style={styles.loadingText}>Loading orders...</Text>
           </View>
         )}
       </View>
