@@ -177,9 +177,9 @@ export default function ManagerMenuScreen() {
         setFoods(formattedFoods);
       }
     } catch (error) {
-      Alert.alert("Lỗi", "Không thể tải lại", [
+      Alert.alert("Error", "Unable to reload", [
         {
-          text: "Thử lại",
+          text: "Retry",
           onPress: () => handleRefresh(),
         },
       ]);

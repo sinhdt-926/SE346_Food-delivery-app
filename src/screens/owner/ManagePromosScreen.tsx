@@ -49,7 +49,7 @@ export default function ManagerPromosScreen() {
       if (isFlag.current) {
         setPromos(data ?? []);
       }
-    } catch (err) {
+    } catch (error) {
       if (isFlag.current) {
         setError("Cannot load promotions");
       }
@@ -97,9 +97,9 @@ export default function ManagerPromosScreen() {
         setPromos(data ?? []);
       }
     } catch (error) {
-      Alert.alert("Lỗi", "Không thể tải lại danh sách khuyến mãi", [
+      Alert.alert("Error", "Unable to reload promotion list", [
         {
-          text: "Thử lại",
+          text: "Retry",
           onPress: () => handleRefresh(),
         },
       ]);
