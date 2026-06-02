@@ -8,6 +8,7 @@ export const getMyOrders = async () => {
       `
             id,
             created_at,
+            updated_at,
             status,
             delivery_address,
             order_details(
@@ -30,6 +31,7 @@ export const getMyOrders = async () => {
   return (data ?? []).map((order) => ({
     id: order.id,
     created_at: order.created_at,
+    updated_at: order.updated_at || order.created_at,
     status: order.status,
     address: order.delivery_address,
     items: (order.order_details ?? []).map((item: any) => ({
@@ -61,6 +63,7 @@ export const getOwnerOrders = async () => {
       `
             id,
             created_at,
+            updated_at,
             status,
             delivery_address,
             users(id, fullname, phone_number),
@@ -101,6 +104,7 @@ export const getOwnerOrders = async () => {
     return {
       id: order.id,
       created_at: order.created_at,
+      updated_at: order.updated_at || order.created_at,
       status: order.status,
       address: order.delivery_address,
       customer: {

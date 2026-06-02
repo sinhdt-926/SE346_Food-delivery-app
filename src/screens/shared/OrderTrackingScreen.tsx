@@ -170,7 +170,8 @@ export default function OrderTrackingScreen({ navigation, route }: any) {
       const SIMULATION_SPEED_MULTIPLIER = 1;
 
       const interval = setInterval(() => {
-        const elapsed = (Date.now() - startTime) * SIMULATION_SPEED_MULTIPLIER;
+        // Đảm bảo elapsed không bao giờ bị âm do sai lệch thời gian (Clock Skew) giữa Server và Client
+        const elapsed = Math.max(0, Date.now() - startTime) * SIMULATION_SPEED_MULTIPLIER;
         let progress = elapsed / totalMs;
 
         if (progress >= 1) {
@@ -178,8 +179,16 @@ export default function OrderTrackingScreen({ navigation, route }: any) {
           clearInterval(interval);
         }
 
-        const targetIndex = Math.floor(progress * (routeCoords.length - 1));
-        setShipperLocation(routeCoords[targetIndex]);
+        // Clamp targetIndex cẩn thận
+        let targetIndex = Math.floor(progress * (routeCoords.length - 1));
+        if (targetIndex < 0) targetIndex = 0;
+        if (targetIndex >= routeCoords.length) targetIndex = routeCoords.length - 1;
+        
+        const nextLocation = routeCoords[targetIndex];
+        if (nextLocation) {
+          setShipperLocation(nextLocation);
+        }
+        
         setShipperRouteIndex(targetIndex);
         setRemainingDistance((1 - progress) * totalDistance);
       }, 1000);

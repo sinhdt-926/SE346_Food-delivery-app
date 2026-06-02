@@ -5,9 +5,10 @@ import CustomButton from "./CustomButton";
 type OrderItemProps = {
   type: "ongoing" | "history";
   order: {
-    id: string;
-    created_at: Date;
-    status: "delivering" | "preparing" | "completed" | "canceled";
+    id: string | number;
+    created_at: Date | string;
+    updated_at?: Date | string;
+    status: "pending" | "delivering" | "preparing" | "completed" | "cancelled" | string;
     items: { name: string; quantity: number }[];
     total: number;
   };
@@ -31,13 +32,15 @@ export default function OrderItem({
   const getStatusDisplay = () => {
     switch (order.status) {
       case "delivering":
-        return { text: "Delivering", colorStyle: styles.textEmerald };
+        return { text: "Đang giao", colorStyle: styles.textEmerald };
       case "completed":
-        return { text: "Completed", colorStyle: styles.textGreen };
+        return { text: "Đã giao", colorStyle: styles.textGreen };
       case "preparing":
-        return { text: "Preparing", colorStyle: styles.textOrange };
-      case "canceled":
-        return { text: "Canceled", colorStyle: styles.textRed };
+        return { text: "Đang chuẩn bị", colorStyle: styles.textOrange };
+      case "pending":
+        return { text: "Chờ xác nhận", colorStyle: styles.textOrange };
+      case "cancelled":
+        return { text: "Đã huỷ", colorStyle: styles.textRed };
       default:
         return { text: order.status, colorStyle: styles.textGray };
     }
@@ -47,23 +50,28 @@ export default function OrderItem({
 
   // 2. Xử lý tóm tắt tên món ăn
   const getOrderTitle = () => {
-    if (!order.items || order.items.length === 0) return "Unknown Order";
+    if (!order.items || order.items.length === 0) return "Đơn hàng không rõ";
     const firstItemName = order.items[0].name;
     const remainingCount = order.items.length - 1;
     return remainingCount > 0
-      ? `${firstItemName} & ${remainingCount} other${remainingCount > 1 ? "s" : ""}`
+      ? `${firstItemName} & ${remainingCount} món khác`
       : firstItemName;
   };
 
   // 3. Xử lý hiển thị ngày/ETA
   const getHeaderDate = () => {
-    const options: Intl.DateTimeFormatOptions = {
-      day: "2-digit",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    };
-    return new Date(order.created_at).toLocaleDateString("en-GB", options).toUpperCase();
+    const timeToFormat =
+      order.status === "completed" || order.status === "cancelled"
+        ? order.updated_at || order.created_at
+        : order.created_at;
+
+    const date = new Date(timeToFormat as string);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString();
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+
+    return `${day}/${month} - ${hours}:${minutes}`;
   };
 
   return (
@@ -89,19 +97,19 @@ export default function OrderItem({
               {getOrderTitle()}
             </Text>
             <TouchableOpacity onPress={onViewDetail} activeOpacity={0.7}>
-              <Text style={styles.viewDetail}>View Detail</Text>
+              <Text style={styles.viewDetail}>Chi tiết</Text>
             </TouchableOpacity>
           </View>
 
           {/* Dòng 2 */}
           <View style={styles.priceRow}>
-            <Text style={styles.price}>{order.total.toLocaleString("vi-VN")}đ</Text>
+            <Text style={styles.price}>{order.total?.toLocaleString("vi-VN")}đ</Text>
             <View style={styles.dot} />
             <Text style={styles.itemsCount}>
               {order.items.length < 10
                 ? `0${order.items.length}`
                 : order.items.length}{" "}
-              Items
+              Món
             </Text>
           </View>
         </View>
@@ -109,43 +117,27 @@ export default function OrderItem({
 
       {/* --- FOOTER --- */}
       <View style={styles.footer}>
-        {type === "ongoing" ? (
+        {type === "ongoing" && (
           <>
             {['pending', 'preparing', 'delivering'].includes(order.status) && (
               <View style={styles.buttonWrapper}>
                 <CustomButton
-                  title="Track Order"
+                  title="Theo dõi đơn"
                   onPress={onTrackOrder}
                   buttonStyle={styles.solidButton}
                 />
               </View>
             )}
-            <View style={styles.buttonWrapper}>
-              <CustomButton
-                title="Cancel"
-                onPress={onCancel}
-                buttonStyle={['pending', 'preparing', 'delivering'].includes(order.status) ? styles.outlineButton : styles.solidButton}
-                textStyle={['pending', 'preparing', 'delivering'].includes(order.status) ? styles.outlineText : undefined}
-              />
-            </View>
-          </>
-        ) : (
-          <>
-            <View style={styles.buttonWrapper}>
-              <CustomButton
-                title="Rate"
-                onPress={onRate}
-                buttonStyle={styles.outlineButton}
-                textStyle={styles.outlineText}
-              />
-            </View>
-            <View style={styles.buttonWrapper}>
-              <CustomButton
-                title="Re-Order"
-                onPress={onReOrder}
-                buttonStyle={styles.solidButton}
-              />
-            </View>
+            {order.status === 'pending' && (
+              <View style={styles.buttonWrapper}>
+                <CustomButton
+                  title="Huỷ đơn"
+                  onPress={onCancel}
+                  buttonStyle={styles.outlineButton}
+                  textStyle={styles.outlineText}
+                />
+              </View>
+            )}
           </>
         )}
       </View>

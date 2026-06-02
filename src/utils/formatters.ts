@@ -24,22 +24,22 @@ export const formatRelativeTime = (date: Date | string, inDetail: boolean) => {
   if (inDetail === false || days <= 1) {
     // dưới 1 phút
     if (minutes < 1) {
-      return "Just now";
+      return "Vừa xong";
     }
 
     // dưới 1 giờ
     if (minutes < 60) {
-      return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+      return `${minutes} phút trước`;
     }
 
     // dưới 24 giờ
     if (hours < 24) {
-      return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+      return `${hours} giờ trước`;
     }
 
     // hôm qua
     if (days === 1) {
-      return "Yesterday";
+      return "Hôm qua";
     }
   }
 
