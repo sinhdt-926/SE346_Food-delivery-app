@@ -1,11 +1,12 @@
 import React from "react";
 import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons } from "@expo/vector-icons";
 import ManagerOrdersScreen from "../screens/owner/ManageOrdersScreen";
 import ManagerMenuScreen from "../screens/owner/ManageMenuScreen";
 import DashboardScreen from "../screens/owner/DashboardScreen";
 import ManagerPromosScreen from "../screens/owner/ManagePromosScreen";
+import { TabIcon } from "../components/TabIcon";
+import { Ionicons } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
 
@@ -18,7 +19,9 @@ export default function CustomerTabs() {
         tabBarShowLabel: false,
 
         tabBarStyle: {
-          height: 80,
+          height: 90,
+          paddingTop: 5,
+          paddingBottom: 10,
           backgroundColor: "#FFFFFF",
           borderTopWidth: 0,
           elevation: 10,
@@ -34,11 +37,7 @@ export default function CustomerTabs() {
         component={DashboardScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="home-outline"
-              size={28}
-              color={focused ? "#FF7A1A" : "#999"}
-            />
+            <TabIcon name="home-outline" title="Trang chủ" focused={focused} />
           ),
         }}
       />
@@ -48,11 +47,7 @@ export default function CustomerTabs() {
         component={ManagerMenuScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="grid-outline"
-              size={28}
-              color={focused ? "#FF7A1A" : "#999"}
-            />
+            <TabIcon name="grid-outline" title="Danh mục" focused={focused} />
           ),
         }}
       />
@@ -93,10 +88,10 @@ export default function CustomerTabs() {
         component={ManagerOrdersScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <Ionicons
+            <TabIcon
               name="clipboard-outline"
-              size={28}
-              color={focused ? "#FF7A1A" : "#999"}
+              title="Đơn hàng"
+              focused={focused}
             />
           ),
         }}
@@ -107,11 +102,7 @@ export default function CustomerTabs() {
         component={ManagerPromosScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="gift-outline"
-              size={28}
-              color={focused ? "#FF7A1A" : "#999"}
-            />
+            <TabIcon name="gift-outline" title="Khuyến mãi" focused={focused} />
           ),
         }}
       />

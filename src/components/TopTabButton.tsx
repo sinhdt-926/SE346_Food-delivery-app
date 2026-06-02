@@ -59,11 +59,7 @@ export default function TopTabButton({
         {title && (
           <Text
             numberOfLines={1}
-            style={[
-              styles.text,
-              active && styles.activeText,
-              iconName && styles.textWithIcon,
-            ]}
+            style={[styles.text, active && styles.activeText]}
           >
             {title}
           </Text>
@@ -84,13 +80,14 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
   },
 
   text: {
-    fontSize: 15,
+    marginTop: 2,
+    fontSize: 7,
     fontWeight: "500",
     color: "#B1B1B1",
   },
@@ -98,10 +95,6 @@ const styles = StyleSheet.create({
   activeText: {
     color: "#FF7622",
     fontWeight: "700",
-  },
-
-  textWithIcon: {
-    marginLeft: 6,
   },
 
   line: {

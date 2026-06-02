@@ -144,12 +144,12 @@ const styles = StyleSheet.create({
   },
 
   time: {
-    fontSize: 13,
+    fontSize: 11,
     color: "#B1B1B1",
   },
 
   name: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "700",
     color: "#222",
   },
@@ -160,45 +160,47 @@ const styles = StyleSheet.create({
   },
 
   price: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 13,
+    fontWeight: "normal",
     color: "#222",
+    textAlign: "right",
   },
 
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 22,
+    justifyContent: "space-around",
+    alignItems: "center",
+    marginTop: 16,
+    gap: 8,
   },
 
   doneButton: {
-    flex: 1,
-    marginRight: 10,
-    borderRadius: 18,
-    paddingVertical: 14,
+    width: 90,
+    borderRadius: 12,
+    paddingVertical: 8,
   },
 
   doneText: {
-    fontSize: 15,
+    fontSize: 11,
   },
 
   cancelButton: {
-    flex: 1,
+    width: 90,
     backgroundColor: "#FFF",
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: "#EF4444",
-    borderRadius: 18,
-    paddingVertical: 14,
+    borderRadius: 12,
+    paddingVertical: 8,
   },
 
   cancelText: {
     color: "#EF4444",
-    fontSize: 15,
+    fontSize: 11,
   },
 
   statusBadge: {
     marginTop: 22,
-    alignSelf: "flex-start",
+    alignSelf: "flex-end",
     paddingHorizontal: 18,
     paddingVertical: 10,
     borderRadius: 999,
@@ -214,7 +216,7 @@ const styles = StyleSheet.create({
 
   statusText: {
     fontWeight: "700",
-    fontSize: 13,
+    fontSize: 12,
   },
 
   completedText: {

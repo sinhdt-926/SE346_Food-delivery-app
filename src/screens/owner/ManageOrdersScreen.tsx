@@ -145,26 +145,31 @@ export default function ManagerOrdersScreen() {
       {/* tab */}
       <View style={styles.tabs}>
         <TopTabButton
+          title="Chờ xác nhận"
           iconName="time-outline"
           active={activeTab === "pending"}
           onPress={() => setActiveTab("pending")}
         />
         <TopTabButton
+          title="Đang chuẩn bị"
           iconName="restaurant-outline"
           active={activeTab === "preparing"}
           onPress={() => setActiveTab("preparing")}
         />
         <TopTabButton
+          title="Đang giao"
           iconName="bicycle-outline"
           active={activeTab === "delivering"}
           onPress={() => setActiveTab("delivering")}
         />
         <TopTabButton
+          title="Hoàn thành"
           iconName="checkmark-done-outline"
           active={activeTab === "completed"}
           onPress={() => setActiveTab("completed")}
         />
         <TopTabButton
+          title="Đã hủy"
           iconName="close-circle-outline"
           active={activeTab === "cancelled"}
           onPress={() => setActiveTab("cancelled")}
