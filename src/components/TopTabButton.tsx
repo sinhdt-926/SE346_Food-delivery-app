@@ -61,7 +61,7 @@ export default function TopTabButton({
         {renderIcon()}
         {title && (
           <Text
-            numberOfLines={1}
+            numberOfLines={2}
             style={[styles.text, active && styles.activeText, textStyle]}
           >
             {title}

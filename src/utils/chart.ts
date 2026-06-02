@@ -7,7 +7,7 @@ export const buildRevenueChart = (
   daysInMonth?: number,
 ) => {
   if (type === "week") {
-    const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const labels = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
     const data = Array(7).fill(0);
     revenueByDate.forEach((item) => {
       const day = new Date(item.date).getDay();

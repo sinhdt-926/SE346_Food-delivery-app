@@ -65,7 +65,7 @@ export default function AddEditFoodScreen() {
           setSelectedCategoryId(data[0].id);
         }
       } catch (error) {
-        Alert.alert("Error", "Unable to load menu. Please try again.");
+        Alert.alert("Lỗi", "Không thể tải menu. Vui lòng thử lại.");
       }
     };
     fetchCategories();
@@ -106,11 +106,11 @@ export default function AddEditFoodScreen() {
       }
       e.preventDefault();
       Alert.alert(
-        "Unsaved Changes",
-        "You have unsaved changes. Save before leaving?",
+        "Thay đổi chưa được lưu",
+        "Bạn có những thay đổi chưa được lưu. Hãy lưu trước khi rời đi?",
         [
           {
-            text: "Discard",
+            text: "Tiếp tục",
             style: "destructive",
             onPress: () => {
               allowExitRef.current = true;
@@ -118,11 +118,11 @@ export default function AddEditFoodScreen() {
             },
           },
           {
-            text: "Cancel",
+            text: "Hủy",
             style: "cancel",
           },
           {
-            text: "Save",
+            text: "Lưu",
             onPress: async () => {
               const success = await handleSave();
               if (success) {
@@ -141,7 +141,10 @@ export default function AddEditFoodScreen() {
       const permission =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert("Permission denied", "Please allow access to gallery");
+        Alert.alert(
+          "Quyền truy cập bị từ chối",
+          "Vui lòng cho phép truy cập vào thư viện ảnh",
+        );
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -154,7 +157,7 @@ export default function AddEditFoodScreen() {
         setImage(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert("Error", "Cannot pick image");
+      Alert.alert("Lỗi", "Không thể chọn ảnh");
     }
   };
   const handleReset = () => {
@@ -178,30 +181,34 @@ export default function AddEditFoodScreen() {
     setIsAvailable(true);
   };
   const confirmReset = () => {
-    Alert.alert("Confirm Reset", "Do you want to reset?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Reset",
-        onPress: async () => {
-          handleReset();
+    Alert.alert(
+      "Xác nhận khôi phục",
+      "Bạn có chắc chắn muốn khôi phục về trạng thái ban đầu không?",
+      [
+        {
+          text: "Hủy",
+          style: "cancel",
         },
-      },
-    ]);
+        {
+          text: "Khôi phục",
+          onPress: async () => {
+            handleReset();
+          },
+        },
+      ],
+    );
   };
   const validateForm = () => {
     if (!name.trim()) {
-      Alert.alert("Missing Name", "Please enter food name");
+      Alert.alert("Tên không hợp lệ", "Vui lòng nhập tên món ăn");
       return false;
     }
     if (!price.trim()) {
-      Alert.alert("Missing Price", "Please enter price");
+      Alert.alert("Giá không hợp lệ", "Vui lòng nhập giá");
       return false;
     }
     if (isNaN(Number(price))) {
-      Alert.alert("Invalid Price", "Price must be a number");
+      Alert.alert("Giá không hợp lệ", "Giá phải là một số");
       return false;
     }
     return true;
@@ -230,14 +237,14 @@ export default function AddEditFoodScreen() {
         await createFood(payload);
       }
       Alert.alert(
-        "Success",
-        isEditMode ? "Food updated successfully!" : "Food added successfully!",
+        "Thành công",
+        isEditMode ? "Đã cập nhật món ăn!" : "Đã thêm món ăn!",
       );
       return true;
     } catch (error) {
       Alert.alert(
         "Error",
-        isEditMode ? "Failed to update food" : "Failed to add food",
+        isEditMode ? "Không thể cập nhật món ăn" : "Không thể thêm món ăn",
       );
       return false;
     } finally {
@@ -246,17 +253,17 @@ export default function AddEditFoodScreen() {
   };
   const confirmSave = () => {
     Alert.alert(
-      "Confirm Save",
+      "Xác nhận",
       isEditMode
-        ? "Do you want to save these changes?"
-        : "Do you want to add this food?",
+        ? "Bạn có muốn lưu những thay đổi này không?"
+        : "Bạn có muốn thêm món ăn này không?",
       [
         {
-          text: "Cancel",
+          text: "Hủy",
           style: "cancel",
         },
         {
-          text: "Save",
+          text: "Lưu",
           onPress: async () => {
             const success = await handleSave();
             if (success) {
@@ -272,36 +279,32 @@ export default function AddEditFoodScreen() {
     try {
       setIsSaving(true);
       await deleteFood(Number(editingFood!.id));
-      Alert.alert("Success", "Food deleted successfully");
+      Alert.alert("Thành công", "Món ăn đã được xóa");
       navigation.goBack();
     } catch (error) {
-      Alert.alert("Error", "Failed to delete food");
+      Alert.alert("Thất bại", "Không thể xóa món ăn");
     } finally {
       setIsSaving(false);
     }
   };
   const confirmDelete = () => {
-    Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this food?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
+    Alert.alert("Xác nhận", "Bạn có chắc muốn xóa món ăn này không?", [
+      {
+        text: "Hủy",
+        style: "cancel",
+      },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: async () => {
+          await handleDelete();
         },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            await handleDelete();
-          },
-        },
-      ],
-    );
+      },
+    ]);
   };
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
-      Alert.alert("Error", "Please enter the category name");
+      Alert.alert("Thất bại", "Vui lòng nhập tên danh mục");
       return;
     }
     try {
@@ -310,9 +313,9 @@ export default function AddEditFoodScreen() {
       setSelectedCategoryId(newCategory.id);
       setNewCategoryName("");
       setShowCategoryModal(false);
-      Alert.alert("Success", "Category added");
+      Alert.alert("Thành công", "Đã thêm danh mục");
     } catch (error) {
-      Alert.alert("Error", "Unable to create category");
+      Alert.alert("Thất bại", "Không thể tạo danh mục");
     }
   };
   return (
@@ -322,10 +325,10 @@ export default function AddEditFoodScreen() {
         <View style={styles.header}>
           <BackButton />
           <Text style={styles.headerTitle}>
-            {isEditMode ? "Edit Food" : "Add New Food"}
+            {isEditMode ? "Chỉnh sửa" : "Thêm mới"}
           </Text>
           <TouchableOpacity activeOpacity={0.8} onPress={confirmReset}>
-            <Text style={styles.resetText}>RESET</Text>
+            <Text style={styles.resetText}>Khôi phục</Text>
           </TouchableOpacity>
         </View>
         <ScrollView
@@ -334,18 +337,18 @@ export default function AddEditFoodScreen() {
         >
           {/* name */}
           <View style={styles.section}>
-            <Text style={styles.label}>FOOD NAME</Text>
+            <Text style={styles.label}>Tên Món Ăn</Text>
             <TextInput
               value={name}
               onChangeText={setName}
-              placeholder="Dish name"
+              placeholder="Tên món ăn"
               placeholderTextColor="#A5A5A5"
               style={styles.input}
             />
           </View>
           {/* image */}
           <View style={styles.section}>
-            <Text style={styles.label}>UPLOAD PHOTO</Text>
+            <Text style={styles.label}>Ảnh Món Ăn</Text>
             <View style={styles.uploadContainer}>
               <TouchableOpacity
                 style={styles.previewBox}
@@ -376,7 +379,7 @@ export default function AddEditFoodScreen() {
           </View>
           {/* price */}
           <View style={styles.section}>
-            <Text style={styles.label}>PRICE</Text>
+            <Text style={styles.label}>Giá</Text>
             <TextInput
               value={price}
               onChangeText={setPrice}
@@ -388,7 +391,7 @@ export default function AddEditFoodScreen() {
           </View>
           {/* status */}
           <View style={styles.section}>
-            <Text style={styles.label}>STATUS</Text>
+            <Text style={styles.label}>Trạng Thái</Text>
             <View style={styles.statusContainer}>
               <TouchableOpacity
                 activeOpacity={0.85}
@@ -404,7 +407,7 @@ export default function AddEditFoodScreen() {
                     isAvailable && styles.activeStatusText,
                   ]}
                 >
-                  Selling
+                  Đang bán
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -421,14 +424,14 @@ export default function AddEditFoodScreen() {
                     !isAvailable && styles.activeStatusText,
                   ]}
                 >
-                  Closed
+                  Dừng bán
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
           {/* category */}
           <View style={styles.section}>
-            <Text style={styles.label}>CATEGORY</Text>
+            <Text style={styles.label}>Danh Mục</Text>
             <View style={styles.tagsContainer}>
               {categories.map((category) => {
                 const isSelected = selectedCategoryId === category.id;
@@ -463,13 +466,13 @@ export default function AddEditFoodScreen() {
           </View>
           {/* details */}
           <View style={styles.section}>
-            <Text style={styles.label}>DETAILS</Text>
+            <Text style={styles.label}>Mô Tả</Text>
             <TextInput
               value={details}
               onChangeText={setDetails}
               multiline
               textAlignVertical="top"
-              placeholder="Description"
+              placeholder="Mô tả"
               placeholderTextColor="#A5A5A5"
               style={styles.detailsInput}
             />
@@ -479,7 +482,7 @@ export default function AddEditFoodScreen() {
             style={[styles.header, !isEditMode && { justifyContent: "center" }]}
           >
             <CustomButton
-              title={isEditMode ? "SAVE CHANGES" : "ADD FOOD"}
+              title={isEditMode ? "Lưu Thay Đổi" : "Thêm Món Ăn"}
               onPress={confirmSave}
               isLoading={isSaving}
               disabled={isSaving}
@@ -488,7 +491,7 @@ export default function AddEditFoodScreen() {
             />
             {isEditMode && (
               <CustomButton
-                title="DELETE FOOD"
+                title="Xóa Món Ăn"
                 onPress={confirmDelete}
                 disabled={isSaving}
                 buttonStyle={styles.deleteButton}

@@ -75,13 +75,13 @@ export default function ManagerOrdersScreen() {
       await updateOrderStatus(id, nextStatus);
       await fetchOrders();
     } catch (error) {
-      Alert.alert("Error", "Unable to update order status", [
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
         {
-          text: "Retry",
+          text: "Thử lại",
           onPress: () => handleNextState(id, currentStatus),
         },
         {
-          text: "Close",
+          text: "Đóng",
           style: "cancel",
         },
       ]);
@@ -94,7 +94,7 @@ export default function ManagerOrdersScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#FF7622" />
-        <Text style={styles.loadingText}>Loading orders...</Text>
+        <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
       </View>
     );
   }
@@ -120,13 +120,13 @@ export default function ManagerOrdersScreen() {
       await updateOrderStatus(id, "cancelled");
       await fetchOrders();
     } catch (error) {
-      Alert.alert("Error", "Unable to update order status", [
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
         {
-          text: "Retry",
+          text: "Thử lại",
           onPress: () => handleCancelOrder(id),
         },
         {
-          text: "Close",
+          text: "Đóng",
           style: "cancel",
         },
       ]);
@@ -138,7 +138,7 @@ export default function ManagerOrdersScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Menu</Text>
+        <Text style={styles.title}>Đơn Hàng</Text>
         <LogoutButton />
       </View>
 
@@ -207,7 +207,7 @@ export default function ManagerOrdersScreen() {
         <View style={styles.overlay}>
           <View style={styles.loadingBox}>
             <ActivityIndicator size="large" color="#FF7622" />
-            <Text style={styles.loadingText}>Updating the order...</Text>
+            <Text style={styles.loadingText}>Cập nhật đơn hàng...</Text>
           </View>
         </View>
       )}

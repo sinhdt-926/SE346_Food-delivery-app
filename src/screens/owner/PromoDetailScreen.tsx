@@ -81,9 +81,9 @@ export default function AddEditPromotionScreen() {
         return;
       }
       e.preventDefault();
-      Alert.alert("Unsaved Changes", "Save before leaving?", [
+      Alert.alert("Thay đổi chưa được lưu", "Lưu trước khi rời đi?", [
         {
-          text: "Discard",
+          text: "Tiếp tục",
           style: "destructive",
           onPress: () => {
             allowExitRef.current = true;
@@ -91,11 +91,11 @@ export default function AddEditPromotionScreen() {
           },
         },
         {
-          text: "Cancel",
+          text: "Hủy",
           style: "cancel",
         },
         {
-          text: "Save",
+          text: "Lưu",
           onPress: async () => {
             const success = await handleSave();
             if (success) {
@@ -111,28 +111,31 @@ export default function AddEditPromotionScreen() {
 
   const validateForm = () => {
     if (!name.trim()) {
-      Alert.alert("Missing Name", "Please enter promotion name");
+      Alert.alert(
+        "Tên chương trình không hợp lệ",
+        "Vui lòng nhập tên chương trình khuyến mãi",
+      );
       return false;
     }
     const value = Number(discountValue);
     if (discountValue.trim() === "" || isNaN(value)) {
-      Alert.alert("Invalid Discount");
+      Alert.alert("Mã giảm giá không hợp lệ");
       return false;
     }
     if (discountType === "percent" && (value <= 0 || value > 100)) {
-      Alert.alert("Percent must be 1 - 100");
+      Alert.alert("Tỷ lệ phần trăm phải nằm trong khoảng từ 1 đến 100");
       return false;
     }
     if (discountType === "fixed" && value <= 0) {
-      Alert.alert("Amount must be > 0");
+      Alert.alert("Số tiền phải lớn hơn 0");
       return false;
     }
     if (!startDate || !endDate) {
-      Alert.alert("Please enter dates");
+      Alert.alert("Vui lòng nhập ngày tháng");
       return false;
     }
     if (endDate <= startDate) {
-      Alert.alert("The end date must be after the start date.");
+      Alert.alert("Ngày kết thúc phải sau ngày bắt đầu");
       return false;
     }
     return true;
@@ -157,12 +160,17 @@ export default function AddEditPromotionScreen() {
         await createPromotion(payload);
       }
       Alert.alert(
-        "Success",
-        isEditMode ? "Promotion updated" : "Promotion created",
+        "Thành công",
+        isEditMode
+          ? "Chương trình khuyến mãi đã được cập nhật"
+          : "Chương trình khuyến mãi đã được tạo",
       );
       return true;
     } catch (error) {
-      Alert.alert("Error", isEditMode ? "Update failed" : "Create failed");
+      Alert.alert(
+        "Thất bại",
+        isEditMode ? "Cập nhật thất bại" : "Tạo thất bại",
+      );
       return false;
     } finally {
       setIsSaving(false);
@@ -170,13 +178,13 @@ export default function AddEditPromotionScreen() {
   };
 
   const confirmSave = () => {
-    Alert.alert("Confirm", isEditMode ? "Save changes?" : "Create promotion?", [
+    Alert.alert("Xác nhận", isEditMode ? "Lưu thay đổi?" : "Tạo khuyến mãi?", [
       {
-        text: "Cancel",
+        text: "Hủy",
         style: "cancel",
       },
       {
-        text: "Save",
+        text: "Lưu",
         onPress: async () => {
           const success = await handleSave();
           if (success) {
@@ -189,13 +197,13 @@ export default function AddEditPromotionScreen() {
     ]);
   };
   const confirmDelete = () => {
-    Alert.alert("Delete Promotion", "Are you sure?", [
+    Alert.alert("Xóa chương trình khuyến mãi", "Bạn có chắc không?", [
       {
-        text: "Cancel",
+        text: "Hủy",
         style: "cancel",
       },
       {
-        text: "Delete",
+        text: "Xóa",
         style: "destructive",
         onPress: handleDelete,
       },
@@ -206,10 +214,10 @@ export default function AddEditPromotionScreen() {
     try {
       setIsSaving(true);
       await deletePromotion(editingPromotion!.id);
-      Alert.alert("Success", "Promotion deleted");
+      Alert.alert("Thành công", "Chương trình khuyến mãi đã bị xóa");
       navigation.goBack();
     } catch {
-      Alert.alert("Error", "Delete failed");
+      Alert.alert("Lỗi", "Xóa không thành công");
     } finally {
       setIsSaving(false);
     }
@@ -232,18 +240,22 @@ export default function AddEditPromotionScreen() {
     setIsActive(true);
   };
   const confirmReset = () => {
-    Alert.alert("Confirm Reset", "Do you want to reset?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Reset",
-        onPress: async () => {
-          handleReset();
+    Alert.alert(
+      "Xác nhận khôi phục",
+      "Bạn có chắc chắn muốn khôi phục về trạng thái ban đầu không?",
+      [
+        {
+          text: "Hủy",
+          style: "cancel",
         },
-      },
-    ]);
+        {
+          text: "Khôi phục",
+          onPress: async () => {
+            handleReset();
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -256,15 +268,15 @@ export default function AddEditPromotionScreen() {
         <View style={styles.header}>
           <BackButton />
           <Text style={styles.headerTitle}>
-            {isEditMode ? "Edit Promotion" : "Add Promotion"}
+            {isEditMode ? "Chỉnh sửa" : "Thêm mới"}
           </Text>
           <TouchableOpacity activeOpacity={0.8} onPress={confirmReset}>
-            <Text style={styles.resetText}>RESET</Text>
+            <Text style={styles.resetText}>Khôi phục</Text>
           </TouchableOpacity>
         </View>
         <ScrollView>
           <View style={styles.section}>
-            <Text style={styles.label}>PROMOTION NAME</Text>
+            <Text style={styles.label}>Tên chương trình</Text>
             <TextInput
               style={styles.input}
               value={name}
@@ -272,7 +284,7 @@ export default function AddEditPromotionScreen() {
             />
           </View>
           <View style={styles.section}>
-            <Text style={styles.label}>DISCOUNT TYPE</Text>
+            <Text style={styles.label}>Loại giảm giá</Text>
             <View style={styles.typeContainer}>
               {["percent", "fixed"].map((type) => (
                 <TouchableOpacity
@@ -289,7 +301,7 @@ export default function AddEditPromotionScreen() {
                       discountType === type && styles.activeText,
                     ]}
                   >
-                    {type}
+                    {type === "percent" ? "Phần trăm" : "Số tiền cố định"}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -297,7 +309,7 @@ export default function AddEditPromotionScreen() {
           </View>
           <View style={styles.section}>
             <Text style={styles.label}>
-              {discountType === "percent" ? "DISCOUNT (%)" : "DISCOUNT AMOUNT"}
+              {discountType === "percent" ? "Giảm giá (%)" : "Số tiền giảm giá"}
             </Text>
             <TextInput
               style={styles.input}
@@ -307,7 +319,7 @@ export default function AddEditPromotionScreen() {
             />
           </View>
           <View style={styles.section}>
-            <Text style={styles.label}>START DATE</Text>
+            <Text style={styles.label}>Ngày bắt đầu</Text>
             <TouchableOpacity
               style={styles.dateInput}
               onPress={() => setShowStartPicker(true)}
@@ -316,18 +328,21 @@ export default function AddEditPromotionScreen() {
               <Text>{startDate}</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.dateInput}
-            onPress={() => setShowEndPicker(true)}
-          >
-            <Ionicons name="calendar-outline" size={20} color="#666" />
-            <Text>{endDate}</Text>
-          </TouchableOpacity>
+          <View style={styles.section}>
+            <Text style={styles.label}>Ngày kết thúc</Text>
+            <TouchableOpacity
+              style={styles.dateInput}
+              onPress={() => setShowStartPicker(true)}
+            >
+              <Ionicons name="calendar-outline" size={20} color="#666" />
+              <Text>{endDate}</Text>
+            </TouchableOpacity>
+          </View>
           <View
             style={[styles.header, !isEditMode && { justifyContent: "center" }]}
           >
             <CustomButton
-              title={isEditMode ? "SAVE CHANGES" : "ADD PROMOTION"}
+              title={isEditMode ? "Lưu Thay Đổi" : "Thêm Mới"}
               onPress={confirmSave}
               isLoading={isSaving}
               disabled={isSaving}
@@ -336,7 +351,7 @@ export default function AddEditPromotionScreen() {
             />
             {isEditMode && (
               <CustomButton
-                title="DELETE"
+                title="Xóa"
                 onPress={confirmDelete}
                 disabled={isSaving}
                 buttonStyle={styles.deleteButton}

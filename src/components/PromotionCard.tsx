@@ -42,6 +42,21 @@ export default function PromotionCard({ promo, status, onPress }: Props) {
         return styles.expiredText;
     }
   };
+  const getStatusLabel = () => {
+    switch (status) {
+      case "active":
+        return "Hoạt động";
+
+      case "upcoming":
+        return "Sắp tới";
+
+      case "expired":
+        return "Hết hạn";
+
+      default:
+        return "";
+    }
+  };
   return (
     <TouchableOpacity
       activeOpacity={0.85}
@@ -54,7 +69,7 @@ export default function PromotionCard({ promo, status, onPress }: Props) {
       </View>
       <View style={[styles.badge, getBadgeStyle()]}>
         <Text style={[styles.badgeText, getBadgeTextStyle()]}>
-          {status.toUpperCase()}
+          {getStatusLabel()}
         </Text>
       </View>
     </TouchableOpacity>

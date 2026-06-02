@@ -30,13 +30,13 @@ export default function OrderCard({
   const getActionTitle = () => {
     switch (status) {
       case "pending":
-        return "Confirm";
+        return "Xác nhận";
 
       case "preparing":
-        return "Deliver";
+        return "Giao hàng";
 
       case "delivering":
-        return "Complete";
+        return "Hoàn thành";
 
       default:
         return null;
@@ -77,7 +77,7 @@ export default function OrderCard({
             isLoading={actionLoading}
           />
           <CustomButton
-            title="Cancel"
+            title="Hủy"
             buttonStyle={styles.cancelButton}
             textStyle={styles.cancelText}
             onPress={onCancelPress}
@@ -100,7 +100,11 @@ export default function OrderCard({
               status === "cancelled" && styles.cancelledText,
             ]}
           >
-            {status.toUpperCase()}
+            {status === "completed"
+              ? "Hoàn thành"
+              : status === "cancelled"
+                ? "Đã hủy"
+                : status}
           </Text>
         </View>
       )}
@@ -175,9 +179,9 @@ const styles = StyleSheet.create({
   },
 
   doneButton: {
-    width: 90,
+    width: 100,
     borderRadius: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
 
   doneText: {
@@ -185,12 +189,12 @@ const styles = StyleSheet.create({
   },
 
   cancelButton: {
-    width: 90,
+    width: 100,
     backgroundColor: "#FFF",
     borderWidth: 1,
     borderColor: "#EF4444",
     borderRadius: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
 
   cancelText: {
@@ -216,7 +220,7 @@ const styles = StyleSheet.create({
 
   statusText: {
     fontWeight: "700",
-    fontSize: 12,
+    fontSize: 11,
   },
 
   completedText: {

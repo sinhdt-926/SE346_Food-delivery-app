@@ -46,13 +46,13 @@ export default function OrderDetailScreen() {
   const getActionTitle = () => {
     switch (currentOrder.status) {
       case "pending":
-        return "Confirm";
+        return "Xác nhận";
 
       case "preparing":
-        return "Deliver";
+        return "Giao hàng";
 
       case "delivering":
-        return "Complete";
+        return "Hoàn thành";
 
       default:
         return null;
@@ -84,13 +84,13 @@ export default function OrderDetailScreen() {
         status: nextStatus,
       }));
     } catch (error) {
-      Alert.alert("Error", "Unable to update order status", [
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
         {
-          text: "Retry",
+          text: "Thử lại",
           onPress: () => handleNextState(),
         },
         {
-          text: "Close",
+          text: "Đóng",
           style: "cancel",
         },
       ]);
@@ -109,18 +109,36 @@ export default function OrderDetailScreen() {
         status: "cancelled",
       }));
     } catch (error) {
-      Alert.alert("Error", "Unable to update order status", [
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
         {
-          text: "Retry",
+          text: "Thử lại",
           onPress: () => handleCancelOrder(),
         },
         {
-          text: "Close",
+          text: "Đóng",
           style: "cancel",
         },
       ]);
     } finally {
       setActionLoading(false);
+    }
+  };
+  const getStatusLabel = () => {
+    switch (currentOrder.status) {
+      case "pending":
+        return "Chờ xác nhận";
+
+      case "preparing":
+        return "Đang chuẩn bị";
+
+      case "delivering":
+        return "Đang giao";
+      case "completed":
+        return "Hoàn thành";
+      case "cancelled":
+        return "Đã hủy";
+      default:
+        return null;
     }
   };
   return (
@@ -133,13 +151,13 @@ export default function OrderDetailScreen() {
       <View style={styles.header}>
         <BackButton />
 
-        <Text style={styles.title}>Order Details</Text>
+        <Text style={styles.title}>Chi Tiết Đơn Hàng</Text>
       </View>
 
       {/* status */}
       <View style={styles.statusCard}>
         <View>
-          <Text style={styles.orderId}>Order #{currentOrder.id}</Text>
+          <Text style={styles.orderId}>Đơn hàng #{currentOrder.id}</Text>
 
           <Text style={styles.label}>
             {formatRelativeTime(currentOrder.created_at, true)}
@@ -147,28 +165,29 @@ export default function OrderDetailScreen() {
         </View>
 
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>
-            {currentOrder.status.toUpperCase()}
-          </Text>
+          <Text style={styles.badgeText}>{getStatusLabel()}</Text>
         </View>
       </View>
 
       {/* customer */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Customer Information</Text>
-        <InfoRow label="Name" value={currentOrder.customer.fullname} />
-        <InfoRow label="Phone" value={currentOrder.customer.phone_number} />
+        <Text style={styles.sectionTitle}>Thông tin khách hàng</Text>
+        <InfoRow label="Tên" value={currentOrder.customer.fullname} />
+        <InfoRow
+          label="Số điện thoại"
+          value={currentOrder.customer.phone_number}
+        />
       </View>
 
       {/* address */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Delivery Address</Text>
+        <Text style={styles.sectionTitle}>Địa chỉ giao hàng</Text>
         <Text style={styles.address}>{currentOrder.address}</Text>
       </View>
 
       {/* items */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Ordered Items</Text>
+        <Text style={styles.sectionTitle}>Món ăn</Text>
 
         {currentOrder.items.map((item, index) => (
           <FoodItem
@@ -184,19 +203,19 @@ export default function OrderDetailScreen() {
         {actionLoading && (
           <View style={styles.center}>
             <ActivityIndicator size="large" color="#FF7622" />
-            <Text style={styles.loadingText}>Loading orders...</Text>
+            <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
           </View>
         )}
       </View>
 
       {/* payment */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Payment Summary</Text>
-        <InfoRow label="Payment Type" value={currentOrder.payment.type} />
-        <InfoRow label="Payment Status" value={currentOrder.payment.status} />
+        <Text style={styles.sectionTitle}>Thánh toán</Text>
+        <InfoRow label="Phương thức" value={currentOrder.payment.type} />
+        <InfoRow label="Trạng thái" value={currentOrder.payment.status} />
         <View style={styles.divider} />
         <InfoRow
-          label="Total"
+          label="Thành tiền"
           value={formatCurrency(currentOrder.payment.amount, "VND")}
           bold
         />
@@ -212,7 +231,7 @@ export default function OrderDetailScreen() {
             />
 
             <CustomButton
-              title="Cancel"
+              title="Hủy"
               buttonStyle={styles.cancelButton}
               onPress={handleCancelOrder}
               disabled={actionLoading}
@@ -251,13 +270,13 @@ function FoodItem({ name, quantity, price, note }: FoodItem) {
         <View style={styles.foodInfo}>
           <Text style={styles.foodName}>{name}</Text>
 
-          <Text style={styles.foodQty}>Quantity: {quantity}</Text>
+          <Text style={styles.foodQty}>Số lượng: {quantity}</Text>
         </View>
 
         <Text style={styles.foodPrice}>{formatCurrency(price, "VND")}</Text>
       </View>
 
-      {note ? <Text style={styles.note}>Note: {note}</Text> : null}
+      {note ? <Text style={styles.note}>Ghi chú: {note}</Text> : null}
     </View>
   );
 }
@@ -334,7 +353,7 @@ const styles = StyleSheet.create({
 
   label: {
     color: "#8E8E8E",
-    fontSize: 15,
+    fontSize: 12,
   },
 
   value: {
