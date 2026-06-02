@@ -149,21 +149,25 @@ export default function ManagerPromosScreen() {
           title="All"
           active={activeTab === "all"}
           onPress={() => setActiveTab("all")}
+          textStyle={{ fontSize: 12 }}
         />
         <TopTabButton
           title="Active"
           active={activeTab === "active"}
           onPress={() => setActiveTab("active")}
+          textStyle={{ fontSize: 12 }}
         />
         <TopTabButton
           title="Coming"
           active={activeTab === "upcoming"}
           onPress={() => setActiveTab("upcoming")}
+          textStyle={{ fontSize: 12 }}
         />
         <TopTabButton
           title="Expired"
           active={activeTab === "expired"}
           onPress={() => setActiveTab("expired")}
+          textStyle={{ fontSize: 12 }}
         />
       </View>
 

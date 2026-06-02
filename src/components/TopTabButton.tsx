@@ -6,6 +6,7 @@ import {
   Text,
   StyleProp,
   ViewStyle,
+  TextStyle,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { IconType } from "../types/icon";
@@ -17,6 +18,7 @@ interface Props {
   active?: boolean;
   onPress?: () => void;
   buttonStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 export default function TopTabButton({
@@ -26,6 +28,7 @@ export default function TopTabButton({
   active = false,
   onPress,
   buttonStyle,
+  textStyle,
 }: Props) {
   const iconColor = active ? "#FF7622" : "#B1B1B1";
   const renderIcon = () => {
@@ -59,7 +62,7 @@ export default function TopTabButton({
         {title && (
           <Text
             numberOfLines={1}
-            style={[styles.text, active && styles.activeText]}
+            style={[styles.text, active && styles.activeText, textStyle]}
           >
             {title}
           </Text>
