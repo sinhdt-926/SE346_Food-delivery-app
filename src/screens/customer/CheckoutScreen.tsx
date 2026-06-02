@@ -26,6 +26,7 @@ import { AddressService, UserAddress } from "../../services/address.service";
 import { getValidPromotions, applyPromotion } from "../../services/promotion.service";
 import { CheckoutService } from "../../services/checkout.service";
 import { useCartStore } from "../../store/useCartStore";
+import { getPaymentStatus } from "../../services/order.service";
 
 // --- Types ---
 type PaymentMethod = "cash" | "vnpay";
@@ -109,8 +110,41 @@ export default function CheckoutScreen({ navigation, route }: any) {
     await fetchCart();
 
     if (paymentMethod === "vnpay" && res.data?.paymentUrl) {
-      await WebBrowser.openAuthSessionAsync(res.data.paymentUrl);
+      const result = await WebBrowser.openAuthSessionAsync(res.data.paymentUrl);
+      let isSuccess = false;
+
+      // 1. Kiểm tra mã phản hồi từ URL (VNPay trả về vnp_ResponseCode=00 là thành công)
+      if (result.type === "success" && result.url) {
+        if (result.url.includes("vnp_ResponseCode=00")) {
+          isSuccess = true;
+        }
+      }
+
+      // 2. Dự phòng: Kiểm tra lại trạng thái DB (đề phòng trường hợp webhook IPN đã chạy xong nhưng URL không rõ ràng)
+      if (!isSuccess) {
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 2000)); // Đợi webhook một chút
+          const paymentStatus = await getPaymentStatus(res.data.orderId);
+          if (paymentStatus?.status === "paid") {
+            isSuccess = true;
+          }
+        } catch (e) {
+          console.log("Error checking payment status", e);
+        }
+      }
+
+      // Nếu thanh toán thất bại/bị huỷ -> Báo lỗi và ở lại trang Checkout
+      if (!isSuccess) {
+        Alert.alert(
+          "Thanh toán thất bại",
+          "Giao dịch của bạn đã bị huỷ hoặc chưa thành công. Vui lòng thử lại!",
+          [{ text: "Đóng" }]
+        );
+        setIsOrdering(false);
+        return; 
+      }
     }
+
     navigation.replace("OrderSuccess", { orderId: res.data?.orderId ?? 0 });
   };
 
