@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/mod.ts";
 import crypto from "node:crypto";
 import qs from "npm:qs";
+import { Buffer } from "node:buffer";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 serve(async (req: Request) => {
@@ -21,7 +22,10 @@ serve(async (req: Request) => {
     delete params.vnp_SecureHashType;
     delete params.appScheme; // Xóa appScheme để không ảnh hưởng thuật toán băm của VNPAY
 
-    const secretKey = Deno.env.get("vnp_HashSecret")!;
+    const secretKey = Deno.env.get("vnp_HashSecret");
+    if (!secretKey) {
+      throw new Error("Missing vnp_HashSecret environment variable");
+    }
 
     // Hàm sortObject chuẩn của VNPAY
     const sortObject = (obj: any) => {
@@ -52,15 +56,29 @@ serve(async (req: Request) => {
       .update(Buffer.from(signData, "utf-8"))
       .digest("hex");
 
-    const isSuccess = expectedHash === vnp_SecureHash && params.vnp_ResponseCode === "00";
+    if (expectedHash !== vnp_SecureHash) {
+      throw new Error("Invalid signature");
+    }
+    const isSuccess = params.vnp_ResponseCode === "00";
 
     // Khởi tạo Supabase Admin Client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error("Missing Supabase environment variables");
+    }
+
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Cập nhật bảng payments
-    const paymentStatus = isSuccess ? 'paid' : 'failed';
+    let paymentStatus = 'failed';
+    if (isSuccess) {
+      paymentStatus = 'paid';
+    } else if (params.vnp_ResponseCode === '24') {
+      paymentStatus = 'cancelled'; // 24: Khách hàng chủ động huỷ thanh toán
+    }
+
     const paidAt = isSuccess ? new Date().toISOString() : null;
 
     const { error: updateError } = await supabaseAdmin
