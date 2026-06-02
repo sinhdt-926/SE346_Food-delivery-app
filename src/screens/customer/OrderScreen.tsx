@@ -13,8 +13,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { useNavigation } from "@react-navigation/native";
 import OrderItem from "../../components/OrderItem";
-import { getMyOrders } from "../../services/order.service";
-import { supabase } from "../../services/supabase";
+import { getMyOrders, subscribeToUserOrders } from "../../services/order.service";
+import { useAuthStore } from "../../store/useAuthStore";
 
 // Tạo một component List dùng chung cho cả hai tab
 const OrderList = ({
@@ -67,6 +67,7 @@ const OrderList = ({
 const Tab = createMaterialTopTabNavigator();
 
 const OrderScreen = ({ navigation }: any) => {
+  const { user } = useAuthStore();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -87,21 +88,16 @@ const OrderScreen = ({ navigation }: any) => {
   useEffect(() => {
     fetchOrders();
 
-    const channel = supabase
-      .channel("public:orders")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
-        () => {
-          fetchOrders(); // Tải lại danh sách ngay lập tức khi có bất kỳ update nào
-        }
-      )
-      .subscribe();
+    if (!user?.id) return;
+
+    const unsubscribe = subscribeToUserOrders(user.id, () => {
+      fetchOrders(); // Tải lại danh sách ngay lập tức khi có bất kỳ update nào của user này
+    });
 
     return () => {
-      supabase.removeChannel(channel);
+      unsubscribe();
     };
-  }, []);
+  }, [user?.id]);
 
   // Xử lý làm mới (pull to refresh)
   const handleRefresh = () => {

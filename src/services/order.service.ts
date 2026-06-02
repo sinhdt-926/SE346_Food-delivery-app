@@ -194,3 +194,20 @@ export const subscribeToOrderUpdates = (orderId: number, onUpdate: (payload: any
     supabase.removeChannel(channel);
   };
 };
+
+export const subscribeToUserOrders = (userId: string, onUpdate: () => void) => {
+  const channel = supabase
+    .channel(`public:orders:user:${userId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${userId}` },
+      () => {
+        onUpdate();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+};
