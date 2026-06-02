@@ -14,6 +14,7 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { useNavigation } from "@react-navigation/native";
 import OrderItem from "../../components/OrderItem";
 import { getMyOrders } from "../../services/order.service";
+import { supabase } from "../../services/supabase";
 
 // Tạo một component List dùng chung cho cả hai tab
 const OrderList = ({
@@ -48,7 +49,9 @@ const OrderList = ({
               // Các hàm này có thể được truyền từ props nếu cần logic xử lý thật
               onViewDetail={() => console.log("View Detail", order.id)}
               onTrackOrder={() => {
-                navigation.navigate('OrderTracking', { orderId: order.id, role: 'customer' });
+                if (['pending', 'preparing', 'delivering'].includes(order.status)) {
+                  navigation.navigate('OrderTracking', { orderId: order.id, role: 'customer' });
+                }
               }}
               onCancel={() => console.log("Cancel Order", order.id)}
               onRate={() => console.log("Rate Order", order.id)}
@@ -83,6 +86,21 @@ const OrderScreen = ({ navigation }: any) => {
 
   useEffect(() => {
     fetchOrders();
+
+    const channel = supabase
+      .channel("public:orders")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        () => {
+          fetchOrders(); // Tải lại danh sách ngay lập tức khi có bất kỳ update nào
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Xử lý làm mới (pull to refresh)

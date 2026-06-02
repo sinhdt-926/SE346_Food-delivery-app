@@ -111,19 +111,21 @@ export default function OrderItem({
       <View style={styles.footer}>
         {type === "ongoing" ? (
           <>
-            <View style={styles.buttonWrapper}>
-              <CustomButton
-                title={`Track Order ${order.status !== 'delivering' ? '(Test)' : ''}`}
-                onPress={onTrackOrder}
-                buttonStyle={styles.solidButton}
-              />
-            </View>
+            {['pending', 'preparing', 'delivering'].includes(order.status) && (
+              <View style={styles.buttonWrapper}>
+                <CustomButton
+                  title="Track Order"
+                  onPress={onTrackOrder}
+                  buttonStyle={styles.solidButton}
+                />
+              </View>
+            )}
             <View style={styles.buttonWrapper}>
               <CustomButton
                 title="Cancel"
                 onPress={onCancel}
-                buttonStyle={order.status === "delivering" ? styles.outlineButton : styles.solidButton}
-                textStyle={order.status === "delivering" ? styles.outlineText : undefined}
+                buttonStyle={['pending', 'preparing', 'delivering'].includes(order.status) ? styles.outlineButton : styles.solidButton}
+                textStyle={['pending', 'preparing', 'delivering'].includes(order.status) ? styles.outlineText : undefined}
               />
             </View>
           </>

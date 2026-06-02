@@ -119,9 +119,14 @@ export const getOwnerOrders = async () => {
   });
 };
 export const updateOrderStatus = async (id: number, status: string) => {
+  const updateData: any = { status };
+  if (status === "delivering") {
+    updateData.delivery_started_at = new Date().toISOString();
+  }
+
   const { error } = await supabase
     .from("orders")
-    .update({ status })
+    .update(updateData)
     .eq("id", id);
 
   if (error) throw error;
@@ -165,10 +170,27 @@ export const getPaymentStatus = async (orderId: number) => {
 export const getOrderAddress = async (orderId: number) => {
   const { data, error } = await supabase
     .from("orders")
-    .select("delivery_address")
+    .select("status, delivery_address, delivery_started_at")
     .eq("id", orderId)
     .single();
 
   if (error) throw error;
-  return data?.delivery_address as string | undefined;
+  return data;
+};
+
+export const subscribeToOrderUpdates = (orderId: number, onUpdate: (payload: any) => void) => {
+  const channel = supabase
+    .channel(`public:orders:${orderId}`)
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` },
+      (payload) => {
+        onUpdate(payload.new);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };
