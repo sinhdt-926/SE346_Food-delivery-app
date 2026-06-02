@@ -2,9 +2,10 @@ import React from "react";
 import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-import OwnerProfileScreen from "../screens/owner/OwnerProfileScreen";
 import ManagerOrdersScreen from "../screens/owner/ManageOrdersScreen";
 import ManagerMenuScreen from "../screens/owner/ManageMenuScreen";
+import DashboardScreen from "../screens/owner/DashboardScreen";
+import ManagerPromosScreen from "../screens/owner/ManagePromosScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -27,6 +28,20 @@ export default function CustomerTabs() {
         },
       }}
     >
+      {/* tab dashboard */}
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="home-outline"
+              size={28}
+              color={focused ? "#FF7A1A" : "#999"}
+            />
+          ),
+        }}
+      />
       {/* tab manager menu */}
       <Tab.Screen
         name="Menu"
@@ -34,7 +49,7 @@ export default function CustomerTabs() {
         options={{
           tabBarIcon: ({ focused }) => (
             <Ionicons
-              name="menu-outline"
+              name="grid-outline"
               size={28}
               color={focused ? "#FF7A1A" : "#999"}
             />
@@ -88,12 +103,12 @@ export default function CustomerTabs() {
       />
       {/* tab profile */}
       <Tab.Screen
-        name="Profile"
-        component={OwnerProfileScreen}
+        name="Promos"
+        component={ManagerPromosScreen}
         options={{
           tabBarIcon: ({ focused }) => (
             <Ionicons
-              name="person-outline"
+              name="gift-outline"
               size={28}
               color={focused ? "#FF7A1A" : "#999"}
             />

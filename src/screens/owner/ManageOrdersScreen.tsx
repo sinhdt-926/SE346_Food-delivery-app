@@ -16,11 +16,17 @@ import {
 } from "../../services/order.service";
 import { Order, OrderStatus } from "../../types/order";
 import CustomButton from "../../components/CustomButton";
+import LogoutButton from "../../components/LogoutButton";
 
 export default function ManagerOrdersScreen() {
   const [activeTab, setActiveTab] = useState<OrderStatus>("pending");
   const [orders, setOrders] = useState<Order[]>([]);
-  const filteredOrders = orders.filter((item) => item.status === activeTab);
+  const filteredOrders = orders
+    .filter((item) => item.status === activeTab)
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
   const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -36,7 +42,7 @@ export default function ManagerOrdersScreen() {
         setOrders(data);
       }
     } catch (error) {
-      if (isFlag.current) setError("Không thể tải danh sách đơn hàng");
+      if (isFlag.current) setError("Unable to load the order list");
     } finally {
       if (isFlag.current) setLoading(false);
     }
@@ -70,14 +76,13 @@ export default function ManagerOrdersScreen() {
       await updateOrderStatus(id, nextStatus);
       await fetchOrders();
     } catch (error) {
-      console.log(error);
-      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
+      Alert.alert("Error", "Unable to update order status", [
         {
-          text: "Thử lại",
+          text: "Retry",
           onPress: () => handleNextState(id, currentStatus),
         },
         {
-          text: "Đóng",
+          text: "Close",
           style: "cancel",
         },
       ]);
@@ -90,7 +95,7 @@ export default function ManagerOrdersScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#FF7622" />
-        <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
+        <Text style={styles.loadingText}>Loading orders...</Text>
       </View>
     );
   }
@@ -116,14 +121,13 @@ export default function ManagerOrdersScreen() {
       await updateOrderStatus(id, "cancelled");
       await fetchOrders();
     } catch (error) {
-      console.log(error);
-      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
+      Alert.alert("Error", "Unable to update order status", [
         {
-          text: "Thử lại",
+          text: "Retry",
           onPress: () => handleCancelOrder(id),
         },
         {
-          text: "Đóng",
+          text: "Close",
           style: "cancel",
         },
       ]);
@@ -134,7 +138,10 @@ export default function ManagerOrdersScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Orders</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Menu</Text>
+        <LogoutButton />
+      </View>
 
       {/* tab */}
       <View style={styles.tabs}>
@@ -179,7 +186,7 @@ export default function ManagerOrdersScreen() {
             customerName={item.customer.fullname}
             customerId={item.customer.id}
             totalPrice={item.payment.amount}
-            avatarUrl={item.customer.avatarUrl}
+            avatarUrl={item.items?.[0]?.image_url}
             time={new Date(item.created_at)}
             onPress={() =>
               navigation.getParent()?.navigate("OrderDetail", {
@@ -196,8 +203,7 @@ export default function ManagerOrdersScreen() {
         <View style={styles.overlay}>
           <View style={styles.loadingBox}>
             <ActivityIndicator size="large" color="#FF7622" />
-
-            <Text style={styles.loadingText}>Đang cập nhật đơn hàng...</Text>
+            <Text style={styles.loadingText}>Updating the order...</Text>
           </View>
         </View>
       )}
@@ -209,23 +215,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F8F8",
-    paddingTop: 65,
-    paddingHorizontal: 24,
   },
 
   title: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#111",
-    marginBottom: 24,
+    color: "#FF7622",
   },
 
   tabs: {
+    marginHorizontal: 24,
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
     borderBottomColor: "#ECECEC",
-    marginBottom: 24,
+    marginBottom: 15,
   },
 
   center: {
@@ -276,5 +281,24 @@ const styles = StyleSheet.create({
 
   retryText: {
     color: "white",
+  },
+  header: {
+    width: "100%",
+    backgroundColor: "#181C2E",
+    paddingTop: 65,
+    paddingBottom: 28,
+    paddingHorizontal: 24,
+    marginBottom: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 4,
   },
 });

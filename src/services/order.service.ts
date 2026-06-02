@@ -51,7 +51,6 @@ type User = {
   id: string;
   fullname: string;
   phone_number: string;
-  avatarUrl: string;
 };
 
 // Admin/Owner lấy toàn bộ danh sách đơn
@@ -64,13 +63,13 @@ export const getOwnerOrders = async () => {
             created_at,
             status,
             delivery_address,
-            users(id, fullname, phone_number, avatarUrl),
+            users(id, fullname, phone_number),
             order_details(
                 quantity,
                 price,
                 subtotal,
                 note,
-                foods(name)
+                foods(name, image_url)
             ),
             payments(
                 id,
@@ -87,6 +86,7 @@ export const getOwnerOrders = async () => {
     const user = order.users as unknown as User;
     const items = (order.order_details ?? []).map((item: any) => ({
       name: item.foods?.name ?? "",
+      image_url: item.foods?.image_url ?? "",
       quantity: item.quantity,
       price: item.price,
       subtotal: Number(item.subtotal),
@@ -107,7 +107,6 @@ export const getOwnerOrders = async () => {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
         phone_number: user?.phone_number ?? "",
-        avatarUrl: user?.avatarUrl ?? "",
       },
       items,
       payment: {
@@ -127,15 +126,38 @@ export const updateOrderStatus = async (id: number, status: string) => {
 
   if (error) throw error;
 };
+//đếm số đơn đang thực hiện
+export const getRunningOrdersCount = async () => {
+  const { count, error } = await supabase
+    .from("orders")
+    .select("*", {
+      count: "exact",
+      head: true,
+    })
+    .in("status", ["pending", "preparing", "delivering"]);
+  if (error) throw error;
+  return count ?? 0;
+};
+//đếm số đơn hàng đang chờ phản hồi
+export const getRequestsCount = async () => {
+  const { count, error } = await supabase
+    .from("orders")
+    .select("*", {
+      count: "exact",
+      head: true,
+    })
+    .eq("status", "pending");
+  if (error) throw error;
+  return count ?? 0;
+};
 
 export const getPaymentStatus = async (orderId: number) => {
   const { data, error } = await supabase
-    .from('payments')
-    .select('status, amount, type, paid_at, transaction_no')
-    .eq('order_id', orderId)
+    .from("payments")
+    .select("status, amount, type, paid_at, transaction_no")
+    .eq("order_id", orderId)
     .single();
 
   if (error) throw error;
   return data;
 };
-

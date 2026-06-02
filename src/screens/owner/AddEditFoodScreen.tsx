@@ -10,6 +10,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,23 +23,10 @@ import {
   updateFood,
   uploadImage,
   deleteFood,
+  getCategories,
+  createCategory,
 } from "../../services/food.service";
-import { FOOD_TYPE_LABELS, food, FoodType } from "../../types/cart";
-
-const category_map: Record<FoodType, number> = {
-  pizza: 1,
-  burger: 2,
-  chicken: 3,
-  dessert: 4,
-  drink: 5,
-};
-const food_tags: FoodType[] = [
-  "pizza",
-  "burger",
-  "chicken",
-  "dessert",
-  "drink",
-];
+import { food, Category } from "../../types/cart";
 
 export default function AddEditFoodScreen() {
   const navigation = useNavigation<any>();
@@ -51,19 +39,37 @@ export default function AddEditFoodScreen() {
   const [price, setPrice] = useState("");
   const [details, setDetails] = useState("");
   const [image, setImage] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<FoodType>("pizza");
   const [isAvailable, setIsAvailable] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const allowExitRef = useRef(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number>(1);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
   useEffect(() => {
     if (!editingFood) return;
     setName(editingFood.name);
     setPrice(String(editingFood.price));
     setDetails(editingFood.description ?? "");
-    setImage(editingFood.image_url);
-    setSelectedTag(editingFood.type);
+    setImage(editingFood.image_url ?? null);
+    setSelectedCategoryId(editingFood.category_id ?? 1);
     setIsAvailable(editingFood.is_available ?? true);
   }, [editingFood]);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+        // default category
+        if (data.length > 0 && !editingFood) {
+          setSelectedCategoryId(data[0].id);
+        }
+      } catch (error) {
+        Alert.alert("Error", "Unable to load menu. Please try again.");
+      }
+    };
+    fetchCategories();
+  }, []);
   const hasChanges = useMemo(() => {
     if (!editingFood) {
       return (
@@ -71,7 +77,7 @@ export default function AddEditFoodScreen() {
         price.trim() !== "" ||
         details.trim() !== "" ||
         image !== null ||
-        selectedTag !== "pizza" ||
+        selectedCategoryId !== categories[0]?.id ||
         isAvailable !== true
       );
     }
@@ -80,10 +86,19 @@ export default function AddEditFoodScreen() {
       price !== String(editingFood.price) ||
       details !== (editingFood.description ?? "") ||
       image !== editingFood.image_url ||
-      selectedTag !== editingFood.type ||
+      selectedCategoryId !== editingFood.category_id ||
       isAvailable !== (editingFood.is_available ?? true)
     );
-  }, [name, price, details, image, selectedTag, isAvailable, editingFood]);
+  }, [
+    name,
+    price,
+    details,
+    image,
+    selectedCategoryId,
+    isAvailable,
+    editingFood,
+    categories,
+  ]);
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e: any) => {
       if (allowExitRef.current || !hasChanges || isSaving) {
@@ -139,19 +154,28 @@ export default function AddEditFoodScreen() {
         setImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.log(error);
       Alert.alert("Error", "Cannot pick image");
     }
   };
   const handleReset = () => {
+    // edit
     if (editingFood) {
       setName(editingFood.name);
       setPrice(String(editingFood.price));
       setDetails(editingFood.description ?? "");
-      setImage(editingFood.image_url);
-      setSelectedTag(editingFood.type);
-      setIsAvailable(editingFood.is_available);
+      setImage(editingFood.image_url ?? null);
+      setSelectedCategoryId(editingFood.category_id ?? 1);
+      setIsAvailable(editingFood.is_available ?? true);
+      return;
     }
+
+    // add
+    setName("");
+    setPrice("");
+    setDetails("");
+    setImage(null);
+    setSelectedCategoryId(categories[0]?.id ?? 1);
+    setIsAvailable(true);
   };
   const confirmReset = () => {
     Alert.alert("Confirm Reset", "Do you want to reset?", [
@@ -197,7 +221,7 @@ export default function AddEditFoodScreen() {
         price: Number(price),
         description: details.trim(),
         image_url: imageUrl ?? undefined,
-        category_id: category_map[selectedTag],
+        category_id: selectedCategoryId,
         is_available: isAvailable,
       };
       if (isEditMode && editingFood) {
@@ -211,7 +235,6 @@ export default function AddEditFoodScreen() {
       );
       return true;
     } catch (error) {
-      console.log(error);
       Alert.alert(
         "Error",
         isEditMode ? "Failed to update food" : "Failed to add food",
@@ -252,7 +275,6 @@ export default function AddEditFoodScreen() {
       Alert.alert("Success", "Food deleted successfully");
       navigation.goBack();
     } catch (error) {
-      console.log(error);
       Alert.alert("Error", "Failed to delete food");
     } finally {
       setIsSaving(false);
@@ -276,6 +298,22 @@ export default function AddEditFoodScreen() {
         },
       ],
     );
+  };
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) {
+      Alert.alert("Error", "Please enter the category name");
+      return;
+    }
+    try {
+      const newCategory = await createCategory(newCategoryName.trim());
+      setCategories((prev) => [...prev, newCategory]);
+      setSelectedCategoryId(newCategory.id);
+      setNewCategoryName("");
+      setShowCategoryModal(false);
+      Alert.alert("Success", "Category added");
+    } catch (error) {
+      Alert.alert("Error", "Unable to create category");
+    }
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -392,13 +430,13 @@ export default function AddEditFoodScreen() {
           <View style={styles.section}>
             <Text style={styles.label}>CATEGORY</Text>
             <View style={styles.tagsContainer}>
-              {food_tags.map((tag) => {
-                const isSelected = selectedTag === tag;
+              {categories.map((category) => {
+                const isSelected = selectedCategoryId === category.id;
                 return (
                   <TouchableOpacity
-                    key={tag}
+                    key={category.id}
                     activeOpacity={0.85}
-                    onPress={() => setSelectedTag(tag)}
+                    onPress={() => setSelectedCategoryId(category.id)}
                     style={[
                       styles.tagButton,
                       isSelected && styles.activeTagButton,
@@ -410,11 +448,17 @@ export default function AddEditFoodScreen() {
                         isSelected && styles.activeTagText,
                       ]}
                     >
-                      {FOOD_TYPE_LABELS[tag]}
+                      {category.category_name}
                     </Text>
                   </TouchableOpacity>
                 );
               })}
+              <TouchableOpacity
+                style={styles.addCategoryButton}
+                onPress={() => setShowCategoryModal(true)}
+              >
+                <Ionicons name="add" size={20} color="#888" />
+              </TouchableOpacity>
             </View>
           </View>
           {/* details */}
@@ -453,6 +497,27 @@ export default function AddEditFoodScreen() {
             )}
           </View>
         </ScrollView>
+        <Modal visible={showCategoryModal} transparent animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Add categories</Text>
+              <TextInput
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+                placeholder="Name of category"
+                style={styles.inputCategory}
+              />
+              <View style={styles.modalActions}>
+                <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
+                  <Text>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleAddCategory}>
+                  <Text style={{ color: "#FF7622" }}>Add</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
         {isSaving && (
           <View style={styles.overlay}>
             <View style={styles.loadingBox}>
@@ -682,10 +747,60 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5E7EB",
   },
-
   deleteButtonText: {
     fontSize: 14,
     fontWeight: "600",
     color: "red",
+  },
+  addCategoryButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#F3F4F6",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 6,
+  },
+  addCategoryShadow: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "85%",
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 16,
+  },
+  inputCategory: {
+    borderWidth: 1,
+    borderColor: "#DDD",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 50,
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 20,
+    marginTop: 20,
   },
 });

@@ -5,6 +5,10 @@ import AddEditFoodScreen from "../screens/owner/AddEditFoodScreen";
 import ManagerOrdersScreen from "../screens/owner/ManageOrdersScreen";
 import OrderDetailScreen from "../screens/owner/OrderDetailScreen";
 import ManagerMenuScreen from "../screens/owner/ManageMenuScreen";
+import DashboardScreen from "../screens/owner/DashboardScreen";
+import AddEditPromotionScreen from "../screens/owner/PromoDetailScreen";
+import PopularItemsScreen from "../screens/owner/PopularItemsScreen";
+import RevenusMonthScreen from "../screens/owner/RevenusMonthScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +31,16 @@ export default function OwnerStack() {
 
       {/* Manager Menu */}
       <Stack.Screen name="ManagerMenu" component={ManagerMenuScreen} />
+      {/* Dashboard */}
+      <Stack.Screen name="Dashboard" component={DashboardScreen} />
+      <Stack.Screen
+        name="AddEditPromotion"
+        component={AddEditPromotionScreen}
+      />
+      {/* PopularItems */}
+      <Stack.Screen name="PopularItems" component={PopularItemsScreen} />
+      {/* Revenus Month */}
+      <Stack.Screen name="RevenusMonth" component={RevenusMonthScreen} />
     </Stack.Navigator>
   );
 }

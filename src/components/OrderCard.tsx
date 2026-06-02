@@ -49,9 +49,11 @@ export default function OrderCard({
     <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.card}>
       <View style={styles.topSection}>
         <Image
-          source={{
-            uri: avatarUrl || "https://i.pravatar.cc/150",
-          }}
+          source={
+            avatarUrl
+              ? { uri: avatarUrl }
+              : require("../../assets/default-food.png")
+          }
           style={styles.image}
         />
         {/* Thông tin đơn hàng */}
@@ -59,7 +61,7 @@ export default function OrderCard({
           <Text style={styles.time}>{formatRelativeTime(time, false)}</Text>
           <Text style={styles.name}>{customerName}</Text>
           <Text style={styles.price}>
-            Total: {formatCurrency(totalPrice, "USD")}
+            Total: {formatCurrency(totalPrice, "VND")}
           </Text>
         </View>
       </View>
@@ -108,10 +110,20 @@ export default function OrderCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFF",
-    borderRadius: 28,
-    padding: 18,
-    marginBottom: 20,
+    backgroundColor: "white",
+    marginHorizontal: 24,
+    marginBottom: 16,
+    borderRadius: 24,
+    padding: 20,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
 
   topSection: {
@@ -119,11 +131,11 @@ const styles = StyleSheet.create({
   },
 
   image: {
-    width: 50,
-    height: 50,
-    borderRadius: 999,
-    backgroundColor: "#A8B5C7",
+    width: 60,
+    height: 60,
+    borderRadius: 12,
     marginRight: 18,
+    backgroundColor: "#EEE",
   },
 
   info: {

@@ -84,14 +84,13 @@ export default function OrderDetailScreen() {
         status: nextStatus,
       }));
     } catch (error) {
-      console.log(error);
-      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
+      Alert.alert("Error", "Unable to update order status", [
         {
-          text: "Thử lại",
+          text: "Retry",
           onPress: () => handleNextState(),
         },
         {
-          text: "Đóng",
+          text: "Close",
           style: "cancel",
         },
       ]);
@@ -110,14 +109,13 @@ export default function OrderDetailScreen() {
         status: "cancelled",
       }));
     } catch (error) {
-      console.log(error);
-      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
+      Alert.alert("Error", "Unable to update order status", [
         {
-          text: "Thử lại",
+          text: "Retry",
           onPress: () => handleCancelOrder(),
         },
         {
-          text: "Đóng",
+          text: "Close",
           style: "cancel",
         },
       ]);
@@ -186,7 +184,7 @@ export default function OrderDetailScreen() {
         {actionLoading && (
           <View style={styles.center}>
             <ActivityIndicator size="large" color="#FF7622" />
-            <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
+            <Text style={styles.loadingText}>Loading orders...</Text>
           </View>
         )}
       </View>
@@ -199,7 +197,7 @@ export default function OrderDetailScreen() {
         <View style={styles.divider} />
         <InfoRow
           label="Total"
-          value={formatCurrency(currentOrder.payment.amount, "USD")}
+          value={formatCurrency(currentOrder.payment.amount, "VND")}
           bold
         />
       </View>
@@ -256,7 +254,7 @@ function FoodItem({ name, quantity, price, note }: FoodItem) {
           <Text style={styles.foodQty}>Quantity: {quantity}</Text>
         </View>
 
-        <Text style={styles.foodPrice}>{formatCurrency(price, "USD")}</Text>
+        <Text style={styles.foodPrice}>{formatCurrency(price, "VND")}</Text>
       </View>
 
       {note ? <Text style={styles.note}>Note: {note}</Text> : null}

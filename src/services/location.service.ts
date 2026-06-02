@@ -11,16 +11,21 @@ export const LocationService = {
    * @param lon2 Kinh độ điểm 2
    * @returns Khoảng cách theo đơn vị Kilomet (km)
    */
-  calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
     const R = 6371; // Bán kính Trái Đất (km)
     const dLat = (lat2 - lat1) * (Math.PI / 180);
     const dLon = (lon2 - lon1) * (Math.PI / 180);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+        Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c;
     return d;
@@ -30,7 +35,10 @@ export const LocationService = {
    * Xin quyền GPS và lấy toạ độ hiện tại của thiết bị
    * @returns Coordinate toạ độ thực tế hoặc FALLBACK_COORDINATE nếu bị từ chối
    */
-  async getCurrentLocation(): Promise<{ coords: Coordinate; isFallback: boolean }> {
+  async getCurrentLocation(): Promise<{
+    coords: Coordinate;
+    isFallback: boolean;
+  }> {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
 
@@ -85,13 +93,18 @@ export const LocationService = {
         let name = "";
 
         for (const place of geocode) {
-          if (!streetNumber && place.streetNumber) streetNumber = place.streetNumber;
-          if (!street && place.street && !place.street.includes("+")) street = place.street;
-          if (!district && place.district && !place.district.includes("+")) district = place.district;
-          if (!subregion && place.subregion && !place.subregion.includes("+")) subregion = place.subregion;
+          if (!streetNumber && place.streetNumber)
+            streetNumber = place.streetNumber;
+          if (!street && place.street && !place.street.includes("+"))
+            street = place.street;
+          if (!district && place.district && !place.district.includes("+"))
+            district = place.district;
+          if (!subregion && place.subregion && !place.subregion.includes("+"))
+            subregion = place.subregion;
           if (!city && place.city) city = place.city;
           if (!region && place.region) region = place.region;
-          if (!name && place.name && !place.name.includes("+")) name = place.name;
+          if (!name && place.name && !place.name.includes("+"))
+            name = place.name;
         }
 
         const namePart = name && name !== streetNumber ? name : null;
@@ -106,7 +119,10 @@ export const LocationService = {
           .filter((val, index, self) => val && self.indexOf(val) === index) // Loại bỏ các giá trị rỗng và trùng lặp
           .join(", ");
 
-        return formattedAddress || `Toạ độ: ${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
+        return (
+          formattedAddress ||
+          `Toạ độ: ${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`
+        );
       }
       return `Toạ độ: ${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
     } catch (error) {
