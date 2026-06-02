@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import TopTabButton from "../../components/TopTabButton";
 import OrderCard from "../../components/OrderCard";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import {
   getOwnerOrders,
   updateOrderStatus,
@@ -47,12 +47,11 @@ export default function ManagerOrdersScreen() {
       if (isFlag.current) setLoading(false);
     }
   };
-  useEffect(() => {
-    fetchOrders();
-    return () => {
-      isFlag.current = false;
-    };
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchOrders();
+    }, []),
+  );
   //chuyển trạng thái đơn hàng
   const handleNextState = async (id: number, currentStatus: OrderStatus) => {
     let nextStatus: OrderStatus = currentStatus;
