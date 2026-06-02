@@ -139,3 +139,14 @@ export const getPaymentStatus = async (orderId: number) => {
   return data;
 };
 
+export const getOrderAddress = async (orderId: number) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("delivery_address")
+    .eq("id", orderId)
+    .single();
+
+  if (error) throw error;
+  return data?.delivery_address as string | undefined;
+};
+

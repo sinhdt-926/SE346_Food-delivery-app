@@ -57,16 +57,13 @@ export default function OrderItem({
 
   // 3. Xử lý hiển thị ngày/ETA
   const getHeaderDate = () => {
-    if (type === "ongoing") {
-      return "ETA: 12:30";
-    }
     const options: Intl.DateTimeFormatOptions = {
       day: "2-digit",
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
     };
-    return order.created_at.toLocaleDateString("en-GB", options).toUpperCase();
+    return new Date(order.created_at).toLocaleDateString("en-GB", options).toUpperCase();
   };
 
   return (
@@ -98,7 +95,7 @@ export default function OrderItem({
 
           {/* Dòng 2 */}
           <View style={styles.priceRow}>
-            <Text style={styles.price}>${order.total.toFixed(2)}</Text>
+            <Text style={styles.price}>{order.total.toLocaleString("vi-VN")}đ</Text>
             <View style={styles.dot} />
             <Text style={styles.itemsCount}>
               {order.items.length < 10
@@ -116,7 +113,7 @@ export default function OrderItem({
           <>
             <View style={styles.buttonWrapper}>
               <CustomButton
-                title="Track Order"
+                title={`Track Order ${order.status !== 'delivering' ? '(Test)' : ''}`}
                 onPress={onTrackOrder}
                 buttonStyle={styles.solidButton}
               />
@@ -125,8 +122,8 @@ export default function OrderItem({
               <CustomButton
                 title="Cancel"
                 onPress={onCancel}
-                buttonStyle={styles.outlineButton}
-                textStyle={styles.outlineText}
+                buttonStyle={order.status === "delivering" ? styles.outlineButton : styles.solidButton}
+                textStyle={order.status === "delivering" ? styles.outlineText : undefined}
               />
             </View>
           </>

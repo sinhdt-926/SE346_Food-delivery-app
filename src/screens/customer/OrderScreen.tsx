@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { useNavigation } from "@react-navigation/native";
 import OrderItem from "../../components/OrderItem";
 import { getMyOrders } from "../../services/order.service";
 
@@ -25,35 +26,40 @@ const OrderList = ({
   type: "ongoing" | "history";
   onRefresh: () => void;
   refreshing: boolean;
-}) => (
-  <View style={styles.listContainer}>
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.listContent}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      {data.length === 0 ? (
-        <Text style={styles.emptyText}>No {type} orders found.</Text>
-      ) : (
-        data.map((order) => (
-          <OrderItem
-            key={`${type}-${order.id}`}
-            type={type}
-            order={order}
-            // Các hàm này có thể được truyền từ props nếu cần logic xử lý thật
-            onViewDetail={() => console.log("View Detail", order.id)}
-            onTrackOrder={() => console.log("Track Order", order.id)}
-            onCancel={() => console.log("Cancel Order", order.id)}
-            onRate={() => console.log("Rate Order", order.id)}
-            onReOrder={() => console.log("Re-Order", order.id)}
-          />
-        ))
-      )}
-    </ScrollView>
-  </View>
-);
+}) => {
+  const navigation = useNavigation<any>();
+  return (
+    <View style={styles.listContainer}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {data.length === 0 ? (
+          <Text style={styles.emptyText}>No {type} orders found.</Text>
+        ) : (
+          data.map((order) => (
+            <OrderItem
+              key={`${type}-${order.id}`}
+              type={type}
+              order={order}
+              // Các hàm này có thể được truyền từ props nếu cần logic xử lý thật
+              onViewDetail={() => console.log("View Detail", order.id)}
+              onTrackOrder={() => {
+                navigation.navigate('OrderTracking', { orderId: order.id, role: 'customer' });
+              }}
+              onCancel={() => console.log("Cancel Order", order.id)}
+              onRate={() => console.log("Rate Order", order.id)}
+              onReOrder={() => console.log("Re-Order", order.id)}
+            />
+          ))
+        )}
+      </ScrollView>
+    </View>
+  );
+};
 
 const Tab = createMaterialTopTabNavigator();
 
