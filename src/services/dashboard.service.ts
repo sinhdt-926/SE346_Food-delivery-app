@@ -4,13 +4,13 @@ import { OrderStatus } from "../types/order";
 
 /**
  * Lấy dữ liệu thống kê doanh thu và đơn hàng cho Chủ cửa hàng (owner).
- * 
+ *
  * @param startDate Ngày bắt đầu lọc (định dạng ISO string, ví dụ: 2026-05-01T00:00:00Z)
  * @param endDate Ngày kết thúc lọc (định dạng ISO string, ví dụ: 2026-05-30T23:59:59Z)
  */
 export const getDashboardStats = async (
   startDate?: string,
-  endDate?: string
+  endDate?: string,
 ): Promise<DashboardStats> => {
   const { data, error } = await supabase.rpc("get_owner_dashboard_stats", {
     p_start_date: startDate || null,

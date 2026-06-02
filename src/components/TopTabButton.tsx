@@ -1,5 +1,12 @@
 import React from "react";
-import { TouchableOpacity, StyleSheet, View, Text } from "react-native";
+import {
+  TouchableOpacity,
+  StyleSheet,
+  View,
+  Text,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { IconType } from "../types/icon";
 
@@ -9,6 +16,7 @@ interface Props {
   iconType?: IconType;
   active?: boolean;
   onPress?: () => void;
+  buttonStyle?: StyleProp<ViewStyle>;
 }
 
 export default function TopTabButton({
@@ -17,6 +25,7 @@ export default function TopTabButton({
   iconType,
   active = false,
   onPress,
+  buttonStyle,
 }: Props) {
   const iconColor = active ? "#FF7622" : "#B1B1B1";
   const renderIcon = () => {
@@ -43,12 +52,13 @@ export default function TopTabButton({
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
-      style={styles.container}
+      style={[styles.container, buttonStyle]}
     >
       <View style={styles.content}>
         {renderIcon()}
         {title && (
           <Text
+            numberOfLines={1}
             style={[
               styles.text,
               active && styles.activeText,
@@ -66,7 +76,7 @@ export default function TopTabButton({
 
 const styles = StyleSheet.create({
   container: {
-    width: 52,
+    flex: 1,
     height: 52,
     alignItems: "center",
     justifyContent: "center",
