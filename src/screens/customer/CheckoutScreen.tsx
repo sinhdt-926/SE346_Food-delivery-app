@@ -143,7 +143,7 @@ export default function CheckoutScreen({ navigation, route }: any) {
           [{ text: "Đóng" }]
         );
         setIsOrdering(false);
-        return; 
+        return;
       }
     }
 
@@ -277,9 +277,14 @@ export default function CheckoutScreen({ navigation, route }: any) {
 
           {checkedItems.map((item) => (
             <View key={item.id} style={styles.orderRow}>
-              <Text style={styles.orderItemName} numberOfLines={2}>
-                {item.foods?.name ?? "Món ăn"}
-              </Text>
+              <View style={styles.orderItemInfo}>
+                <Text style={styles.orderItemName} numberOfLines={2}>
+                  {item.foods?.name ?? "Món ăn"}
+                </Text>
+                <Text style={styles.unitPrice}>
+                  {(item.foods?.price ?? 0).toLocaleString()}đ
+                </Text>
+              </View>
               <Text style={styles.qtyText}>{item.quantity}</Text>
               <Text style={styles.orderItemPrice}>
                 {(item.quantity * (item.foods?.price ?? 0)).toLocaleString()}đ
@@ -468,30 +473,36 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#A0A5BA",
     fontWeight: "600",
-    textTransform: "uppercase",
   },
   orderRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 8,
   },
-  orderItemName: {
+  orderItemInfo: {
     flex: 2,
-    fontSize: 14,
+    paddingRight: 8,
+  },
+  orderItemName: {
+    fontSize: 13,
     color: "#32343E",
     fontWeight: "500",
-    paddingRight: 8,
+  },
+  unitPrice: {
+    fontSize: 11,
+    color: "#A0A5BA",
+    marginTop: 2,
   },
   qtyText: {
     flex: 0.8,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
     color: "#6E7078",
     textAlign: "center",
   },
   orderItemPrice: {
     flex: 1.2,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "700",
     color: "#181C2E",
     textAlign: "right",
@@ -506,7 +517,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F7FA",
     borderRadius: 8,
     padding: 12,
-    fontSize: 14,
+    fontSize: 13,
     color: "#32343E",
     minHeight: 60,
     textAlignVertical: "top",
@@ -554,5 +565,5 @@ const styles = StyleSheet.create({
   defaultTag: { fontSize: 11, color: "#FF7622", fontWeight: "400" },
 
   removePromoBtn: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 12, alignSelf: "flex-start" },
-  removePromoText: { fontSize: 13, color: "#FF7622", fontWeight: "600" },
+  removePromoText: { fontSize: 13, color: "#ff2222ff", fontWeight: "600" },
 });

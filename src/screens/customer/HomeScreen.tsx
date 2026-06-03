@@ -99,7 +99,11 @@ const HomeScreen = ({ navigation }: any) => {
       Toast.show({
         type: "success",
         text1: "Thành công",
-        text2: `Đã thêm ${food.name} vào giỏ hàng`,
+        props: {
+          prefix: "Đã thêm ",
+          highlight: food.name,
+          suffix: " vào giỏ hàng"
+        },
         visibilityTime: 2000,
         topOffset: 120, // Hiển thị dưới Header
       });

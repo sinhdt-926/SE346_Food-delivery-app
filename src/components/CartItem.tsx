@@ -98,7 +98,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
               {food.name}
             </Text>
             {/* Hiển thị giá tiền */}
-            <Text style={styles.priceText}>{(food.price)} đ</Text>
+            <Text style={styles.priceText}>{(food.price ?? 0).toLocaleString()}đ</Text>
 
             {/* Hiển thị trạng thái hết hàng nếu có */}
             {!food.is_available && (
@@ -201,8 +201,8 @@ const styles = StyleSheet.create({
   priceText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#2b2424ff",
-    marginTop: 5,
+    color: "#2b24249a",
+    marginTop: 8,
   },
   unavailableText: {
     fontSize: 12,
@@ -212,8 +212,8 @@ const styles = StyleSheet.create({
     zIndex: 11,
   },
   qtyContainer: { flexDirection: "row", alignItems: "center" },
-  qtyBtn: { padding: 3 },
-  qtyText: { fontSize: 13, fontWeight: "bold", marginHorizontal: 8 },
+  qtyBtn: { padding: 2 },
+  qtyText: { fontSize: 13, fontWeight: "bold", marginHorizontal: 6 },
   deleteBtn: {
     backgroundColor: "#FF4722",
     justifyContent: "center",

@@ -163,8 +163,8 @@ const styles = StyleSheet.create({
     color: "#A0A5BA",
   },
   totalValue: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
-    color: "#181C2E",
+    color: "#000000ff",
   },
 });
