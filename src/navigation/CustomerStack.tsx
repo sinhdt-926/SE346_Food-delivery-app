@@ -9,6 +9,9 @@ import MyAddressScreen from '../screens/customer/MyAddressScreen';
 import AddLocationScreen from '../screens/customer/AddLocationScreen';
 import CategoryFoodScreen from '../screens/customer/CategoryFoodScreen';
 import SearchFoodScreen from '../screens/customer/SearchFoodScreen';
+import CheckoutScreen from '../screens/customer/CheckoutScreen';
+import OrderSuccessScreen from '../screens/customer/OrderSuccessScreen';
+import OrderTrackingScreen from '../screens/shared/OrderTrackingScreen';
 
 export type CustomerStackParamList = {
     CustomerTabs: undefined;
@@ -19,6 +22,9 @@ export type CustomerStackParamList = {
     AddLocation: { editData: any | null };
     CategoryFood: { category_id: number | null; category_name: string };
     SearchFood: undefined;
+    Checkout: { checkedItemIds: number[] };
+    OrderSuccess: { orderId: number };
+    OrderTracking: { orderId: number; role?: string };
 };
 
 const Stack = createNativeStackNavigator<CustomerStackParamList>();
@@ -44,6 +50,9 @@ export default function CustomerStack() {
             />
             <Stack.Screen name="CategoryFood" component={CategoryFoodScreen} />
             <Stack.Screen name="SearchFood" component={SearchFoodScreen} />
+            <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} options={{ animation: 'fade', gestureEnabled: false }} />
+            <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
         </Stack.Navigator>
     );
 }

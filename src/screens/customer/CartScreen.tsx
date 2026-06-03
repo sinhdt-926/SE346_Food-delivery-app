@@ -16,13 +16,11 @@ import CustomButton from "../../components/CustomButton";
 import { useCartStore } from "../../store/useCartStore";
 import { useAuthStore } from "../../store/useAuthStore";
 // Import Service để gọi API
-import { CheckoutService } from "../../services/checkout.service";
 import { Alert } from "react-native";
 
 const CartScreen = ({ navigation }: any) => {
   const [openedId, setOpenedId] = useState<number | null>(null);
   const { user } = useAuthStore();
-  const address = user?.publicProfile?.address || "Chưa cập nhật địa chỉ";
 
   // Lấy dữ liệu và hàm từ Zustand Store
   const {
@@ -44,30 +42,12 @@ const CartScreen = ({ navigation }: any) => {
 
   const total = getTotalPrice();
 
-  const handleCheckout = async () => {
-    // Tạm lấy dữ liệu cứng đang có trên UI để test API
-    const paymentType = "cash"; // Mặc định COD
-
-    // Gọi CheckoutService theo tham số yêu cầu
-    const response = await CheckoutService.processOrder(
-      address,
-      paymentType,
-      checkedIds,
-    );
-
-    if (response.success) {
-      /* Thay vì dùng resetCartState làm mất luôn các món chưa thanh toán,
-         ta gọi fetchCart để đồng bộ lại data từ Supabase */
-      await fetchCart();
-
-      Alert.alert(
-        "Thành công",
-        `Đặt hàng thành công! Mã đơn: ${response.data}`,
-      );
-      // Sau này cần thêm navigation.navigate("SuccessScreen") tại đây
-    } else {
-      Alert.alert("Lỗi", response.error || "Có lỗi xảy ra khi thanh toán");
+  const handleGoToCheckout = () => {
+    if (checkedIds.length === 0) {
+      Alert.alert('Thông báo', 'Vui lòng chọn ít nhất 1 sản phẩm để đặt hàng.');
+      return;
     }
+    navigation.navigate('Checkout', { checkedItemIds: checkedIds });
   };
 
   return (
@@ -109,19 +89,6 @@ const CartScreen = ({ navigation }: any) => {
       )}
 
       <View style={styles.footer}>
-        <View style={styles.addressSection}>
-          <Text style={styles.label}>ĐỊA CHỈ GIAO HÀNG</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('MyAddress')}>
-            <Text style={styles.editLink}>SỬA</Text>
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity
-          style={styles.addressBox}
-          onPress={() => navigation.navigate('MyAddress')}
-          activeOpacity={0.75}
-        >
-          <Text style={styles.addressText}>{address}</Text>
-        </TouchableOpacity>
         <View style={styles.bottomRow}>
           <View style={{ flex: 1, paddingRight: 10 }}>
             <Text style={styles.totalLabel}>Tổng tiền:</Text>
@@ -131,7 +98,7 @@ const CartScreen = ({ navigation }: any) => {
           </View>
           <CustomButton
             title="ĐẶT HÀNG"
-            onPress={handleCheckout}
+            onPress={handleGoToCheckout}
             buttonStyle={{ width: 140, paddingVertical: 15, borderRadius: 15 }}
             disabled={total === 0 || isLoading}
           />
@@ -179,31 +146,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
-  },
-  addressSection: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  label: {
-    fontSize: 12,
-    color: "#A0A5BA",
-    fontWeight: "bold",
-  },
-  editLink: {
-    color: "#FF7622",
-    fontSize: 12,
-    textDecorationLine: "underline",
-  },
-  addressBox: {
-    backgroundColor: "#F0F5FA",
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  addressText: {
-    color: "#32343E",
-    fontSize: 14,
   },
   bottomRow: {
     flexDirection: "row",

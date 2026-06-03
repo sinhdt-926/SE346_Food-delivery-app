@@ -8,6 +8,7 @@ export const getMyOrders = async () => {
       `
             id,
             created_at,
+            updated_at,
             status,
             delivery_address,
             order_details(
@@ -30,6 +31,7 @@ export const getMyOrders = async () => {
   return (data ?? []).map((order) => ({
     id: order.id,
     created_at: order.created_at,
+    updated_at: order.updated_at || order.created_at,
     status: order.status,
     address: order.delivery_address,
     items: (order.order_details ?? []).map((item: any) => ({
@@ -61,6 +63,7 @@ export const getOwnerOrders = async () => {
       `
             id,
             created_at,
+            updated_at,
             status,
             delivery_address,
             users(id, fullname, phone_number),
@@ -101,6 +104,7 @@ export const getOwnerOrders = async () => {
     return {
       id: order.id,
       created_at: order.created_at,
+      updated_at: order.updated_at || order.created_at,
       status: order.status,
       address: order.delivery_address,
       customer: {
@@ -119,9 +123,14 @@ export const getOwnerOrders = async () => {
   });
 };
 export const updateOrderStatus = async (id: number, status: string) => {
+  const updateData: any = { status };
+  if (status === "delivering") {
+    updateData.delivery_started_at = new Date().toISOString();
+  }
+
   const { error } = await supabase
     .from("orders")
-    .update({ status })
+    .update(updateData)
     .eq("id", id);
 
   if (error) throw error;
@@ -160,4 +169,49 @@ export const getPaymentStatus = async (orderId: number) => {
 
   if (error) throw error;
   return data;
+};
+
+export const getOrderAddress = async (orderId: number) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("status, delivery_address, delivery_started_at")
+    .eq("id", orderId)
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const subscribeToOrderUpdates = (orderId: number, onUpdate: (payload: any) => void) => {
+  const channel = supabase
+    .channel(`public:orders:${orderId}`)
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` },
+      (payload) => {
+        onUpdate(payload.new);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+};
+
+export const subscribeToUserOrders = (userId: string, onUpdate: () => void) => {
+  const channel = supabase
+    .channel(`public:orders:user:${userId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${userId}` },
+      () => {
+        onUpdate();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };
