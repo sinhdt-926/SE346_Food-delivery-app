@@ -11,6 +11,7 @@ interface ProfileData {
     fullName?: string;
     email?: string;
     phone?: string;
+    imageUrl?: string;
 }
 
 interface AuthState {

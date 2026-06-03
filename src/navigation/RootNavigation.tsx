@@ -32,18 +32,6 @@ export default function RootNavigation() {
   };
 
   useEffect(() => {
-    // 1. Kiểm tra session ngay khi mở app
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-        await fetchUserRole(session.user.id);
-      } else {
-        setUser(null);
-      }
-      setIsLoading(false);
-    });
-
-    // 2. Lắng nghe auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -56,8 +44,8 @@ export default function RootNavigation() {
 
       if (session?.user) {
         setUser(session.user);
-        // Chỉ fetch role khi sign in/sign up, không phải mỗi lần update
-        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        // Chỉ fetch role khi app khởi động (INITIAL_SESSION) hoặc vừa đăng nhập xong (SIGNED_IN)
+        if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
           setIsLoading(true);
           await fetchUserRole(session.user.id);
           setIsLoading(false);
@@ -65,6 +53,7 @@ export default function RootNavigation() {
       } else {
         setUser(null);
         setRole(null);
+        setIsLoading(false); //tắt loading nếu chưa đăng nhập
       }
     });
 

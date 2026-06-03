@@ -13,14 +13,16 @@ export default function PersonalInfoScreen({ navigation }: any) {
     icon,
     label,
     value,
+    color,
   }: {
     icon: any;
     label: string;
     value: string;
+    color: string;
   }) => (
     <View style={styles.infoRow}>
       <View style={styles.iconBox}>
-        <Ionicons name={icon} size={20} color="#FF8A00" />
+        <Ionicons name={icon} size={20} color={color} />
       </View>
       <View style={styles.textContainer}>
         <Text style={styles.label}>{label}</Text>
@@ -32,31 +34,35 @@ export default function PersonalInfoScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       <CustomHeader
-        title="Personal Info"
-        rightActionLabel="EDIT"
+        title="THÔNG TIN"
+        rightActionLabel="Sửa"
         onRightActionPress={() => navigation.navigate("EditProfile")}
       />
 
       <ScrollView contentContainerStyle={styles.content}>
         <UserHeader
           name={user?.user_metadata?.full_name || ""}
+          imageUrl={user?.user_metadata?.image_url || user?.publicProfile?.image_url || undefined}
         />
 
         <View style={styles.card}>
           <InfoRow
             icon="person-outline"
-            label="FULL NAME"
+            label="HỌ VÀ TÊN"
             value={user?.user_metadata?.full_name || ""}
+            color="#4A90E2"
           />
           <InfoRow
             icon="mail-outline"
             label="EMAIL"
             value={user?.email || ""}
+            color="#c13429ff"
           />
           <InfoRow
             icon="call-outline"
-            label="PHONE NUMBER"
+            label="SỐ ĐIỆN THOẠI"
             value={user?.user_metadata?.phone || ""}
+            color="#62e051ff"
           />
         </View>
       </ScrollView>

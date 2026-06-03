@@ -8,6 +8,7 @@ interface MenuItemProps {
     subLabel?: string;
     onPress: () => void;
     showChevron?: boolean;
+    iconColor?: string;
 }
 
 export default function MenuItem({
@@ -16,12 +17,13 @@ export default function MenuItem({
     subLabel,
     onPress,
     showChevron = true,
+    iconColor = "#FF8A00",
 }: MenuItemProps) {
     return (
         <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
             <View style={styles.leftSection}>
                 <View style={styles.iconWrapper}>
-                    <Ionicons name={iconName} size={22} color="#FF8A00" />
+                    <Ionicons name={iconName} size={22} color={iconColor} />
                 </View>
                 <View style={styles.textWrapper}>
                     <Text style={styles.label}>{label}</Text>

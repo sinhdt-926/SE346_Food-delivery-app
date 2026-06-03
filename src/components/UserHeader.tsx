@@ -1,24 +1,34 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 interface UserHeaderProps {
   name?: string;
+  imageUrl?: string | null;
   showEditBadge?: boolean;
+  onEditPress?: () => void;
 }
 
 export default function UserHeader({
   name,
+  imageUrl,
   showEditBadge = false,
+  onEditPress,
 }: UserHeaderProps) {
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
-        <View style={styles.avatarPlaceholder} />
+        {imageUrl ? (
+          <Image source={{ uri: imageUrl }} style={styles.avatarImage} />
+        ) : (
+          <View style={styles.avatarPlaceholder}>
+            <Ionicons name="person" size={50} color="#FFF" />
+          </View>
+        )}
 
         {showEditBadge && (
-          <TouchableOpacity style={styles.editBadge}>
-            <Ionicons name="pencil" size={12} color="#FFF" />
+          <TouchableOpacity style={styles.editBadge} onPress={onEditPress}>
+            <Ionicons name="camera" size={14} color="#FFF" />
           </TouchableOpacity>
         )}
       </View>
@@ -30,11 +40,18 @@ export default function UserHeader({
 const styles = StyleSheet.create({
   container: { alignItems: "center", marginVertical: 24 },
   avatarContainer: { position: "relative" },
+  avatarImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
   avatarPlaceholder: {
     width: 100,
     height: 100,
     borderRadius: 50,
     backgroundColor: "#FFD4B8",
+    justifyContent: "center",
+    alignItems: "center",
   },
   editBadge: {
     position: "absolute",
