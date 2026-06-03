@@ -58,7 +58,7 @@ export default function ProfileScreen({ navigation }: any) {
             iconName="lock-closed-outline"
             label="Đổi mật khẩu"
             iconColor="#9B51E0"
-            onPress={() => { }}
+            onPress={() => navigation.navigate('ChangePassword')}
           />
         </View>
 

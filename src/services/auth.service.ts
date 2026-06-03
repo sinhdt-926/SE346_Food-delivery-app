@@ -28,6 +28,16 @@ export const authService = {
     return data;
   },
 
+  // 2.5 Gửi lại mã OTP đăng ký
+  resendSignUpOtp: async (email: string) => {
+    const { data, error } = await supabase.auth.resend({
+      type: "signup",
+      email: email,
+    });
+    if (error) throw error;
+    return data;
+  },
+
   // 3. Gửi OTP quên mật khẩu
   resetPassword: async (email: string) => {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email);

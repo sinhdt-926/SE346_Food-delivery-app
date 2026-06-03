@@ -20,6 +20,7 @@ import { AuthStackParamList } from "../../types/app";
 import { authService } from "../../services/auth.service";
 import Toast from "react-native-toast-message";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -37,9 +38,26 @@ const LoginScreen = ({
   const [remember, setRemember] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {},
-  );
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  // Tải thông tin tài khoản đã lưu nếu người dùng từng check "Ghi nhớ"
+  React.useEffect(() => {
+    const loadRememberedData = async () => {
+      try {
+        const isRemembered = await AsyncStorage.getItem("IS_REMEMBERED");
+        if (isRemembered === "true") {
+          const storedEmail = await AsyncStorage.getItem("REMEMBERED_EMAIL");
+          const storedPassword = await AsyncStorage.getItem("REMEMBERED_PASSWORD");
+          if (storedEmail) setEmail(storedEmail);
+          if (storedPassword) setPassword(storedPassword);
+          setRemember(true);
+        }
+      } catch (error) {
+        console.log("Error loading login data", error);
+      }
+    };
+    loadRememberedData();
+  }, []);
 
   // Kiểm tra tính hợp lệ của email và mật khẩu trước khi gọi API
   const validate = () => {
@@ -48,15 +66,15 @@ const LoginScreen = ({
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!email) {
-      newErrors.email = "Please enter your email";
+      newErrors.email = "Vui lòng nhập email";
       isValid = false;
     } else if (!emailRegex.test(email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = "Vui lòng nhập đúng định dạng email";
       isValid = false;
     }
 
     if (!password) {
-      newErrors.password = "Please enter your password";
+      newErrors.password = "Vui lòng nhập mật khẩu";
       isValid = false;
     }
 
@@ -72,18 +90,28 @@ const LoginScreen = ({
     try {
       await authService.login(email, password);
 
+      // Xử lý logic Ghi nhớ (Remember me)
+      if (remember) {
+        await AsyncStorage.setItem("IS_REMEMBERED", "true");
+        await AsyncStorage.setItem("REMEMBERED_EMAIL", email);
+        await AsyncStorage.setItem("REMEMBERED_PASSWORD", password);
+      } else {
+        await AsyncStorage.removeItem("IS_REMEMBERED");
+        await AsyncStorage.removeItem("REMEMBERED_EMAIL");
+        await AsyncStorage.removeItem("REMEMBERED_PASSWORD");
+      }
+
       // Hiển thị thông báo thành công
       Toast.show({
         type: "success",
-        text1: "Success",
-        text2: "Welcome back! 👋",
+        text1: "Đăng nhập thành công",
       });
     } catch (error: any) {
       // Hiển thị thông báo lỗi từ server
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: error.message || "Invalid email or password.",
+        text1: "Lỗi",
+        text2: "Sai thông tin tài khoản hoặc mật khẩu.",
       });
     } finally {
       setIsLoading(false);
@@ -105,14 +133,14 @@ const LoginScreen = ({
         >
           <View style={styles.container}>
             <View style={styles.header}>
-              <Text style={styles.title}>Log In</Text>
+              <Text style={styles.title}>ĐĂNG NHẬP</Text>
               <Text style={styles.subtitle}>
-                Please sign in to your existing account
+                Vui lòng đăng nhập để tiếp tục
               </Text>
             </View>
 
             <View style={styles.formContainer}>
-              <Text style={styles.label}>EMAIL</Text>
+              <Text style={styles.label}>Email</Text>
               <View
                 style={[
                   styles.inputWrapper,
@@ -136,7 +164,7 @@ const LoginScreen = ({
                 <Text style={styles.errorText}>{errors.email}</Text>
               )}
 
-              <Text style={styles.label}>PASSWORD</Text>
+              <Text style={styles.label}>Mật khẩu</Text>
               <View
                 style={[
                   styles.inputWrapper,
@@ -175,10 +203,10 @@ const LoginScreen = ({
                     onValueChange={setRemember}
                     style={styles.checkbox}
                   />
-                  <Text style={styles.rememberText}>Remember me</Text>
+                  <Text style={styles.rememberText}>Ghi nhớ</Text>
                 </View>
                 <TouchableOpacity onPress={() => navigation.navigate("Forgot")}>
-                  <Text style={styles.forgotText}>Forgot Password</Text>
+                  <Text style={styles.forgotText}>Quên mật khẩu</Text>
                 </TouchableOpacity>
               </View>
 
@@ -190,36 +218,16 @@ const LoginScreen = ({
                 {isLoading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.loginBtnText}>LOG IN</Text>
+                  <Text style={styles.loginBtnText}>ĐĂNG NHẬP</Text>
                 )}
               </TouchableOpacity>
 
               <View style={styles.footerRow}>
-                <Text style={styles.footerText}>Don't have an account? </Text>
+                <Text style={styles.footerText}>Chưa có tài khoản? </Text>
                 <TouchableOpacity
                   onPress={() => navigation.navigate("Register")}
                 >
-                  <Text style={styles.signUpText}>SIGN UP</Text>
-                </TouchableOpacity>
-              </View>
-
-              <Text style={styles.orText}>Or</Text>
-
-              <View style={styles.socialRow}>
-                <TouchableOpacity
-                  style={[styles.socialIcon, { backgroundColor: "#3B5998" }]}
-                >
-                  <Ionicons name="logo-facebook" size={24} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.socialIcon, { backgroundColor: "#1DA1F2" }]}
-                >
-                  <Ionicons name="logo-twitter" size={24} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.socialIcon, { backgroundColor: "#181C2E" }]}
-                >
-                  <Ionicons name="logo-apple" size={24} color="white" />
+                  <Text style={styles.signUpText}>ĐĂNG KÝ</Text>
                 </TouchableOpacity>
               </View>
             </View>

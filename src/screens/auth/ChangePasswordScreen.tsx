@@ -14,52 +14,53 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { AuthStackParamList } from "../../types/app";
 import BackButton from "../../components/BackButton";
 import { authService } from "../../services/auth.service";
 import { useAuthStore } from "../../store/useAuthStore";
 import Toast from "react-native-toast-message";
 
-type NewPasswordScreenNavigationProp = NativeStackNavigationProp<
-  AuthStackParamList,
-  "NewPassword"
->;
-
-interface Props {
-  navigation: NewPasswordScreenNavigationProp;
-}
-
-const NewPasswordScreen: React.FC<Props> = ({ navigation }) => {
-  const { setIsRecoveringPassword } = useAuthStore();
-  const [password, setPassword] = useState("");
+export default function ChangePasswordScreen({ navigation }: any) {
+  const { user } = useAuthStore();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [showRePassword, setShowRePassword] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{
-    password?: string;
+    currentPassword?: string;
+    newPassword?: string;
     rePassword?: string;
   }>({});
 
-  // Kiểm tra dữ liệu đầu vào: mật khẩu trống, độ dài tối thiểu và khớp mật khẩu
   const validate = () => {
     let isValid = true;
-    let newErrors: { password?: string; rePassword?: string } = {};
+    let newErrors: { currentPassword?: string; newPassword?: string; rePassword?: string } = {};
 
-    if (!password) {
-      newErrors.password = "Vui lòng nhập mật khẩu";
+    if (!currentPassword) {
+      newErrors.currentPassword = "Vui lòng nhập mật khẩu hiện tại";
       isValid = false;
-    } else if (password.length < 6) {
-      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+    }
+
+    if (!newPassword) {
+      newErrors.newPassword = "Vui lòng nhập mật khẩu mới";
+      isValid = false;
+    } else if (newPassword.length < 6) {
+      newErrors.newPassword = "Mật khẩu mới phải có ít nhất 6 ký tự";
+      isValid = false;
+    } else if (newPassword === currentPassword) {
+      newErrors.newPassword = "Mật khẩu mới phải khác mật khẩu hiện tại";
       isValid = false;
     }
 
     if (!rePassword) {
-      newErrors.rePassword = "Vui lòng xác nhận mật khẩu";
+      newErrors.rePassword = "Vui lòng xác nhận mật khẩu mới";
       isValid = false;
-    } else if (password !== rePassword) {
-      newErrors.rePassword = "Mật khẩu không khớp";
+    } else if (newPassword !== rePassword) {
+      newErrors.rePassword = "Mật khẩu xác nhận không khớp";
       isValid = false;
     }
 
@@ -67,33 +68,36 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation }) => {
     return isValid;
   };
 
-  // Gửi yêu cầu cập nhật mật khẩu mới và hiển thị thông báo kết quả
-  const handleSavePassword = async () => {
+  const handleChangePassword = async () => {
     if (!validate()) return;
+    if (!user || !user.email) return;
 
     setIsLoading(true);
     try {
-      await authService.updatePassword(password);
+      // 1. Xác thực mật khẩu hiện tại (thử đăng nhập lại)
+      try {
+        await authService.login(user.email, currentPassword);
+      } catch (loginError: any) {
+        throw new Error("Mật khẩu hiện tại không chính xác");
+      }
+
+      // 2. Cập nhật mật khẩu mới
+      await authService.updatePassword(newPassword);
 
       Toast.show({
         type: "success",
         text1: "Đổi mật khẩu thành công",
-        text2: "Mật khẩu mới của bạn đã được cập nhật!",
+        text2: "Mật khẩu của bạn đã được cập nhật!",
       });
 
-      // Đăng xuất và điều hướng về Login
-      await authService.signOut();
-      navigation.navigate("Login");
+      // Quay lại ProfileScreen
+      navigation.goBack();
     } catch (error: any) {
-      if (error.message && error.message.includes("different from the old password")) {
-        setErrors({ ...errors, password: "Mật khẩu mới phải khác mật khẩu hiện tại" });
-      } else {
-        Toast.show({
-          type: "error",
-          text1: "Lỗi",
-          text2: error.message,
-        });
-      }
+      Toast.show({
+        type: "error",
+        text1: "Lỗi",
+        text2: error.message,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -109,56 +113,92 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation }) => {
           <ScrollView
             contentContainerStyle={{ flexGrow: 1 }}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
             <View style={styles.container}>
               <View style={styles.header}>
                 <BackButton style={styles.backButtonPosition} />
-                <Text style={styles.title}>Đặt lại mật khẩu</Text>
+                <Text style={styles.title}>Đổi mật khẩu</Text>
                 <Text style={styles.subtitle}>
                   Vui lòng nhập mật khẩu mới của bạn
                 </Text>
               </View>
 
               <View style={styles.formContainer}>
-                {/* NHẬP MẬT KHẨU MỚI */}
-                <Text style={styles.label}>Mật khẩu mới</Text>
+                {/* MẬT KHẨU HIỆN TẠI */}
+                <Text style={styles.label}>MẬT KHẨU HIỆN TẠI</Text>
                 <View
                   style={[
                     styles.inputWrapper,
-                    errors.password ? styles.inputError : null,
+                    errors.currentPassword ? styles.inputError : null,
                   ]}
                 >
                   <TextInput
                     placeholder="••••••••••••"
-                    secureTextEntry={!showPassword}
+                    secureTextEntry={!showCurrentPassword}
                     style={styles.input}
-                    value={password}
+                    value={currentPassword}
                     onChangeText={(text) => {
-                      setPassword(text);
-                      setErrors({ ...errors, password: undefined });
+                      setCurrentPassword(text);
+                      setErrors({ ...errors, currentPassword: undefined });
                     }}
                     placeholderTextColor="#A0A5BA"
                   />
                   <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
+                    onPress={() => setShowCurrentPassword(!showCurrentPassword)}
                   >
                     <Ionicons
-                      name={showPassword ? "eye-outline" : "eye-off-outline"}
+                      name={showCurrentPassword ? "eye-outline" : "eye-off-outline"}
                       size={20}
                       color="#A0A5BA"
                     />
                   </TouchableOpacity>
                 </View>
-                {errors.password && (
-                  <Text style={styles.errorText}>{errors.password}</Text>
+                {errors.currentPassword && (
+                  <Text style={styles.errorText}>{errors.currentPassword}</Text>
                 )}
 
-                {/* XÁC NHẬN LẠI MẬT KHẨU */}
-                <Text style={styles.label}>Xác nhận mật khẩu</Text>
+                {/* MẬT KHẨU MỚI */}
+                <Text style={styles.label}>MẬT KHẨU MỚI</Text>
                 <View
                   style={[
                     styles.inputWrapper,
-                    (errors.rePassword || (rePassword && password && rePassword !== password)) ? styles.inputError : null,
+                    (errors.newPassword || (newPassword && currentPassword && newPassword === currentPassword)) ? styles.inputError : null,
+                  ]}
+                >
+                  <TextInput
+                    placeholder="••••••••••••"
+                    secureTextEntry={!showNewPassword}
+                    style={styles.input}
+                    value={newPassword}
+                    onChangeText={(text) => {
+                      setNewPassword(text);
+                      setErrors({ ...errors, newPassword: undefined });
+                    }}
+                    placeholderTextColor="#A0A5BA"
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowNewPassword(!showNewPassword)}
+                  >
+                    <Ionicons
+                      name={showNewPassword ? "eye-outline" : "eye-off-outline"}
+                      size={20}
+                      color="#A0A5BA"
+                    />
+                  </TouchableOpacity>
+                </View>
+                {(errors.newPassword || (newPassword && currentPassword && newPassword === currentPassword)) ? (
+                  <Text style={styles.errorText}>
+                    {errors.newPassword || "Mật khẩu mới phải khác mật khẩu hiện tại"}
+                  </Text>
+                ) : null}
+
+                {/* XÁC NHẬN MẬT KHẨU MỚI */}
+                <Text style={styles.label}>NHẬP LẠI MẬT KHẨU MỚI</Text>
+                <View
+                  style={[
+                    styles.inputWrapper,
+                    (errors.rePassword || (rePassword && newPassword && rePassword !== newPassword)) ? styles.inputError : null,
                   ]}
                 >
                   <TextInput
@@ -182,7 +222,7 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation }) => {
                     />
                   </TouchableOpacity>
                 </View>
-                {(errors.rePassword || (rePassword && password && rePassword !== password)) ? (
+                {(errors.rePassword || (rePassword && newPassword && rePassword !== newPassword)) ? (
                   <Text style={styles.errorText}>
                     {errors.rePassword || "Mật khẩu xác nhận không khớp"}
                   </Text>
@@ -191,15 +231,15 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation }) => {
                 <TouchableOpacity
                   style={[
                     styles.submitBtn,
-                    (!password || !rePassword || password !== rePassword) ? styles.submitBtnDisabled : null
+                    (!currentPassword || !newPassword || !rePassword || newPassword === currentPassword || newPassword !== rePassword) ? styles.submitBtnDisabled : null
                   ]}
-                  onPress={handleSavePassword}
-                  disabled={isLoading || !password || !rePassword || password !== rePassword}
+                  onPress={handleChangePassword}
+                  disabled={isLoading || !currentPassword || !newPassword || !rePassword || newPassword === currentPassword || newPassword !== rePassword}
                 >
                   {isLoading ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <Text style={styles.submitBtnText}>LƯU</Text>
+                    <Text style={styles.submitBtnText}>LƯU MẬT KHẨU</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -209,28 +249,25 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation }) => {
       </TouchableWithoutFeedback>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#181C2E",
   },
-
   header: {
-    height: 220,
+    height: 180,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
     position: "relative",
   },
-
   backButtonPosition: {
     position: "absolute",
     top: 20,
     left: 20,
   },
-
   title: {
     fontSize: 30,
     color: "#fff",
@@ -238,13 +275,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 20,
   },
-
   subtitle: {
     color: "#fff",
     opacity: 0.8,
-    fontSize: 16,
+    fontSize: 15,
   },
-
   formContainer: {
     flex: 1,
     backgroundColor: "#fff",
@@ -253,7 +288,6 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingTop: 10,
   },
-
   label: {
     fontSize: 13,
     color: "#32343E",
@@ -261,7 +295,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontWeight: "600",
   },
-
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
@@ -270,13 +303,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     height: 56,
   },
-
   input: {
     flex: 1,
     color: "#32343E",
     fontSize: 15,
   },
-
   submitBtn: {
     backgroundColor: "#FF7622",
     height: 60,
@@ -289,14 +320,12 @@ const styles = StyleSheet.create({
   submitBtnDisabled: {
     backgroundColor: "#e0e0e0ff",
   },
-
   submitBtnText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
     textTransform: "uppercase",
   },
-
   inputError: {
     borderWidth: 1,
     borderColor: "#FF4B4B",
@@ -308,5 +337,3 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
 });
-
-export default NewPasswordScreen;
