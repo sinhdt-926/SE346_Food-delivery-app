@@ -203,11 +203,17 @@ export default function ManagerOrdersScreen() {
               totalPrice={item.payment.amount}
               avatarUrl={item.customer?.avatarUrl}
               time={new Date(item.created_at)}
-              onPress={() =>
-                navigation.getParent()?.navigate("OrderDetail", {
-                  order: item,
-                })
-              }
+              onPress={() => {
+                if (item.status === "delivering") {
+                  navigation.getParent()?.navigate("Tracking", {
+                    orderId: item.id,
+                  });
+                } else {
+                  navigation.getParent()?.navigate("OrderDetail", {
+                    order: item,
+                  });
+                }
+              }}
               onActionPress={() => handleNextState(item.id, item.status)}
               onCancelPress={() => handleCancelOrder(item.id)}
               actionLoading={actionLoading}
