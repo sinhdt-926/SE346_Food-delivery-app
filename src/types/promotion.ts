@@ -7,4 +7,5 @@ export interface Promotion {
   end_date: string;
   is_active: boolean;
   min_order_value?: number; // nullable — NULL = no minimum requirement
+  image_url?: string;
 }

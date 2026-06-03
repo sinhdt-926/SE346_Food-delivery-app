@@ -371,7 +371,7 @@ export default function AddEditFoodScreen() {
                         color="#FF7A1A"
                       />
                     </View>
-                    <Text style={styles.uploadText}>Upload Photo</Text>
+                    <Text style={styles.uploadText}>Tải ảnh</Text>
                   </View>
                 )}
               </TouchableOpacity>

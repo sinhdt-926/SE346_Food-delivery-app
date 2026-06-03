@@ -10,6 +10,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -24,6 +25,7 @@ import { Promotion } from "../../types/promotion";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { getLocalDateString } from "../../utils/date";
+import * as ImagePicker from "expo-image-picker";
 
 export default function AddEditPromotionScreen() {
   const navigation = useNavigation<any>();
@@ -43,6 +45,7 @@ export default function AddEditPromotionScreen() {
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [startDate, setStartDate] = useState(getLocalDateString());
   const [endDate, setEndDate] = useState(getLocalDateString());
+  const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!editingPromotion) return;
@@ -55,8 +58,9 @@ export default function AddEditPromotionScreen() {
     setMinOrderValue(
       editingPromotion.min_order_value != null
         ? String(editingPromotion.min_order_value)
-        : ""
+        : "",
     );
+    setImage(editingPromotion.image_url ?? null);
   }, [editingPromotion]);
 
   const hasChanges = useMemo(() => {
@@ -70,9 +74,11 @@ export default function AddEditPromotionScreen() {
       startDate !== editingPromotion.start_date.slice(0, 10) ||
       endDate !== editingPromotion.end_date.slice(0, 10) ||
       isActive !== editingPromotion.is_active ||
-      minOrderValue !== (editingPromotion.min_order_value != null
-        ? String(editingPromotion.min_order_value)
-        : "")
+      minOrderValue !==
+        (editingPromotion.min_order_value != null
+          ? String(editingPromotion.min_order_value)
+          : "") ||
+      image !== (editingPromotion.image_url ?? null)
     );
   }, [
     name,
@@ -82,6 +88,7 @@ export default function AddEditPromotionScreen() {
     endDate,
     isActive,
     minOrderValue,
+    image,
     editingPromotion,
   ]);
 
@@ -167,9 +174,9 @@ export default function AddEditPromotionScreen() {
         start_date: startDate,
         end_date: endDate,
         is_active: isActive,
-        min_order_value: minOrderValue.trim() !== ""
-          ? Number(minOrderValue)
-          : undefined,
+        min_order_value:
+          minOrderValue.trim() !== "" ? Number(minOrderValue) : undefined,
+        image_url: image ?? undefined,
       };
 
       if (isEditMode && editingPromotion) {
@@ -251,7 +258,7 @@ export default function AddEditPromotionScreen() {
       setMinOrderValue(
         editingPromotion.min_order_value != null
           ? String(editingPromotion.min_order_value)
-          : ""
+          : "",
       );
       return;
     }
@@ -281,6 +288,30 @@ export default function AddEditPromotionScreen() {
       ],
     );
   };
+  const pickImage = async () => {
+    try {
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert(
+          "Quyền truy cập bị từ chối",
+          "Vui lòng cho phép truy cập vào thư viện ảnh",
+        );
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể chọn ảnh");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -306,6 +337,36 @@ export default function AddEditPromotionScreen() {
               value={name}
               onChangeText={setName}
             />
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.label}>Ảnh chương trình</Text>
+            <View style={styles.uploadContainer}>
+              <TouchableOpacity
+                style={styles.previewBox}
+                activeOpacity={0.85}
+                onPress={pickImage}
+              >
+                {image ? (
+                  <Image
+                    source={{
+                      uri: image,
+                    }}
+                    style={styles.previewImage}
+                  />
+                ) : (
+                  <View style={styles.emptyUploadContainer}>
+                    <View style={styles.uploadIconWrapper}>
+                      <Ionicons
+                        name="cloud-upload-outline"
+                        size={34}
+                        color="#FF7A1A"
+                      />
+                    </View>
+                    <Text style={styles.uploadText}>Tải ảnh</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
           <View style={styles.section}>
             <Text style={styles.label}>Loại giảm giá</Text>
@@ -340,6 +401,19 @@ export default function AddEditPromotionScreen() {
               keyboardType="numeric"
               value={discountValue}
               onChangeText={setDiscountValue}
+            />
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.label}>
+              Giá trị đơn hàng tối thiểu (không bắt buộc)
+            </Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              placeholder="Để trống nếu không áp dụng"
+              placeholderTextColor="#999"
+              value={minOrderValue}
+              onChangeText={setMinOrderValue}
             />
           </View>
           <View style={styles.section}>
@@ -577,5 +651,43 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 3,
     elevation: 1,
+  },
+  uploadContainer: {
+    alignItems: "center",
+  },
+  previewBox: {
+    width: "80%",
+    aspectRatio: 1,
+    maxWidth: 240,
+    borderRadius: 28,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderColor: "#DADADA",
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  previewImage: {
+    width: "100%",
+    height: "100%",
+  },
+  emptyUploadContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  uploadIconWrapper: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    backgroundColor: "#FFF3EA",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  uploadText: {
+    color: "#999",
+    fontSize: 15,
+    fontWeight: "600",
   },
 });

@@ -1,8 +1,9 @@
 import React from "react";
-import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import { TouchableOpacity, View, Text, StyleSheet, Image } from "react-native";
 
 import { Promotion } from "../types/promotion";
 import { formatCurrency } from "../utils/formatters";
+import { formatDate } from "../utils/formatters";
 
 interface Props {
   promo: Promotion;
@@ -63,9 +64,18 @@ export default function PromotionCard({ promo, status, onPress }: Props) {
       onPress={onPress}
       style={styles.card}
     >
+      <Image
+        source={
+          promo.image_url
+            ? { uri: promo.image_url }
+            : require("../../assets/default-voucher.png")
+        }
+        style={styles.image}
+      />
       <View style={styles.content}>
         <Text style={styles.name}>{promo.name}</Text>
         <Text style={styles.discount}>{renderDiscount()}</Text>
+        <Text style={styles.discount}>HSD: {formatDate(promo.end_date)}</Text>
       </View>
       <View style={[styles.badge, getBadgeStyle()]}>
         <Text style={[styles.badgeText, getBadgeTextStyle()]}>
@@ -98,14 +108,14 @@ const styles = StyleSheet.create({
   },
 
   name: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "700",
     color: "#222",
     marginBottom: 8,
   },
 
   discount: {
-    fontSize: 15,
+    fontSize: 13,
     color: "#777",
     fontWeight: "600",
   },
@@ -143,5 +153,12 @@ const styles = StyleSheet.create({
   },
   expiredText: {
     color: "#9CA3AF",
+  },
+  image: {
+    width: 70,
+    height: 70,
+    borderRadius: 14,
+    marginRight: 16,
+    backgroundColor: "#EEE",
   },
 });

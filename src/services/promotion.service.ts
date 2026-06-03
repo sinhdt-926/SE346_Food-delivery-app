@@ -23,6 +23,7 @@ export const createPromotion = async (data: {
   start_date: string;
   end_date: string;
   min_order_value?: number;
+  image_url?: string;
 }) => {
   const { data: result, error } = await supabase
     .from("promotions")
@@ -35,6 +36,7 @@ export const createPromotion = async (data: {
         end_date: data.end_date,
         is_active: true,
         min_order_value: data.min_order_value ?? null,
+        image_url: data.image_url ?? null,
       },
     ])
     .select();
@@ -82,6 +84,7 @@ export const updatePromotion = async (
     end_date: string;
     is_active: boolean;
     min_order_value?: number;
+    image_url?: string;
   },
 ) => {
   const { data: result, error } = await supabase
@@ -94,6 +97,7 @@ export const updatePromotion = async (
       end_date: data.end_date,
       is_active: data.is_active,
       min_order_value: data.min_order_value ?? null,
+      image_url: data.image_url ?? null,
     })
     .eq("id", id)
     .select();
