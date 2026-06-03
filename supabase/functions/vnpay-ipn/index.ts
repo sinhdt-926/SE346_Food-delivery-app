@@ -14,17 +14,14 @@ serve(async (req: Request) => {
       params[key] = value;
     }
 
-    // Lấy appScheme truyền từ create-payment
-    const dynamicScheme = params.appScheme;
-    
     const vnp_SecureHash = params.vnp_SecureHash;
     delete params.vnp_SecureHash;
     delete params.vnp_SecureHashType;
-    delete params.appScheme; // Xóa appScheme để không ảnh hưởng thuật toán băm của VNPAY
 
     const secretKey = Deno.env.get("vnp_HashSecret");
     if (!secretKey) {
-      throw new Error("Missing vnp_HashSecret environment variable");
+      console.error("Missing vnp_HashSecret environment variable");
+      return new Response(JSON.stringify({ RspCode: "99", Message: "Unknown Error" }), { status: 500 });
     }
 
     // Hàm sortObject chuẩn của VNPAY
@@ -57,8 +54,10 @@ serve(async (req: Request) => {
       .digest("hex");
 
     if (expectedHash !== vnp_SecureHash) {
-      throw new Error("Invalid signature");
+      console.error("Invalid signature in IPN");
+      return new Response(JSON.stringify({ RspCode: "97", Message: "Invalid Checksum" }), { status: 200 });
     }
+
     const isSuccess = params.vnp_ResponseCode === "00";
 
     // Khởi tạo Supabase Admin Client
@@ -66,19 +65,40 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error("Missing Supabase environment variables");
+      console.error("Missing Supabase environment variables");
+      return new Response(JSON.stringify({ RspCode: "99", Message: "Unknown Error" }), { status: 500 });
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Cập nhật bảng payments
-    let paymentStatus = 'failed';
-    if (isSuccess) {
-      paymentStatus = 'paid';
-    } else if (params.vnp_ResponseCode === '24') {
-      paymentStatus = 'cancelled'; // 24: Khách hàng chủ động huỷ thanh toán
+    // Lấy thông tin đơn hàng hiện tại
+    const { data: payment, error: fetchError } = await supabaseAdmin
+      .from('payments')
+      .select('status, amount')
+      .eq('order_id', params.vnp_TxnRef)
+      .single();
+
+    if (fetchError || !payment) {
+      console.error("Order not found in IPN");
+      return new Response(JSON.stringify({ RspCode: "01", Message: "Order Not Found" }), { status: 200 });
     }
 
+    // Kiểm tra số tiền
+    // VNPay gửi số tiền nhân 100, cần chia lại để so sánh
+    const vnpAmount = parseInt(params.vnp_Amount, 10) / 100;
+    if (payment.amount !== vnpAmount) {
+      console.error("Invalid amount in IPN");
+      return new Response(JSON.stringify({ RspCode: "04", Message: "Invalid Amount" }), { status: 200 });
+    }
+
+    // Nếu đơn hàng đã được cập nhật trước đó
+    if (payment.status !== 'unpaid' && payment.status !== 'pending') {
+      console.log("Order already confirmed");
+      return new Response(JSON.stringify({ RspCode: "02", Message: "Order already confirmed" }), { status: 200 });
+    }
+
+    // Cập nhật bảng payments
+    const paymentStatus = isSuccess ? 'paid' : 'failed';
     const paidAt = isSuccess ? new Date().toISOString() : null;
 
     const { error: updateError } = await supabaseAdmin
@@ -95,26 +115,12 @@ serve(async (req: Request) => {
 
     if (updateError) {
       console.error('Lỗi khi cập nhật bảng payments:', updateError);
+      return new Response(JSON.stringify({ RspCode: "99", Message: "Unknown Error" }), { status: 500 });
     }
 
-    // Redirect về app thông qua Deep Link
-    // Ưu tiên dynamicScheme (được gửi từ máy dev hiện tại), nếu không có thì dùng APP_SCHEME env
-    const appScheme = dynamicScheme || Deno.env.get("APP_SCHEME") || "exp://127.0.0.1:8081/--";
-    
-    // Đảm bảo scheme có dấu /-- ở cuối nếu dùng Expo Go
-    let finalScheme = appScheme;
-    if (finalScheme.startsWith('exp://') && !finalScheme.endsWith('/--')) {
-      finalScheme = finalScheme.endsWith('/') ? `${finalScheme}--` : `${finalScheme}/--`;
-    }
-    // Xóa dấu slash thừa
-    if (finalScheme.endsWith('/')) {
-        finalScheme = finalScheme.slice(0, -1);
-    }
-    
-    const redirectUrl = `${finalScheme}/payment-result?status=${isSuccess ? 'success' : 'failed'}&orderId=${params.vnp_TxnRef}`;
-
-    return Response.redirect(redirectUrl, 302);
+    return new Response(JSON.stringify({ RspCode: "00", Message: "Confirm Success" }), { status: 200 });
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    console.error("Lỗi Exception trong IPN:", err);
+    return new Response(JSON.stringify({ RspCode: "99", Message: "Unknown Error" }), { status: 500 });
   }
 });

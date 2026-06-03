@@ -8,13 +8,14 @@ export const getMyOrders = async () => {
       `
             id,
             created_at,
+            updated_at,
             status,
             delivery_address,
+            note,
             order_details(
                 quantity,
                 price,
                 subtotal,
-                note,
                 foods(name)
             ),
             payments(
@@ -30,14 +31,15 @@ export const getMyOrders = async () => {
   return (data ?? []).map((order) => ({
     id: order.id,
     created_at: order.created_at,
+    updated_at: order.updated_at || order.created_at,
     status: order.status,
     address: order.delivery_address,
+    note: order.note,
     items: (order.order_details ?? []).map((item: any) => ({
       name: item.foods?.name,
       quantity: item.quantity,
       price: item.price,
       subtotal: Number(item.subtotal),
-      note: item.note,
     })),
     // Lấy tổng tiền thực tế (đã giảm) từ bản ghi payments đầu tiên thuộc về order này
     total:
@@ -62,8 +64,10 @@ export const getOwnerOrders = async () => {
       `
             id,
             created_at,
+            updated_at,
             status,
             delivery_address,
+            note,
             users(id, fullname, phone_number, image_url),
             order_details(
                 quantity,
@@ -99,8 +103,10 @@ export const getOwnerOrders = async () => {
     return {
       id: order.id,
       created_at: order.created_at,
+      updated_at: order.updated_at || order.created_at,
       status: order.status,
       address: order.delivery_address,
+      note: order.note,
       customer: {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
@@ -118,9 +124,14 @@ export const getOwnerOrders = async () => {
   });
 };
 export const updateOrderStatus = async (id: number, status: string) => {
+  const updateData: any = { status };
+  if (status === "delivering") {
+    updateData.delivery_started_at = new Date().toISOString();
+  }
+
   const { error } = await supabase
     .from("orders")
-    .update({ status })
+    .update(updateData)
     .eq("id", id);
 
   if (error) throw error;
@@ -159,4 +170,62 @@ export const getPaymentStatus = async (orderId: number) => {
 
   if (error) throw error;
   return data;
+};
+
+export const getOrderAddress = async (orderId: number) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("status, delivery_address, delivery_started_at")
+    .eq("id", orderId)
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const subscribeToOrderUpdates = (
+  orderId: number,
+  onUpdate: (payload: any) => void,
+) => {
+  const channel = supabase
+    .channel(`public:orders:${orderId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "orders",
+        filter: `id=eq.${orderId}`,
+      },
+      (payload) => {
+        onUpdate(payload.new);
+      },
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+};
+
+export const subscribeToUserOrders = (userId: string, onUpdate: () => void) => {
+  const channel = supabase
+    .channel(`public:orders:user:${userId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "orders",
+        filter: `user_id=eq.${userId}`,
+      },
+      () => {
+        onUpdate();
+      },
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };

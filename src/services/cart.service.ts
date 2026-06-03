@@ -1,4 +1,4 @@
-import {supabase} from './supabase';
+import { supabase } from './supabase';
 import { CartItem } from '../types/cart';
 import { ServiceResponse } from '../types/service';
 
@@ -83,8 +83,8 @@ export const CartService = {
 
             const { data, error } = await supabase
                 .rpc('add_to_cart', {
-                    p_cart_id:  cartId,
-                    p_food_id:  foodId,
+                    p_cart_id: cartId,
+                    p_food_id: foodId,
                     p_quantity: quantity,
                 });
 
@@ -94,7 +94,7 @@ export const CartService = {
             return { success: false, error: error.message };
         }
     },
-  
+
     // Cập nhật số lượng món ăn (Tăng/Giảm trực tiếp)
     async updateQuantity(cartItemId: number, newQuantity: number): Promise<ServiceResponse> {
         try {

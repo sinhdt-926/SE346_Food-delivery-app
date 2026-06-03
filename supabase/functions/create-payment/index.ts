@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/mod.ts";
 import crypto from "node:crypto";
 import qs from "npm:qs";
 import { Buffer } from "node:buffer";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,20 +16,43 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { orderId, amount, appScheme } = await req.json();
+    const { orderId, appScheme } = await req.json();
 
-    if (!orderId || !amount) {
-      throw new Error("Missing orderId or amount");
+    if (!orderId) {
+      throw new Error("Missing orderId");
     }
 
-    const tmnCode    = Deno.env.get("vnp_TmnCode")!;
-    const secretKey  = Deno.env.get("vnp_HashSecret")!;
+    const tmnCode    = Deno.env.get("vnp_TmnCode");
+    const secretKey  = Deno.env.get("vnp_HashSecret");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!tmnCode || !secretKey || !supabaseUrl || !supabaseServiceKey) {
+      throw new Error("Missing required environment variables");
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: payment, error } = await supabaseAdmin
+      .from("payments")
+      .select("amount, status")
+      .eq("order_id", orderId)
+      .single();
+
+    if (error || !payment) {
+      throw new Error("Payment not found for the given orderId");
+    }
+
+    if (payment.status !== "unpaid") {
+      throw new Error(`Payment cannot be processed because its current status is '${payment.status}'. Please create a new order.`);
+    }
+
+    const amount = payment.amount;
+
     const vnpUrl     = Deno.env.get("vnp_Url") || "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     
     // Sử dụng vnpay-return function làm URL trả về
     // Mặc định url của edge function vnpay-return
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-    const defaultReturnUrl = supabaseUrl ? `${supabaseUrl}/functions/v1/vnpay-return` : "";
+    const defaultReturnUrl = `${supabaseUrl}/functions/v1/vnpay-return`;
     const returnFunctionUrl = Deno.env.get("VNP_RETURN_URL") || defaultReturnUrl;
 
     const date = new Date();

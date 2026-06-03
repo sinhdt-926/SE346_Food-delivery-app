@@ -36,6 +36,7 @@ export default function AddEditPromotionScreen() {
   const [discountType, setDiscountType] = useState("percent");
   const [discountValue, setDiscountValue] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [minOrderValue, setMinOrderValue] = useState(""); // nullable — empty string = NULL
   const [isSaving, setIsSaving] = useState(false);
   const allowExitRef = useRef(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
@@ -51,6 +52,11 @@ export default function AddEditPromotionScreen() {
     setStartDate(editingPromotion.start_date.slice(0, 10));
     setEndDate(editingPromotion.end_date.slice(0, 10));
     setIsActive(editingPromotion.is_active);
+    setMinOrderValue(
+      editingPromotion.min_order_value != null
+        ? String(editingPromotion.min_order_value)
+        : ""
+    );
   }, [editingPromotion]);
 
   const hasChanges = useMemo(() => {
@@ -63,7 +69,10 @@ export default function AddEditPromotionScreen() {
       discountValue !== String(editingPromotion.discount_value) ||
       startDate !== editingPromotion.start_date.slice(0, 10) ||
       endDate !== editingPromotion.end_date.slice(0, 10) ||
-      isActive !== editingPromotion.is_active
+      isActive !== editingPromotion.is_active ||
+      minOrderValue !== (editingPromotion.min_order_value != null
+        ? String(editingPromotion.min_order_value)
+        : "")
     );
   }, [
     name,
@@ -72,6 +81,7 @@ export default function AddEditPromotionScreen() {
     startDate,
     endDate,
     isActive,
+    minOrderValue,
     editingPromotion,
   ]);
 
@@ -138,6 +148,11 @@ export default function AddEditPromotionScreen() {
       Alert.alert("Ngày kết thúc phải sau ngày bắt đầu");
       return false;
     }
+    const minVal = Number(minOrderValue);
+    if (minOrderValue.trim() !== "" && (isNaN(minVal) || minVal < 0)) {
+      Alert.alert("Invalid minimum order value", "Must be a number >= 0");
+      return false;
+    }
     return true;
   };
 
@@ -152,6 +167,9 @@ export default function AddEditPromotionScreen() {
         start_date: startDate,
         end_date: endDate,
         is_active: isActive,
+        min_order_value: minOrderValue.trim() !== ""
+          ? Number(minOrderValue)
+          : undefined,
       };
 
       if (isEditMode && editingPromotion) {
@@ -230,6 +248,11 @@ export default function AddEditPromotionScreen() {
       setStartDate(editingPromotion.start_date.slice(0, 10));
       setEndDate(editingPromotion.end_date.slice(0, 10));
       setIsActive(editingPromotion.is_active);
+      setMinOrderValue(
+        editingPromotion.min_order_value != null
+          ? String(editingPromotion.min_order_value)
+          : ""
+      );
       return;
     }
     setName("");
@@ -238,6 +261,7 @@ export default function AddEditPromotionScreen() {
     setStartDate("");
     setEndDate("");
     setIsActive(true);
+    setMinOrderValue("");
   };
   const confirmReset = () => {
     Alert.alert(
