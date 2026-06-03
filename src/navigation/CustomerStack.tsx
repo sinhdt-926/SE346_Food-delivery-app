@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import Toast from 'react-native-toast-message';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import { subscribeToUserOrders } from '../services/order.service';
+import { useAuthStore } from '../store/useAuthStore';
 import CustomerTabs from './CustomerTabs';
 
 import PersonalInfoScreen from '../screens/customer/PersonalInfoScreen';
@@ -30,6 +34,54 @@ export type CustomerStackParamList = {
 const Stack = createNativeStackNavigator<CustomerStackParamList>();
 
 export default function CustomerStack() {
+    const navigation = useNavigation<any>();
+    const { user } = useAuthStore();
+
+    useEffect(() => {
+        if (!user) return;
+
+        // Lắng nghe thông qua Service
+        const unsubscribe = subscribeToUserOrders(user.id, (payload: any) => {
+            const oldStatus = payload?.old?.status;
+            const newStatus = payload?.new?.status;
+
+            // Chỉ thông báo nếu trạng thái thực sự thay đổi
+            if (oldStatus !== newStatus && newStatus) {
+                let title = 'Cập nhật đơn hàng';
+                let message = 'Đơn hàng của bạn vừa được cập nhật.';
+
+                if (newStatus === 'preparing') {
+                    title = '🧑‍🍳 Quán đã nhận đơn!';
+                    message = 'Nhà hàng đang chuẩn bị món ăn cho bạn nhé.';
+                } else if (newStatus === 'delivering') {
+                    title = '🛵 Shipper đang giao hàng!';
+                    message = 'Tài xế đã lấy món và đang trên đường đến chỗ bạn.';
+                } else if (newStatus === 'completed') {
+                    title = '✅ Giao hàng thành công!';
+                    message = 'Đơn hàng của bạn đã được giao. Chúc bạn ngon miệng!';
+                } else if (newStatus === 'cancelled') {
+                    title = '❌ Đơn hàng bị huỷ';
+                    message = 'Rất tiếc, đơn hàng của bạn đã bị huỷ.';
+                }
+
+                // Hiện Toast thông báo
+                Toast.show({
+                    type: 'info',
+                    text1: title,
+                    text2: message,
+                    position: 'top',
+                    visibilityTime: 4000,
+                    onPress: () => {
+                        Toast.hide();
+                        navigation.navigate('CustomerTabs', { screen: 'Orders' });
+                    },
+                });
+            }
+        });
+
+        return unsubscribe;
+    }, [user, navigation]);
+
     return (
         <Stack.Navigator
             initialRouteName="CustomerTabs"
