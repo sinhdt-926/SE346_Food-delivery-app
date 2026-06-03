@@ -52,7 +52,7 @@ export default function OrderCard({
           source={
             avatarUrl
               ? { uri: avatarUrl }
-              : require("../../assets/default-food.png")
+              : require("../../assets/default_avt.png")
           }
           style={styles.image}
         />

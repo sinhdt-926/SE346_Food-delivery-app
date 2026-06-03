@@ -22,7 +22,6 @@ export interface Order {
     price: number;
     image_url?: string;
     subtotal: number;
-    note?: string;
   }[];
   payment: {
     id: number;

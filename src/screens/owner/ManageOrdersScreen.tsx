@@ -42,11 +42,17 @@ export default function ManagerOrdersScreen() {
         setOrders(data);
       }
     } catch (error) {
-      if (isFlag.current) setError("Unable to load the order list");
+      if (isFlag.current) setError("Không thể tải danh sách đơn hàng");
     } finally {
       if (isFlag.current) setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchOrders();
+    return () => {
+      isFlag.current = false;
+    };
+  }, []);
   useFocusEffect(
     useCallback(() => {
       fetchOrders();
@@ -183,25 +189,31 @@ export default function ManagerOrdersScreen() {
           paddingBottom: 120,
         }}
       >
-        {filteredOrders.map((item) => (
-          <OrderCard
-            key={item.id}
-            status={item.status}
-            customerName={item.customer.fullname}
-            customerId={item.customer.id}
-            totalPrice={item.payment.amount}
-            avatarUrl={item.items?.[0]?.image_url}
-            time={new Date(item.created_at)}
-            onPress={() =>
-              navigation.getParent()?.navigate("OrderDetail", {
-                order: item,
-              })
-            }
-            onActionPress={() => handleNextState(item.id, item.status)}
-            onCancelPress={() => handleCancelOrder(item.id)}
-            actionLoading={actionLoading}
-          />
-        ))}
+        {filteredOrders.length === 0 ? (
+          <Text style={{ textAlign: "center", marginTop: 20 }}>
+            Chưa có đơn hàng
+          </Text>
+        ) : (
+          filteredOrders.map((item) => (
+            <OrderCard
+              key={item.id}
+              status={item.status}
+              customerName={item.customer.fullname}
+              customerId={item.customer.id}
+              totalPrice={item.payment.amount}
+              avatarUrl={item.customer?.avatarUrl}
+              time={new Date(item.created_at)}
+              onPress={() =>
+                navigation.getParent()?.navigate("OrderDetail", {
+                  order: item,
+                })
+              }
+              onActionPress={() => handleNextState(item.id, item.status)}
+              onCancelPress={() => handleCancelOrder(item.id)}
+              actionLoading={actionLoading}
+            />
+          ))
+        )}
       </ScrollView>
       {actionLoading && (
         <View style={styles.overlay}>

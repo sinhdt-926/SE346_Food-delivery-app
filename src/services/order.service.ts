@@ -51,6 +51,7 @@ type User = {
   id: string;
   fullname: string;
   phone_number: string;
+  avatarUrl?: string;
 };
 
 // Admin/Owner lấy toàn bộ danh sách đơn
@@ -63,12 +64,11 @@ export const getOwnerOrders = async () => {
             created_at,
             status,
             delivery_address,
-            users(id, fullname, phone_number),
+            users(id, fullname, phone_number, image_url),
             order_details(
                 quantity,
                 price,
                 subtotal,
-                note,
                 foods(name, image_url)
             ),
             payments(
@@ -80,7 +80,6 @@ export const getOwnerOrders = async () => {
         `,
     )
     .order("created_at", { ascending: false });
-
   if (error) throw error;
   return (data ?? []).map((order) => {
     const user = order.users as unknown as User;
@@ -90,7 +89,6 @@ export const getOwnerOrders = async () => {
       quantity: item.quantity,
       price: item.price,
       subtotal: Number(item.subtotal),
-      note: item.note,
     }));
     // Lấy tổng tiền từ bảng payments thay vì tính tổng bằng vòng lặp reduce
     const total =
@@ -107,6 +105,7 @@ export const getOwnerOrders = async () => {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
         phone_number: user?.phone_number ?? "",
+        avatarUrl: user?.avatarUrl ?? "",
       },
       items,
       payment: {
