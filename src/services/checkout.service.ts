@@ -9,7 +9,8 @@ export const CheckoutService = {
     paymentType: string,
     checkedItemIds: number[],
     promotionId?: number,
-    appScheme?: string // Thêm appScheme từ UI (vd: exp://192.168.100.97:8081/--)
+    note?: string,          // ghi chú đơn hàng — ghi vào orders.note
+    appScheme?: string      // Thêm appScheme từ UI (vd: exp://192.168.100.97:8081/--)
   ): Promise<CheckoutResponse> {
     try {
       if (checkedItemIds.length === 0) {
@@ -21,6 +22,7 @@ export const CheckoutService = {
         p_payment_type: paymentType,
         p_checked_item_ids: checkedItemIds,
         p_promotion_id: promotionId || null,
+        p_note: note || null,
       });
 
       if (error) throw error;
