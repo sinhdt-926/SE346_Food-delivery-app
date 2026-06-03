@@ -165,9 +165,7 @@ const HomeScreen = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-      {/* =========================================
-          ANIMATED HEADER 
-      ========================================= */}
+
       <Animated.View
         style={[
           styles.headerContainer,
@@ -178,20 +176,26 @@ const HomeScreen = ({ navigation }: any) => {
         ]}
       >
         {/* Dòng 1: Address (Sẽ bị giấu đi khi cuộn) */}
-        <Animated.View style={[styles.addressRow, { opacity: addressOpacity }]}>
-          <Ionicons name="location" size={20} color="#FF7622" />
-          <View style={{ marginLeft: 8, flex: 1 }}>
-            <Text style={styles.deliverToLabel}>Giao đến</Text>
-            <Text style={styles.addressText} numberOfLines={1} ellipsizeMode="tail">
-              {address}
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color="#A0A5BA" />
+        <Animated.View style={{ opacity: addressOpacity }}>
+          <TouchableOpacity
+            style={styles.addressRow}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("MyAddress")}
+          >
+            <Ionicons name="location" size={20} color="#FF7622" />
+            <View style={{ marginLeft: 8, flex: 1 }}>
+              <Text style={styles.deliverToLabel}>Giao đến</Text>
+              <Text style={styles.addressText} numberOfLines={1} ellipsizeMode="tail">
+                {address}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#A0A5BA" />
+          </TouchableOpacity>
         </Animated.View>
 
         {/* Dòng 2: Thanh tìm kiếm (Sẽ giữ nguyên (sticky) khi cuộn) */}
         <View style={styles.searchRow}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.searchInputWrapper}
             activeOpacity={0.9}
             onPress={() => navigation.navigate("SearchFood")}
@@ -376,7 +380,7 @@ const styles = StyleSheet.create({
     color: "#32343E",
     fontSize: 13,
   },
-  
+
   // Food Grid
   foodGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
 });

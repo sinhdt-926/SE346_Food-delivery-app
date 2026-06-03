@@ -55,9 +55,6 @@ const CartScreen = ({ navigation }: any) => {
       <View style={styles.header}>
         <BackButton onPress={() => navigation?.goBack()} />
         <Text style={styles.headerTitle}>Giỏ hàng</Text>
-        <TouchableOpacity>
-          <Text style={styles.editBtnText}>SỬA</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Hiển thị Loading khi đang gọi API */}
@@ -73,6 +70,9 @@ const CartScreen = ({ navigation }: any) => {
           contentContainerStyle={styles.listContent}
           onTouchStart={() => setOpenedId(null)}
         >
+          {items.length === 0 ? (
+            <Text style={styles.emptyText}>Chưa có sản phẩm trong giỏ hàng.</Text>
+          ) : null}
           {items.map((item) => (
             <CartItemCard
               key={item.id}
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: 20,
   },
@@ -126,17 +126,23 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "500",
     color: "#181C2E",
+    marginLeft: 20,
   },
-  editBtnText: {
-    color: "#FF7622",
-    fontSize: 14,
-    textDecorationLine: "underline",
+  emptyText: {
+    textAlign: "center",
+    color: "#A0A5BA",
+    marginTop: "50%",
+    fontSize: 16,
   },
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 30,
   },
   footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: "#FFF",
     padding: 25,
     borderTopLeftRadius: 30,
