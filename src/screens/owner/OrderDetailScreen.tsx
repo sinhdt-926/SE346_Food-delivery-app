@@ -185,6 +185,14 @@ export default function OrderDetailScreen() {
         <Text style={styles.address}>{currentOrder.address}</Text>
       </View>
 
+      {/* note */}
+      {currentOrder.note ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Order Note</Text>
+          <Text style={styles.note}>{currentOrder.note}</Text>
+        </View>
+      ) : null}
+
       {/* items */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Món ăn</Text>
@@ -195,7 +203,6 @@ export default function OrderDetailScreen() {
             name={item.name}
             quantity={item.quantity}
             price={item.subtotal}
-            note={item.note}
           />
         ))}
 
@@ -261,9 +268,8 @@ interface FoodItem {
   name: string;
   quantity: number;
   price: number;
-  note?: string;
 }
-function FoodItem({ name, quantity, price, note }: FoodItem) {
+function FoodItem({ name, quantity, price }: FoodItem) {
   return (
     <View style={styles.foodItemContainer}>
       <View style={styles.foodItemTop}>
@@ -275,8 +281,6 @@ function FoodItem({ name, quantity, price, note }: FoodItem) {
 
         <Text style={styles.foodPrice}>{formatCurrency(price, "VND")}</Text>
       </View>
-
-      {note ? <Text style={styles.note}>Ghi chú: {note}</Text> : null}
     </View>
   );
 }

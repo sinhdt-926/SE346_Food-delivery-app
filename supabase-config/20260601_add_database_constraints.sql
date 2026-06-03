@@ -31,4 +31,4 @@ ALTER TABLE payments ADD CONSTRAINT check_payment_amount CHECK (amount >= 0); --
 
 -- Enum Status (Trạng thái)
 ALTER TABLE orders ADD CONSTRAINT check_order_status CHECK (status IN ('pending', 'preparing', 'delivering', 'completed', 'cancelled')); -- Ràng buộc trạng thái đơn hàng
-ALTER TABLE payments ADD CONSTRAINT check_payment_status CHECK (status IN ('unpaid', 'paid', 'cancelled')); -- Ràng buộc trạng thái thanh toán
+ALTER TABLE payments ADD CONSTRAINT check_payment_status CHECK (status IN ('failed','unpaid', 'paid', 'cancelled')); -- Ràng buộc trạng thái thanh toán

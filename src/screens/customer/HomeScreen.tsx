@@ -21,6 +21,8 @@ import { LocationService } from "../../services/location.service";
 import Toast from "react-native-toast-message";
 import HomeFoodCard from "../../components/HomeFoodCard";
 
+import { useLocationStore } from "../../store/useLocationStore";
+
 const { width } = Dimensions.get("window");
 
 const getCategoryIcon = (name: string) => {
@@ -39,8 +41,9 @@ const getCategoryIcon = (name: string) => {
 const HomeScreen = ({ navigation }: any) => {
   const insets = useSafeAreaInsets();
   const { addToCart } = useCartStore();
+  const { currentAddress, fetchLocation } = useLocationStore();
+  const address = currentAddress || "Đang định vị...";
 
-  const [address, setAddress] = useState("Đang định vị...");
   const [foods, setFoods] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [promotions, setPromotions] = useState<any[]>([]);
@@ -51,6 +54,10 @@ const HomeScreen = ({ navigation }: any) => {
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
+    // Nếu store chưa có địa chỉ thì mới gọi hàm lấy vị trí (không await để tránh block giao diện)
+    if (!currentAddress) {
+      fetchLocation();
+    }
     fetchData();
   }, []);
 
@@ -68,10 +75,6 @@ const HomeScreen = ({ navigation }: any) => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const locationRes = await LocationService.getCurrentLocation();
-      const addr = await LocationService.getAddressFromCoords(locationRes.coords);
-      setAddress(addr);
-
       const [foodsData, catsData, promosData] = await Promise.all([
         getFoods(),
         getCategories(),

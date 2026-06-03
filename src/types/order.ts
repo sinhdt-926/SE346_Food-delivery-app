@@ -10,6 +10,7 @@ export interface Order {
   created_at: string;
   status: OrderStatus;
   address: string;
+  note?: string; // ghi chú cấp đơn hàng — từ orders.note
   customer: {
     id: string;
     fullname: string;
@@ -22,7 +23,7 @@ export interface Order {
     price: number;
     image_url?: string;
     subtotal: number;
-    note?: string;
+    // note đã được chuyển lên cấp Order, không còn per-item
   }[];
   payment: {
     id: number;
