@@ -10,7 +10,10 @@ import {
 import BackButton from "../../components/BackButton";
 import CustomButton from "../../components/CustomButton";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { updateOrderStatus } from "../../services/order.service";
+import {
+  updateOrderStatus,
+  getPaymentStatus,
+} from "../../services/order.service";
 import { Order, OrderStatus } from "../../types/order";
 import { formatCurrency, formatRelativeTime } from "../../utils/formatters";
 
@@ -79,9 +82,16 @@ export default function OrderDetailScreen() {
     try {
       setActionLoading(true);
       await updateOrderStatus(currentOrder.id, nextStatus);
+      const paymentData = await getPaymentStatus(currentOrder.id);
       setCurrentOrder((prev) => ({
         ...prev,
         status: nextStatus,
+        payment: {
+          ...prev.payment,
+          status: paymentData.status,
+          amount: Number(paymentData.amount),
+          type: paymentData.type,
+        },
       }));
     } catch (error) {
       Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
@@ -103,10 +113,17 @@ export default function OrderDetailScreen() {
   const handleCancelOrder = async () => {
     try {
       setActionLoading(true);
-      await updateOrderStatus(currentOrder.id, "cancelled");
+      const paymentData = await getPaymentStatus(currentOrder.id);
+
       setCurrentOrder((prev) => ({
         ...prev,
         status: "cancelled",
+        payment: {
+          ...prev.payment,
+          status: paymentData.status,
+          amount: Number(paymentData.amount),
+          type: paymentData.type,
+        },
       }));
     } catch (error) {
       Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
@@ -139,6 +156,42 @@ export default function OrderDetailScreen() {
         return "Đã hủy";
       default:
         return null;
+    }
+  };
+  const getPaymentStatusLabel = () => {
+    switch (currentOrder.payment.status) {
+      case "paid":
+        return "Đã thanh toán";
+
+      case "unpaid":
+        return "Chưa thanh toán";
+
+      case "pending":
+        return "Đang xử lý";
+
+      default:
+        return currentOrder.payment.status;
+    }
+  };
+  const getPaymentTypeLabel = () => {
+    switch (currentOrder.payment.type) {
+      case "cash":
+        return "Tiền mặt";
+
+      case "vnpay":
+        return "VNPay";
+
+      case "momo":
+        return "MoMo";
+
+      case "zalopay":
+        return "ZaloPay";
+
+      case "banking":
+        return "Chuyển khoản";
+
+      default:
+        return currentOrder.payment.type;
     }
   };
   return (
@@ -216,9 +269,9 @@ export default function OrderDetailScreen() {
       {/* payment */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Thánh toán</Text>
-        <InfoRow label="Phương thức" value={currentOrder.payment.type} />
+        <InfoRow label="Phương thức" value={getPaymentTypeLabel()} />
         <View style={styles.divider} />
-        <InfoRow label="Trạng thái" value={currentOrder.payment.status} />
+        <InfoRow label="Trạng thái" value={getPaymentStatusLabel()} />
         <View style={styles.divider} />
         <InfoRow
           label="Thành tiền"
@@ -331,7 +384,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: "#FF7A1A",
     fontWeight: "700",
-    fontSize: 12,
+    fontSize: 11,
   },
 
   section: {
@@ -342,7 +395,7 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: "#222222",
     marginBottom: 18,
@@ -361,7 +414,7 @@ const styles = StyleSheet.create({
 
   value: {
     color: "#222222",
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: "500",
   },
 
