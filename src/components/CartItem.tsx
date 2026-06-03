@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   priceText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#2b24249a",
+    color: "#f27c1bff",
     marginTop: 8,
   },
   unavailableText: {
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   qtyContainer: { flexDirection: "row", alignItems: "center" },
   qtyBtn: { padding: 2 },
-  qtyText: { fontSize: 13, fontWeight: "bold", marginHorizontal: 6 },
+  qtyText: { fontSize: 13, fontWeight: "bold", marginHorizontal: 4 },
   deleteBtn: {
     backgroundColor: "#FF4722",
     justifyContent: "center",
