@@ -47,6 +47,7 @@ export default function DashboardScreen() {
       //lấy doanh thu theo tuần
       const { startDate, endDate } = getCurrentWeekRange();
       const currentWeek = await getDashboardStats(startDate, endDate);
+      setTotalRevenue(currentWeek.total_revenue);
       setRevenueChart(buildRevenueChart(currentWeek.revenue_by_date, "week"));
       //top món ăn
       setPopularFoods(currentWeek.top_selling_foods);
