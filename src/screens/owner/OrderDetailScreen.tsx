@@ -181,15 +181,6 @@ export default function OrderDetailScreen() {
       case "vnpay":
         return "VNPay";
 
-      case "momo":
-        return "MoMo";
-
-      case "zalopay":
-        return "ZaloPay";
-
-      case "banking":
-        return "Chuyển khoản";
-
       default:
         return currentOrder.payment.type;
     }
