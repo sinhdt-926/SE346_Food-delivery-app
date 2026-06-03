@@ -7,6 +7,7 @@ import { applyPromotion } from "../../services/promotion.service";
 import { useCartStore } from "../../store/useCartStore";
 import Toast from "react-native-toast-message";
 import CustomHeader from "../../components/CustomHeader";
+import BackButton from "../../components/BackButton";
 
 export default function FoodDetailScreen({ route, navigation }: any) {
   const { id } = route.params;
@@ -60,8 +61,8 @@ export default function FoodDetailScreen({ route, navigation }: any) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <CustomHeader title="Chi tiết món ăn" />
+      <SafeAreaView style={styles.loadingContainer} edges={["top", "bottom"]}>
+        <BackButton style={{ marginLeft: 20, marginTop: 10 }} />
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#FF7622" />
         </View>
@@ -71,8 +72,8 @@ export default function FoodDetailScreen({ route, navigation }: any) {
 
   if (!food) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <CustomHeader title="Chi tiết món ăn" />
+      <SafeAreaView style={styles.loadingContainer} edges={["top", "bottom"]}>
+        <BackButton style={{ marginLeft: 20, marginTop: 10 }} />
         <View style={styles.center}>
           <Text style={{ color: "#646982" }}>Món ăn không tồn tại</Text>
         </View>
@@ -139,6 +140,11 @@ export default function FoodDetailScreen({ route, navigation }: any) {
         </View>
       </ScrollView>
 
+      {/* Floating Back Button */}
+      <View style={styles.backBtnWrapper}>
+        <BackButton />
+      </View>
+
       <View style={styles.footer}>
         <TouchableOpacity
           style={[styles.addToCartButton, !food.is_available && styles.disabledButton]}
@@ -162,13 +168,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F4F5F9" },
   loadingContainer: { flex: 1, backgroundColor: "#F4F5F9" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  content: { paddingBottom: 100 },
+  content: { paddingBottom: 10 },
   image: { width: "100%", height: 250 },
   detailsContainer: {
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    marginTop: -20,
+    marginTop: -15,
     padding: 24,
     minHeight: 500,
   },
@@ -217,4 +223,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#BDBDBD",
   },
   addToCartText: { color: "#FFF", fontSize: 16, fontWeight: "700" },
+  backBtnWrapper: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
 });
