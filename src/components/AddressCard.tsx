@@ -22,16 +22,15 @@ const LABEL_ICON_NAMES: Record<string, any> = {
     'Khác': 'location-outline',
 };
 
+const LABEL_COLORS: Record<string, string> = {
+    'Nhà': '#008BEA',
+    'Cơ quan': '#219653',
+    'Khác': '#FF7622',
+};
+
 export default function AddressCard({ item, onSelect, onEdit, onDelete }: AddressCardProps) {
     const iconName = LABEL_ICON_NAMES[item.label] ?? 'location-outline';
-
-    // Chuyển label sang tiếng Anh in hoa theo như thiết kế mẫu
-    const getDisplayLabel = () => {
-        if (item.label === 'Nhà') return 'HOME';
-        if (item.label === 'Cơ quan') return 'WORK';
-        return 'OTHER';
-    };
-
+    const color = LABEL_COLORS[item.label] ?? '#FF7622';
     return (
         <TouchableOpacity
             style={[styles.card, item.is_default && styles.cardSelected]}
@@ -43,7 +42,7 @@ export default function AddressCard({ item, onSelect, onEdit, onDelete }: Addres
                 <Ionicons
                     name={iconName}
                     size={24}
-                    color="#008BEA"
+                    color={color}
                 />
             </View>
 
@@ -52,7 +51,7 @@ export default function AddressCard({ item, onSelect, onEdit, onDelete }: Addres
                 <View style={styles.topRow}>
                     <View style={styles.labelWrapper}>
                         <Text style={styles.labelText}>
-                            {getDisplayLabel()}
+                            {item.label}
                         </Text>
                         {item.is_default && (
                             <View style={styles.defaultBadge}>
