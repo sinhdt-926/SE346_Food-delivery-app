@@ -38,6 +38,7 @@ interface Promotion {
   discount_value: number;
   start_date: string;
   end_date: string;
+  min_order_value?: number; // nullable — NULL = không có điều kiện tối thiểu
 }
 
 export default function CheckoutScreen({ navigation, route }: any) {
@@ -98,7 +99,8 @@ export default function CheckoutScreen({ navigation, route }: any) {
       selectedAddress.address,
       paymentMethod,
       checkedItemIds,
-      selectedPromo?.id
+      selectedPromo?.id,
+      orderNote.trim() || undefined
     );
     setIsOrdering(false);
 

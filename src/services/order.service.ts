@@ -11,11 +11,11 @@ export const getMyOrders = async () => {
             updated_at,
             status,
             delivery_address,
+            note,
             order_details(
                 quantity,
                 price,
                 subtotal,
-                note,
                 foods(name)
             ),
             payments(
@@ -34,12 +34,12 @@ export const getMyOrders = async () => {
     updated_at: order.updated_at || order.created_at,
     status: order.status,
     address: order.delivery_address,
+    note: order.note,
     items: (order.order_details ?? []).map((item: any) => ({
       name: item.foods?.name,
       quantity: item.quantity,
       price: item.price,
       subtotal: Number(item.subtotal),
-      note: item.note,
     })),
     // Lấy tổng tiền thực tế (đã giảm) từ bản ghi payments đầu tiên thuộc về order này
     total:
@@ -66,12 +66,12 @@ export const getOwnerOrders = async () => {
             updated_at,
             status,
             delivery_address,
+            note,
             users(id, fullname, phone_number),
             order_details(
                 quantity,
                 price,
                 subtotal,
-                note,
                 foods(name, image_url)
             ),
             payments(
@@ -93,7 +93,6 @@ export const getOwnerOrders = async () => {
       quantity: item.quantity,
       price: item.price,
       subtotal: Number(item.subtotal),
-      note: item.note,
     }));
     // Lấy tổng tiền từ bảng payments thay vì tính tổng bằng vòng lặp reduce
     const total =
@@ -107,6 +106,7 @@ export const getOwnerOrders = async () => {
       updated_at: order.updated_at || order.created_at,
       status: order.status,
       address: order.delivery_address,
+      note: order.note,
       customer: {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
