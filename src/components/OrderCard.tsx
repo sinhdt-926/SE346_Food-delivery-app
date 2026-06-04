@@ -61,7 +61,7 @@ export default function OrderCard({
           <Text style={styles.time}>{formatRelativeTime(time, false)}</Text>
           <Text style={styles.name}>{customerName}</Text>
           <Text style={styles.price}>
-            Total: {formatCurrency(totalPrice, "VND")}
+            Tổng tiền: <Text style={{ color: "#199834ff", fontWeight: "bold" }}>{formatCurrency(totalPrice, "VND")}</Text>
           </Text>
         </View>
       </View>
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 13,
     fontWeight: "normal",
-    color: "#222",
+    color: "#222222ff",
     textAlign: "right",
   },
 

@@ -205,11 +205,12 @@ export default function ManagerOrdersScreen() {
               time={new Date(item.created_at)}
               onPress={() => {
                 if (item.status === "delivering") {
-                  navigation.getParent()?.navigate("Tracking", {
+                  navigation.navigate("Tracking", {
                     orderId: item.id,
+                    role: "owner",
                   });
                 } else {
-                  navigation.getParent()?.navigate("OrderDetail", {
+                  navigation.navigate("OrderDetail", {
                     order: item,
                   });
                 }

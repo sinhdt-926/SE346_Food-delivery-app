@@ -52,10 +52,12 @@ export default function RootNavigation() {
       }
 
       if (session?.user) {
+        // Lấy trạng thái user HIỆN TẠI (trước khi cập nhật) để biết là đang đăng nhập mới hay chỉ xác thực lại
+        const previousUser = useAuthStore.getState().user;
         setUser(session.user);
-        // Chỉ fetch role khi app khởi động hoặc khi vừa đăng nhập (trước đó chưa có user)
-        const currentUser = useAuthStore.getState().user;
-        if (event === "INITIAL_SESSION" || (event === "SIGNED_IN" && !currentUser)) {
+        
+        // Chỉ fetch role khi app khởi động hoặc khi vừa đăng nhập mới (trước đó chưa có user)
+        if (event === "INITIAL_SESSION" || (event === "SIGNED_IN" && !previousUser)) {
           setIsLoading(true);
           await fetchUserRole(session.user.id);
           setIsLoading(false);
