@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ToastConfig } from "react-native-toast-message";
 
-const CustomToast = ({ text1, text2, type }: any) => {
+const CustomToast = ({ text1, text2, type, props }: any) => {
   const isSuccess = type === "success";
   const iconName = isSuccess ? "checkmark-circle" : "alert-circle";
   const iconColor = isSuccess ? "#4CAF50" : "#FF4B4B";
@@ -18,7 +18,17 @@ const CustomToast = ({ text1, text2, type }: any) => {
       />
       <View style={styles.textContainer}>
         {text1 ? <Text style={styles.title}>{text1}</Text> : null}
-        {text2 ? <Text style={styles.description}>{text2}</Text> : null}
+        {props?.highlight ? (
+          <Text style={styles.description}>
+            {props.prefix}
+            <Text style={{ fontWeight: "900", color: "#000000ff" }}>
+              {props.highlight}
+            </Text>
+            {props.suffix}
+          </Text>
+        ) : text2 ? (
+          <Text style={styles.description}>{text2}</Text>
+        ) : null}
       </View>
     </View>
   );
@@ -60,6 +70,6 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: "#646982",
+    color: "#646982be",
   },
 });

@@ -9,20 +9,57 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+import * as ImagePicker from "expo-image-picker";
 import CustomHeader from "../../components/CustomHeader";
 import FormInput from "../../components/FormInput";
 import UserHeader from "../../components/UserHeader";
 import { useAuthStore } from "../../store/useAuthStore";
+import { authService } from "../../services/auth.service";
 
 export default function EditProfileScreen({ navigation }: any) {
   const { user, updateProfile } = useAuthStore();
 
-  const [formData, setFormData] = useState({
+  const initialData = {
     fullName: user?.user_metadata?.full_name || "",
     email: user?.email || "",
     phone: user?.user_metadata?.phone || "",
-  });
+    imageUrl: user?.user_metadata?.image_url || user?.publicProfile?.image_url || "",
+  };
+
+  const [formData, setFormData] = useState(initialData);
   const [isSaving, setIsSaving] = useState(false);
+
+  const isChanged =
+    formData.fullName !== initialData.fullName ||
+    formData.email !== initialData.email ||
+    formData.phone !== initialData.phone ||
+    formData.imageUrl !== initialData.imageUrl;
+
+  const pickImage = async () => {
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Toast.show({
+          type: "error",
+          text1: "Lỗi quyền truy cập",
+          text2: "Vui lòng cấp quyền truy cập thư viện ảnh để đổi Avatar.",
+          topOffset: 60,
+        });
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (!result.canceled) {
+        setFormData({ ...formData, imageUrl: result.assets[0].uri });
+      }
+    } catch (error) {
+      console.error("Lỗi chọn ảnh:", error);
+    }
+  };
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -40,9 +77,16 @@ export default function EditProfileScreen({ navigation }: any) {
         return;
       }
 
-      const payload: { fullName: string; phone: string; email?: string } = {
+      let finalImageUrl = formData.imageUrl;
+      // Nếu là ảnh mới chọn từ máy (có prefix file://)
+      if (formData.imageUrl && formData.imageUrl.startsWith("file")) {
+        finalImageUrl = await authService.uploadAvatar(formData.imageUrl);
+      }
+
+      const payload: { fullName: string; phone: string; email?: string; imageUrl?: string } = {
         fullName: formData.fullName.trim(),
         phone: formData.phone.trim(),
+        imageUrl: finalImageUrl,
       };
 
       // Chỉ gửi email nếu có thay đổi
@@ -80,16 +124,21 @@ export default function EditProfileScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <CustomHeader title="Edit Profile" />
+      <CustomHeader title="Chỉnh sửa thông tin" />
 
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <UserHeader name={formData.fullName} showEditBadge={true} />
+        <UserHeader
+          name={formData.fullName}
+          imageUrl={formData.imageUrl}
+          showEditBadge={true}
+          onEditPress={pickImage}
+        />
 
         <FormInput
-          label="FULL NAME"
+          label="HỌ VÀ TÊN"
           value={formData.fullName}
           onChangeText={(text) => setFormData({ ...formData, fullName: text })}
           style={styles.customInput}
@@ -106,7 +155,7 @@ export default function EditProfileScreen({ navigation }: any) {
         />
 
         <FormInput
-          label="PHONE NUMBER"
+          label="SỐ ĐIỆN THOẠI"
           value={formData.phone}
           keyboardType="phone-pad"
           onChangeText={(text) => setFormData({ ...formData, phone: text })}
@@ -116,15 +165,15 @@ export default function EditProfileScreen({ navigation }: any) {
 
       <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+          style={[styles.saveButton, (isSaving || !isChanged) && styles.saveButtonDisabled]}
           onPress={handleSave}
-          disabled={isSaving}
+          disabled={isSaving || !isChanged}
           activeOpacity={0.8}
         >
           {isSaving ? (
             <ActivityIndicator color="#FFF" size="small" />
           ) : (
-            <Text style={styles.saveButtonText}>SAVE</Text>
+            <Text style={styles.saveButtonText}>LƯU</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -149,7 +198,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   saveButtonDisabled: {
-    backgroundColor: "#FFBA6B",
+    backgroundColor: "#e1e0deff",
   },
   saveButtonText: {
     color: "#FFF",

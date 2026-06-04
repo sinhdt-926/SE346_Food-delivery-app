@@ -28,6 +28,16 @@ export const authService = {
     return data;
   },
 
+  // 2.5 Gửi lại mã OTP đăng ký
+  resendSignUpOtp: async (email: string) => {
+    const { data, error } = await supabase.auth.resend({
+      type: "signup",
+      email: email,
+    });
+    if (error) throw error;
+    return data;
+  },
+
   // 3. Gửi OTP quên mật khẩu
   resetPassword: async (email: string) => {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email);
@@ -59,6 +69,28 @@ export const authService = {
     return data;
   },
 
+  // 6. Upload Avatar
+  uploadAvatar: async (uri: string) => {
+    const fileName = `avatars/avatar-${Date.now()}.jpg`;
+    
+    const formData = new FormData();
+    formData.append("file", {
+      uri: uri,
+      name: `avatar.jpg`,
+      type: "image/jpeg",
+    } as any);
+
+    const { error } = await supabase.storage
+      .from("images")
+      .upload(fileName, formData);
+      
+    if (error) {
+      throw error;
+    }
+    const { data } = await supabase.storage.from("images").getPublicUrl(fileName);
+    return data.publicUrl;
+  },
+
   signOut: async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -69,7 +101,7 @@ export const authService = {
   getCurrentUser: async () => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) throw error;
-    
+
     if (user) {
       // Lấy thêm thông tin từ bảng public.users
       const { data: publicProfile } = await supabase
@@ -77,12 +109,12 @@ export const authService = {
         .select('*')
         .eq('id', user.id)
         .single();
-        
+
       if (publicProfile) {
         (user as any).publicProfile = publicProfile;
       }
     }
-    
+
     return user;
   },
 
@@ -92,6 +124,7 @@ export const authService = {
     fullName?: string;
     phone?: string;
     email?: string;
+    imageUrl?: string;
   }) => {
     // Lấy user hiện tại để có ID
     const { data: { user: currentUser }, error: getUserError } = await supabase.auth.getUser();
@@ -104,6 +137,7 @@ export const authService = {
         full_name: profileData.fullName,
         fullname: profileData.fullName, // đồng bộ cả hai key
         phone: profileData.phone,
+        image_url: profileData.imageUrl,
       },
     };
 
@@ -120,6 +154,10 @@ export const authService = {
       fullname: profileData.fullName,
       phone_number: profileData.phone,
     };
+
+    if (profileData.imageUrl) {
+      publicUpdatePayload.image_url = profileData.imageUrl;
+    }
 
     // Chỉ update email trong public.users nếu có thay đổi
     if (profileData.email && profileData.email.trim() !== "") {

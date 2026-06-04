@@ -37,11 +37,11 @@ const ForgotScreen = ({
   const validate = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
-      setError("Please enter your email");
+      setError("Vui lòng nhập email");
       return false;
     }
     if (!emailRegex.test(email)) {
-      setError("Invalid email format");
+      setError("Vui lòng nhập đúng định dạng email");
       return false;
     }
     return true;
@@ -55,11 +55,10 @@ const ForgotScreen = ({
     try {
       await authService.resetPassword(email);
 
-      // Hiển thị thông báo thành công dạng trượt
       Toast.show({
         type: "success",
-        text1: "Code sent",
-        text2: "Please check your inbox.",
+        text1: "Mã đã được gửi",
+        text2: "Vui lòng kiểm tra email của bạn.",
       });
 
       navigation.navigate("Verification", {
@@ -67,11 +66,10 @@ const ForgotScreen = ({
         fromScreen: "Forgot",
       });
     } catch (error: any) {
-      // Hiển thị thông báo lỗi nếu API gặp vấn đề
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: error.message,
+        text1: "Lỗi",
+        text2: "Sai thông tin email.",
       });
     } finally {
       setIsLoading(false);
@@ -92,9 +90,9 @@ const ForgotScreen = ({
             <View style={styles.container}>
               <View style={styles.header}>
                 <BackButton style={styles.backButtonPosition} />
-                <Text style={styles.title}>Forgot Password</Text>
+                <Text style={styles.title}>Quên mật khẩu</Text>
                 <Text style={styles.subtitle}>
-                  Please sign in to your existing account
+                  Vui lòng nhập email để nhận mã OTP
                 </Text>
               </View>
 
@@ -129,7 +127,7 @@ const ForgotScreen = ({
                   {isLoading ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <Text style={styles.submitBtnText}>SEND CODE</Text>
+                    <Text style={styles.submitBtnText}>GỬI MÃ</Text>
                   )}
                 </TouchableOpacity>
               </View>

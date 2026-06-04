@@ -166,9 +166,6 @@ const OrderScreen = ({ navigation }: any) => {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
         </View>
-        <TouchableOpacity style={styles.iconBtn}>
-          <Ionicons name="ellipsis-horizontal" size={24} color="#181C2E" />
-        </TouchableOpacity>
       </View>
 
       {/* --- CONTENT --- */}

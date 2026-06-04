@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -43,6 +43,43 @@ const VerificationScreen: React.FC<Props> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [countdown, setCountdown] = useState(60);
+  const [isResending, setIsResending] = useState(false);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [countdown]);
+
+  const handleResend = async () => {
+    if (countdown > 0 || isResending) return;
+    setIsResending(true);
+    try {
+      if (fromScreen === "Register") {
+        await authService.resendSignUpOtp(email);
+      } else if (fromScreen === "Forgot") {
+        await authService.resetPassword(email);
+      }
+      setCountdown(60);
+      Toast.show({
+        type: "success",
+        text1: "Đã gửi lại mã",
+        text2: "Vui lòng kiểm tra email của bạn.",
+      });
+    } catch (error: any) {
+      Toast.show({
+        type: "error",
+        text1: "Lỗi gửi mã",
+        text2: error.message || "Không thể gửi lại mã, vui lòng thử lại sau.",
+      });
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   // Tự động chuyển sang ô tiếp theo khi người dùng nhập số
   const handleChangeText = (text: string, index: number) => {
     setError(null);
@@ -82,20 +119,19 @@ const VerificationScreen: React.FC<Props> = ({ navigation }) => {
         await authService.verifyOtp(email, finalCode, "signup");
         Toast.show({
           type: "success",
-          text1: "Authentication successful 🎉",
-          text2: "Your account has been activated! You can now log in.",
+          text1: "Xác thực thành công 🎉",
+          text2: "Tài khoản của bạn đã được kích hoạt. Chào mừng bạn!",
         });
-        navigation.navigate("Login");
       } else if (fromScreen === "Forgot") {
         await authService.verifyOtp(email, finalCode, "recovery");
         navigation.navigate("NewPassword");
       }
     } catch (error: any) {
-      setError("Invalid or expired verification code");
+      setError("Mã OTP đã hết hạn hoặc không đúng");
       Toast.show({
         type: "error",
-        text1: "Verification failed",
-        text2: "Please check your OTP code.",
+        text1: "Xác thực thất bại",
+        text2: "Vui lòng kiểm tra lại mã OTP.",
       });
     } finally {
       setIsLoading(false);
@@ -116,21 +152,23 @@ const VerificationScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.container}>
               <View style={styles.header}>
                 <BackButton style={styles.backButtonPosition} />
-                <Text style={styles.title}>Verification</Text>
+                <Text style={styles.title}>Xác thực</Text>
                 <Text style={styles.subtitle}>
-                  We have sent a code to your email
+                  Chúng tôi đã gửi mã đến email của bạn
                 </Text>
                 <Text style={styles.emailText}>{email}</Text>
               </View>
 
               <View style={styles.formContainer}>
                 <View style={styles.codeHeaderRow}>
-                  <Text style={styles.label}>CODE</Text>
+                  <Text style={styles.label}>Mã OTP</Text>
                   <View style={styles.resendContainer}>
-                    <TouchableOpacity>
-                      <Text style={styles.resendText}>Resend</Text>
+                    <TouchableOpacity onPress={handleResend} disabled={countdown > 0 || isResending}>
+                      <Text style={[styles.resendText, (countdown > 0 || isResending) && { color: "#A0A5BA", textDecorationLine: "none" }]}>
+                        {isResending ? "Đang gửi..." : "Gửi lại"}
+                      </Text>
                     </TouchableOpacity>
-                    <Text style={styles.timerText}> in</Text>
+                    {countdown > 0 && <Text style={styles.timerText}> sau {countdown}s</Text>}
                   </View>
                 </View>
 
@@ -176,7 +214,7 @@ const VerificationScreen: React.FC<Props> = ({ navigation }) => {
                   {isLoading ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <Text style={styles.submitBtnText}>VERIFY</Text>
+                    <Text style={styles.submitBtnText}>XÁC NHẬN</Text>
                   )}
                 </TouchableOpacity>
               </View>

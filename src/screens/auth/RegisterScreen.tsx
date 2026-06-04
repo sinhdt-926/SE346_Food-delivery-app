@@ -45,31 +45,31 @@ const RegisterScreen = ({
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!name.trim()) {
-      newErrors.name = "Please enter your name";
+      newErrors.name = "Vui lòng nhập tên";
       isValid = false;
     }
 
     if (!email) {
-      newErrors.email = "Please enter your email";
+      newErrors.email = "Vui lòng nhập email";
       isValid = false;
     } else if (!emailRegex.test(email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = "Vui lòng nhập đúng định dạng email";
       isValid = false;
     }
 
     if (!password) {
-      newErrors.password = "Please enter a password";
+      newErrors.password = "Vui lòng nhập mật khẩu";
       isValid = false;
     } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
       isValid = false;
     }
 
     if (!rePassword) {
-      newErrors.rePassword = "Please confirm your password";
+      newErrors.rePassword = "Vui lòng xác nhận mật khẩu";
       isValid = false;
     } else if (password !== rePassword) {
-      newErrors.rePassword = "Passwords do not match";
+      newErrors.rePassword = "Mật khẩu không khớp";
       isValid = false;
     }
 
@@ -88,8 +88,8 @@ const RegisterScreen = ({
       // Hiển thị thông báo thành công
       Toast.show({
         type: "success",
-        text1: "Great!",
-        text2: "Please check your email to get the verification code.",
+        text1: "Thành công!",
+        text2: "Vui lòng kiểm tra email để lấy mã xác minh.",
       });
 
       navigation.navigate("Verification", {
@@ -100,7 +100,7 @@ const RegisterScreen = ({
       // Hiển thị thông báo lỗi
       Toast.show({
         type: "error",
-        text1: "Error signing up",
+        text1: "Lỗi đăng ký",
         text2: error.message,
       });
     } finally {
@@ -124,13 +124,13 @@ const RegisterScreen = ({
           <View style={styles.container}>
             <View style={styles.header}>
               <BackButton style={styles.backButtonPosition} />
-              <Text style={styles.title}>Sign Up</Text>
-              <Text style={styles.subtitle}>Please sign up to get started</Text>
+              <Text style={styles.title}>Đăng Ký</Text>
+              <Text style={styles.subtitle}>Vui lòng đăng ký để bắt đầu</Text>
             </View>
 
             <View style={styles.formContainer}>
               {/* INPUT TÊN */}
-              <Text style={styles.label}>NAME</Text>
+              <Text style={styles.label}>Tên của bạn</Text>
               <View
                 style={[styles.inputWrapper, errors.name && styles.inputError]}
               >
@@ -151,7 +151,7 @@ const RegisterScreen = ({
               )}
 
               {/* INPUT EMAIL */}
-              <Text style={styles.label}>EMAIL</Text>
+              <Text style={styles.label}>Email</Text>
               <View
                 style={[styles.inputWrapper, errors.email && styles.inputError]}
               >
@@ -173,7 +173,7 @@ const RegisterScreen = ({
               )}
 
               {/* INPUT MẬT KHẨU */}
-              <Text style={styles.label}>PASSWORD</Text>
+              <Text style={styles.label}>Mật khẩu</Text>
               <View
                 style={[
                   styles.inputWrapper,
@@ -206,7 +206,7 @@ const RegisterScreen = ({
               )}
 
               {/* NHẬP LẠI MẬT KHẨU */}
-              <Text style={styles.label}>RE-TYPE PASSWORD</Text>
+              <Text style={styles.label}>Xác nhận mật khẩu</Text>
               <View
                 style={[
                   styles.inputWrapper,
@@ -246,7 +246,7 @@ const RegisterScreen = ({
                 {isLoading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.submitBtnText}>SIGN UP</Text>
+                  <Text style={styles.submitBtnText}>ĐĂNG KÝ</Text>
                 )}
               </TouchableOpacity>
             </View>

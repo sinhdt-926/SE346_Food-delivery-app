@@ -208,9 +208,10 @@ export const subscribeToOrderUpdates = (
   };
 };
 
-export const subscribeToUserOrders = (userId: string, onUpdate: () => void) => {
+export const subscribeToUserOrders = (userId: string, onUpdate: (payload?: any) => void) => {
+  // Thêm random suffix để tránh lỗi trùng channel khi component khác cùng lắng nghe
   const channel = supabase
-    .channel(`public:orders:user:${userId}`)
+    .channel(`public:orders:user:${userId}-${Math.random()}`)
     .on(
       "postgres_changes",
       {
@@ -219,8 +220,26 @@ export const subscribeToUserOrders = (userId: string, onUpdate: () => void) => {
         table: "orders",
         filter: `user_id=eq.${userId}`,
       },
-      () => {
-        onUpdate();
+      (payload) => {
+        onUpdate(payload);
+      },
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+};
+
+// Owner: Lắng nghe tất cả đơn hàng mới trên toàn hệ thống
+export const subscribeToNewGlobalOrders = (onInsert: (payload: any) => void) => {
+  const channel = supabase
+    .channel(`public:new_orders-${Math.random()}`)
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "orders" },
+      (payload) => {
+        onInsert(payload);
       },
     )
     .subscribe();

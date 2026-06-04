@@ -8,7 +8,7 @@ import CustomerStack from "./CustomerStack";
 import OwnerStack from "./OwnerStack";
 
 export default function RootNavigation() {
-  const { user, setUser } = useAuthStore();
+  const { user, setUser, isRecoveringPassword, setIsRecoveringPassword } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
 
@@ -32,22 +32,19 @@ export default function RootNavigation() {
   };
 
   useEffect(() => {
-    // 1. Kiểm tra session ngay khi mở app
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-        await fetchUserRole(session.user.id);
-      } else {
-        setUser(null);
-      }
-      setIsLoading(false);
-    });
-
-    // 2. Lắng nghe auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth event:", event);
+
+      if (event === "PASSWORD_RECOVERY") {
+        console.log("PASSWORD_RECOVERY event - staying on AuthStack for NewPassword");
+        setIsRecoveringPassword(true);
+      }
+
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        setIsRecoveringPassword(false);
+      }
 
       if (event === "USER_UPDATED") {
         console.log("USER_UPDATED event - skipping navigation re-render");
@@ -56,8 +53,9 @@ export default function RootNavigation() {
 
       if (session?.user) {
         setUser(session.user);
-        // Chỉ fetch role khi sign in/sign up, không phải mỗi lần update
-        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        // Chỉ fetch role khi app khởi động hoặc khi vừa đăng nhập (trước đó chưa có user)
+        const currentUser = useAuthStore.getState().user;
+        if (event === "INITIAL_SESSION" || (event === "SIGNED_IN" && !currentUser)) {
           setIsLoading(true);
           await fetchUserRole(session.user.id);
           setIsLoading(false);
@@ -65,6 +63,7 @@ export default function RootNavigation() {
       } else {
         setUser(null);
         setRole(null);
+        setIsLoading(false); //tắt loading nếu chưa đăng nhập
       }
     });
 
@@ -87,8 +86,8 @@ export default function RootNavigation() {
     );
   }
 
-  // Chưa đăng nhập
-  if (!user) {
+  // Chưa đăng nhập HOẶC đang trong quá trình đặt lại mật khẩu mới
+  if (!user || isRecoveringPassword) {
     return <AuthStack />;
   }
 

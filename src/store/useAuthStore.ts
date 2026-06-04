@@ -11,12 +11,14 @@ interface ProfileData {
     fullName?: string;
     email?: string;
     phone?: string;
+    imageUrl?: string;
 }
 
 interface AuthState {
     user: AppUser | null;
     isLoading: boolean;
     error: string | null;
+    isRecoveringPassword: boolean;
     // Lấy thông tin user từ Supabase và lưu vào store
     fetchUser: () => Promise<void>;
     // Set user trực tiếp (ví dụ: ngay sau khi login thành công)
@@ -25,12 +27,14 @@ interface AuthState {
     updateProfile: (profileData: ProfileData) => Promise<void>;
     // Xóa thông tin user khi đăng xuất
     clearAuth: () => void;
+    setIsRecoveringPassword: (val: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
     user: null,
     isLoading: false,
     error: null,
+    isRecoveringPassword: false,
 
     fetchUser: async () => {
         set({ isLoading: true, error: null });
@@ -66,4 +70,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     clearAuth: () => set({ user: null, error: null }),
+    setIsRecoveringPassword: (val) => set({ isRecoveringPassword: val }),
 }));
