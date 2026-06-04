@@ -76,7 +76,28 @@
 
 ---
 
-## ⚙️ Hướng dẫn cài đặt & Chạy ứng dụng
+## 📱 Cài đặt nhanh qua file APK (Android)
+
+> [!TIP]
+> **Cách nhanh nhất để chạy thử ứng dụng** — không cần cài Node.js, không cần build từ source code. Chỉ cần tải file APK về và cài đặt trực tiếp trên thiết bị Android.
+
+### Tải file APK
+
+File APK bản mới nhất được đính kèm tại mục **[Releases](https://github.com/sinhdt-926/SE346_Food-delivery-app/releases/tag/v1.0.0)** trên GitHub.
+
+### Các bước cài đặt
+
+1. **Tải file APK** — Vào mục **Releases** → tải file `Food Delivery.apk` về điện thoại Android.
+2. **Cho phép cài từ nguồn không rõ** — Vào **Cài đặt → Bảo mật** (hoặc **Cài đặt ứng dụng**) → Bật **"Cài đặt ứng dụng không rõ nguồn gốc"** (hoặc cho phép trình duyệt/file manager cài APK).
+3. **Cài đặt** — Mở file APK vừa tải → Nhấn **Cài đặt** → Chờ hoàn tất.
+4. **Mở ứng dụng** — Tìm icon **Food Delivery** trên màn hình chính và mở lên.
+
+> [!NOTE]
+> File APK chỉ hỗ trợ **Android**. Ứng dụng đã được kết nối sẵn với Supabase backend của nhóm — không cần cấu hình thêm gì. Sử dụng tài khoản thử nghiệm trong phần **[Tài khoản thử nghiệm](#-tài-khoản-thử-nghiệm)** bên dưới để đăng nhập.
+
+---
+
+## ⚙️ Chạy từ Source Code (Dành cho Developer)
 
 ### Yêu cầu hệ thống
 
