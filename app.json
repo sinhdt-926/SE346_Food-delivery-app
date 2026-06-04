@@ -16,6 +16,12 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.fooddelivery.app",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDoX6PAyUmmyREawSdvHqzc4pqkYRZS0eA"
+        }
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -27,6 +33,14 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["@react-native-community/datetimepicker", "expo-web-browser"]
+    "plugins": [
+      "@react-native-community/datetimepicker",
+      "expo-web-browser"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c369a8c7-674a-4d51-b77b-e03074c66074"
+      }
+    }
   }
 }
