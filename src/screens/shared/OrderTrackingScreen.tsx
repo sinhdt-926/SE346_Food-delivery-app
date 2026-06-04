@@ -113,7 +113,6 @@ export default function OrderTrackingScreen({ navigation, route }: any) {
         }
 
         const deliveryAddress = orderData.delivery_address;
-        
         // 1. Ưu tiên lấy toạ độ chính xác đã được nhúng trong lúc đặt đơn (Cách mới)
         if ((orderData as any).latitude && (orderData as any).longitude) {
           targetLoc = {

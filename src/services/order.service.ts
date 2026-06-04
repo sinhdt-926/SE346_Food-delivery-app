@@ -182,14 +182,12 @@ export const getOrderAddress = async (orderId: number) => {
     .single();
 
   if (error) throw error;
-  
   if (data) {
     const parsed = parseDeliveryAddress(data.delivery_address);
     data.delivery_address = parsed.address;
     (data as any).latitude = parsed.latitude;
     (data as any).longitude = parsed.longitude;
   }
-  
   return data;
 };
 
