@@ -23,7 +23,6 @@ export interface Order {
     price: number;
     image_url?: string;
     subtotal: number;
-    // note đã được chuyển lên cấp Order, không còn per-item
   }[];
   payment: {
     id: number;

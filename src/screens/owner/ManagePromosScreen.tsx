@@ -51,7 +51,7 @@ export default function ManagerPromosScreen() {
       }
     } catch (error) {
       if (isFlag.current) {
-        setError("Cannot load promotions");
+        setError("Không thể tải các khuyến mãi");
       }
     } finally {
       if (isFlag.current) {
@@ -97,9 +97,9 @@ export default function ManagerPromosScreen() {
         setPromos(data ?? []);
       }
     } catch (error) {
-      Alert.alert("Error", "Unable to reload promotion list", [
+      Alert.alert("Lỗi", "Không thể tải lại danh sách khuyến mãi", [
         {
-          text: "Retry",
+          text: "Thử lại",
           onPress: () => handleRefresh(),
         },
       ]);
@@ -123,14 +123,14 @@ export default function ManagerPromosScreen() {
     <View style={styles.container}>
       {/* header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Promos</Text>
+        <Text style={styles.title}>Khuyến mãi</Text>
         <LogoutButton />
       </View>
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color="#999" />
 
         <TextInput
-          placeholder="Search promo..."
+          placeholder="Tìm kiếm khuyến mãi..."
           value={searchText}
           onChangeText={setSearchText}
           style={styles.searchInput}
@@ -146,30 +146,34 @@ export default function ManagerPromosScreen() {
       {/* tabs */}
       <View style={styles.tabs}>
         <TopTabButton
-          title="All"
+          title="Tất cả"
           active={activeTab === "all"}
           onPress={() => setActiveTab("all")}
+          textStyle={{ fontSize: 12 }}
         />
         <TopTabButton
-          title="Active"
+          title="Hoạt động"
           active={activeTab === "active"}
           onPress={() => setActiveTab("active")}
+          textStyle={{ fontSize: 12 }}
         />
         <TopTabButton
-          title="Coming"
+          title="Sắp diễn ra"
           active={activeTab === "upcoming"}
           onPress={() => setActiveTab("upcoming")}
+          textStyle={{ fontSize: 12 }}
         />
         <TopTabButton
-          title="Expired"
+          title="Hết hạn"
           active={activeTab === "expired"}
           onPress={() => setActiveTab("expired")}
+          textStyle={{ fontSize: 12 }}
         />
       </View>
 
       {/* count */}
       <View style={styles.subContainer}>
-        <Text style={styles.countText}>{filteredPromos.length} promos</Text>
+        <Text style={styles.countText}>{filteredPromos.length} khuyến mãi</Text>
         <View style={styles.actionButtons}>
           {/* add */}
           <CustomButton
@@ -211,7 +215,9 @@ export default function ManagerPromosScreen() {
         >
           {filteredPromos.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No promotions found</Text>
+              <Text style={styles.emptyText}>
+                Không tìm thấy khuyễn mãi nào
+              </Text>
             </View>
           ) : (
             filteredPromos.map((promo) => (

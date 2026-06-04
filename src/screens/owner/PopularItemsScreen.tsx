@@ -28,7 +28,7 @@ export default function PopularItemsScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <BackButton />
-        <Text style={styles.headerTitle}>Popular Items</Text>
+        <Text style={styles.headerTitle}>Món Ăn Phổ Biến</Text>
       </View>
       <FlatList
         data={popularFoods}

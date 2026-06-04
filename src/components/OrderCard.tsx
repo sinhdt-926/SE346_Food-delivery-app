@@ -30,13 +30,13 @@ export default function OrderCard({
   const getActionTitle = () => {
     switch (status) {
       case "pending":
-        return "Confirm";
+        return "Xác nhận";
 
       case "preparing":
-        return "Deliver";
+        return "Giao hàng";
 
       case "delivering":
-        return "Complete";
+        return "Hoàn thành";
 
       default:
         return null;
@@ -52,7 +52,7 @@ export default function OrderCard({
           source={
             avatarUrl
               ? { uri: avatarUrl }
-              : require("../../assets/default-food.png")
+              : require("../../assets/default_avt.png")
           }
           style={styles.image}
         />
@@ -77,7 +77,7 @@ export default function OrderCard({
             isLoading={actionLoading}
           />
           <CustomButton
-            title="Cancel"
+            title="Hủy"
             buttonStyle={styles.cancelButton}
             textStyle={styles.cancelText}
             onPress={onCancelPress}
@@ -100,7 +100,11 @@ export default function OrderCard({
               status === "cancelled" && styles.cancelledText,
             ]}
           >
-            {status.toUpperCase()}
+            {status === "completed"
+              ? "Hoàn thành"
+              : status === "cancelled"
+                ? "Đã hủy"
+                : status}
           </Text>
         </View>
       )}
@@ -144,12 +148,12 @@ const styles = StyleSheet.create({
   },
 
   time: {
-    fontSize: 13,
+    fontSize: 11,
     color: "#B1B1B1",
   },
 
   name: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "700",
     color: "#222",
   },
@@ -160,45 +164,47 @@ const styles = StyleSheet.create({
   },
 
   price: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 13,
+    fontWeight: "normal",
     color: "#222",
+    textAlign: "right",
   },
 
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 22,
+    justifyContent: "space-around",
+    alignItems: "center",
+    marginTop: 16,
+    gap: 8,
   },
 
   doneButton: {
-    flex: 1,
-    marginRight: 10,
-    borderRadius: 18,
-    paddingVertical: 14,
+    width: 100,
+    borderRadius: 12,
+    paddingVertical: 10,
   },
 
   doneText: {
-    fontSize: 15,
+    fontSize: 11,
   },
 
   cancelButton: {
-    flex: 1,
+    width: 100,
     backgroundColor: "#FFF",
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: "#EF4444",
-    borderRadius: 18,
-    paddingVertical: 14,
+    borderRadius: 12,
+    paddingVertical: 10,
   },
 
   cancelText: {
     color: "#EF4444",
-    fontSize: 15,
+    fontSize: 11,
   },
 
   statusBadge: {
     marginTop: 22,
-    alignSelf: "flex-start",
+    alignSelf: "flex-end",
     paddingHorizontal: 18,
     paddingVertical: 10,
     borderRadius: 999,
@@ -214,7 +220,7 @@ const styles = StyleSheet.create({
 
   statusText: {
     fontWeight: "700",
-    fontSize: 13,
+    fontSize: 11,
   },
 
   completedText: {

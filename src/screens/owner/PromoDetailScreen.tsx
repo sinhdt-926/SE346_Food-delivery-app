@@ -10,6 +10,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -24,6 +25,7 @@ import { Promotion } from "../../types/promotion";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { getLocalDateString } from "../../utils/date";
+import * as ImagePicker from "expo-image-picker";
 
 export default function AddEditPromotionScreen() {
   const navigation = useNavigation<any>();
@@ -43,6 +45,7 @@ export default function AddEditPromotionScreen() {
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [startDate, setStartDate] = useState(getLocalDateString());
   const [endDate, setEndDate] = useState(getLocalDateString());
+  const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!editingPromotion) return;
@@ -55,8 +58,9 @@ export default function AddEditPromotionScreen() {
     setMinOrderValue(
       editingPromotion.min_order_value != null
         ? String(editingPromotion.min_order_value)
-        : ""
+        : "",
     );
+    setImage(editingPromotion.image_url ?? null);
   }, [editingPromotion]);
 
   const hasChanges = useMemo(() => {
@@ -70,9 +74,11 @@ export default function AddEditPromotionScreen() {
       startDate !== editingPromotion.start_date.slice(0, 10) ||
       endDate !== editingPromotion.end_date.slice(0, 10) ||
       isActive !== editingPromotion.is_active ||
-      minOrderValue !== (editingPromotion.min_order_value != null
-        ? String(editingPromotion.min_order_value)
-        : "")
+      minOrderValue !==
+        (editingPromotion.min_order_value != null
+          ? String(editingPromotion.min_order_value)
+          : "") ||
+      image !== (editingPromotion.image_url ?? null)
     );
   }, [
     name,
@@ -82,6 +88,7 @@ export default function AddEditPromotionScreen() {
     endDate,
     isActive,
     minOrderValue,
+    image,
     editingPromotion,
   ]);
 
@@ -91,9 +98,9 @@ export default function AddEditPromotionScreen() {
         return;
       }
       e.preventDefault();
-      Alert.alert("Unsaved Changes", "Save before leaving?", [
+      Alert.alert("Thay đổi chưa được lưu", "Lưu trước khi rời đi?", [
         {
-          text: "Discard",
+          text: "Tiếp tục",
           style: "destructive",
           onPress: () => {
             allowExitRef.current = true;
@@ -101,11 +108,11 @@ export default function AddEditPromotionScreen() {
           },
         },
         {
-          text: "Cancel",
+          text: "Hủy",
           style: "cancel",
         },
         {
-          text: "Save",
+          text: "Lưu",
           onPress: async () => {
             const success = await handleSave();
             if (success) {
@@ -121,28 +128,31 @@ export default function AddEditPromotionScreen() {
 
   const validateForm = () => {
     if (!name.trim()) {
-      Alert.alert("Missing Name", "Please enter promotion name");
+      Alert.alert(
+        "Tên chương trình không hợp lệ",
+        "Vui lòng nhập tên chương trình khuyến mãi",
+      );
       return false;
     }
     const value = Number(discountValue);
     if (discountValue.trim() === "" || isNaN(value)) {
-      Alert.alert("Invalid Discount");
+      Alert.alert("Mã giảm giá không hợp lệ");
       return false;
     }
     if (discountType === "percent" && (value <= 0 || value > 100)) {
-      Alert.alert("Percent must be 1 - 100");
+      Alert.alert("Tỷ lệ phần trăm phải nằm trong khoảng từ 1 đến 100");
       return false;
     }
     if (discountType === "fixed" && value <= 0) {
-      Alert.alert("Amount must be > 0");
+      Alert.alert("Số tiền phải lớn hơn 0");
       return false;
     }
     if (!startDate || !endDate) {
-      Alert.alert("Please enter dates");
+      Alert.alert("Vui lòng nhập ngày tháng");
       return false;
     }
     if (endDate <= startDate) {
-      Alert.alert("The end date must be after the start date.");
+      Alert.alert("Ngày kết thúc phải sau ngày bắt đầu");
       return false;
     }
     const minVal = Number(minOrderValue);
@@ -164,9 +174,9 @@ export default function AddEditPromotionScreen() {
         start_date: startDate,
         end_date: endDate,
         is_active: isActive,
-        min_order_value: minOrderValue.trim() !== ""
-          ? Number(minOrderValue)
-          : undefined,
+        min_order_value:
+          minOrderValue.trim() !== "" ? Number(minOrderValue) : undefined,
+        image_url: image ?? undefined,
       };
 
       if (isEditMode && editingPromotion) {
@@ -175,12 +185,17 @@ export default function AddEditPromotionScreen() {
         await createPromotion(payload);
       }
       Alert.alert(
-        "Success",
-        isEditMode ? "Promotion updated" : "Promotion created",
+        "Thành công",
+        isEditMode
+          ? "Chương trình khuyến mãi đã được cập nhật"
+          : "Chương trình khuyến mãi đã được tạo",
       );
       return true;
     } catch (error) {
-      Alert.alert("Error", isEditMode ? "Update failed" : "Create failed");
+      Alert.alert(
+        "Thất bại",
+        isEditMode ? "Cập nhật thất bại" : "Tạo thất bại",
+      );
       return false;
     } finally {
       setIsSaving(false);
@@ -188,13 +203,13 @@ export default function AddEditPromotionScreen() {
   };
 
   const confirmSave = () => {
-    Alert.alert("Confirm", isEditMode ? "Save changes?" : "Create promotion?", [
+    Alert.alert("Xác nhận", isEditMode ? "Lưu thay đổi?" : "Tạo khuyến mãi?", [
       {
-        text: "Cancel",
+        text: "Hủy",
         style: "cancel",
       },
       {
-        text: "Save",
+        text: "Lưu",
         onPress: async () => {
           const success = await handleSave();
           if (success) {
@@ -207,13 +222,13 @@ export default function AddEditPromotionScreen() {
     ]);
   };
   const confirmDelete = () => {
-    Alert.alert("Delete Promotion", "Are you sure?", [
+    Alert.alert("Xóa chương trình khuyến mãi", "Bạn có chắc không?", [
       {
-        text: "Cancel",
+        text: "Hủy",
         style: "cancel",
       },
       {
-        text: "Delete",
+        text: "Xóa",
         style: "destructive",
         onPress: handleDelete,
       },
@@ -224,10 +239,10 @@ export default function AddEditPromotionScreen() {
     try {
       setIsSaving(true);
       await deletePromotion(editingPromotion!.id);
-      Alert.alert("Success", "Promotion deleted");
+      Alert.alert("Thành công", "Chương trình khuyến mãi đã bị xóa");
       navigation.goBack();
     } catch {
-      Alert.alert("Error", "Delete failed");
+      Alert.alert("Lỗi", "Xóa không thành công");
     } finally {
       setIsSaving(false);
     }
@@ -243,7 +258,7 @@ export default function AddEditPromotionScreen() {
       setMinOrderValue(
         editingPromotion.min_order_value != null
           ? String(editingPromotion.min_order_value)
-          : ""
+          : "",
       );
       return;
     }
@@ -256,18 +271,46 @@ export default function AddEditPromotionScreen() {
     setMinOrderValue("");
   };
   const confirmReset = () => {
-    Alert.alert("Confirm Reset", "Do you want to reset?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Reset",
-        onPress: async () => {
-          handleReset();
+    Alert.alert(
+      "Xác nhận khôi phục",
+      "Bạn có chắc chắn muốn khôi phục về trạng thái ban đầu không?",
+      [
+        {
+          text: "Hủy",
+          style: "cancel",
         },
-      },
-    ]);
+        {
+          text: "Khôi phục",
+          onPress: async () => {
+            handleReset();
+          },
+        },
+      ],
+    );
+  };
+  const pickImage = async () => {
+    try {
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert(
+          "Quyền truy cập bị từ chối",
+          "Vui lòng cho phép truy cập vào thư viện ảnh",
+        );
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể chọn ảnh");
+    }
   };
 
   return (
@@ -280,15 +323,15 @@ export default function AddEditPromotionScreen() {
         <View style={styles.header}>
           <BackButton />
           <Text style={styles.headerTitle}>
-            {isEditMode ? "Edit Promotion" : "Add Promotion"}
+            {isEditMode ? "Chỉnh sửa" : "Thêm mới"}
           </Text>
           <TouchableOpacity activeOpacity={0.8} onPress={confirmReset}>
-            <Text style={styles.resetText}>RESET</Text>
+            <Text style={styles.resetText}>Khôi phục</Text>
           </TouchableOpacity>
         </View>
         <ScrollView>
           <View style={styles.section}>
-            <Text style={styles.label}>PROMOTION NAME</Text>
+            <Text style={styles.label}>Tên chương trình</Text>
             <TextInput
               style={styles.input}
               value={name}
@@ -296,7 +339,37 @@ export default function AddEditPromotionScreen() {
             />
           </View>
           <View style={styles.section}>
-            <Text style={styles.label}>DISCOUNT TYPE</Text>
+            <Text style={styles.label}>Ảnh chương trình</Text>
+            <View style={styles.uploadContainer}>
+              <TouchableOpacity
+                style={styles.previewBox}
+                activeOpacity={0.85}
+                onPress={pickImage}
+              >
+                {image ? (
+                  <Image
+                    source={{
+                      uri: image,
+                    }}
+                    style={styles.previewImage}
+                  />
+                ) : (
+                  <View style={styles.emptyUploadContainer}>
+                    <View style={styles.uploadIconWrapper}>
+                      <Ionicons
+                        name="cloud-upload-outline"
+                        size={34}
+                        color="#FF7A1A"
+                      />
+                    </View>
+                    <Text style={styles.uploadText}>Tải ảnh</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.label}>Loại giảm giá</Text>
             <View style={styles.typeContainer}>
               {["percent", "fixed"].map((type) => (
                 <TouchableOpacity
@@ -313,7 +386,7 @@ export default function AddEditPromotionScreen() {
                       discountType === type && styles.activeText,
                     ]}
                   >
-                    {type}
+                    {type === "percent" ? "Phần trăm" : "Số tiền cố định"}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -321,7 +394,7 @@ export default function AddEditPromotionScreen() {
           </View>
           <View style={styles.section}>
             <Text style={styles.label}>
-              {discountType === "percent" ? "DISCOUNT (%)" : "DISCOUNT AMOUNT"}
+              {discountType === "percent" ? "Giảm giá (%)" : "Số tiền giảm giá"}
             </Text>
             <TextInput
               style={styles.input}
@@ -331,18 +404,20 @@ export default function AddEditPromotionScreen() {
             />
           </View>
           <View style={styles.section}>
-            <Text style={styles.label}>MIN ORDER VALUE (optional)</Text>
+            <Text style={styles.label}>
+              Giá trị đơn hàng tối thiểu (không bắt buộc)
+            </Text>
             <TextInput
               style={styles.input}
               keyboardType="numeric"
-              placeholder="Leave empty for no minimum"
+              placeholder="Để trống nếu không áp dụng"
               placeholderTextColor="#999"
               value={minOrderValue}
               onChangeText={setMinOrderValue}
             />
           </View>
           <View style={styles.section}>
-            <Text style={styles.label}>START DATE</Text>
+            <Text style={styles.label}>Ngày bắt đầu</Text>
             <TouchableOpacity
               style={styles.dateInput}
               onPress={() => setShowStartPicker(true)}
@@ -351,18 +426,21 @@ export default function AddEditPromotionScreen() {
               <Text>{startDate}</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.dateInput}
-            onPress={() => setShowEndPicker(true)}
-          >
-            <Ionicons name="calendar-outline" size={20} color="#666" />
-            <Text>{endDate}</Text>
-          </TouchableOpacity>
+          <View style={styles.section}>
+            <Text style={styles.label}>Ngày kết thúc</Text>
+            <TouchableOpacity
+              style={styles.dateInput}
+              onPress={() => setShowEndPicker(true)}
+            >
+              <Ionicons name="calendar-outline" size={20} color="#666" />
+              <Text>{endDate}</Text>
+            </TouchableOpacity>
+          </View>
           <View
             style={[styles.header, !isEditMode && { justifyContent: "center" }]}
           >
             <CustomButton
-              title={isEditMode ? "SAVE CHANGES" : "ADD PROMOTION"}
+              title={isEditMode ? "Lưu Thay Đổi" : "Thêm Mới"}
               onPress={confirmSave}
               isLoading={isSaving}
               disabled={isSaving}
@@ -371,7 +449,7 @@ export default function AddEditPromotionScreen() {
             />
             {isEditMode && (
               <CustomButton
-                title="DELETE"
+                title="Xóa"
                 onPress={confirmDelete}
                 disabled={isSaving}
                 buttonStyle={styles.deleteButton}
@@ -573,5 +651,43 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 3,
     elevation: 1,
+  },
+  uploadContainer: {
+    alignItems: "center",
+  },
+  previewBox: {
+    width: "80%",
+    aspectRatio: 1,
+    maxWidth: 240,
+    borderRadius: 28,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderColor: "#DADADA",
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  previewImage: {
+    width: "100%",
+    height: "100%",
+  },
+  emptyUploadContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  uploadIconWrapper: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    backgroundColor: "#FFF3EA",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  uploadText: {
+    color: "#999",
+    fontSize: 15,
+    fontWeight: "600",
   },
 });

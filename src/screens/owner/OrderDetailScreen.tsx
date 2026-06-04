@@ -10,7 +10,10 @@ import {
 import BackButton from "../../components/BackButton";
 import CustomButton from "../../components/CustomButton";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { updateOrderStatus } from "../../services/order.service";
+import {
+  updateOrderStatus,
+  getPaymentStatus,
+} from "../../services/order.service";
 import { Order, OrderStatus } from "../../types/order";
 import { formatCurrency, formatRelativeTime } from "../../utils/formatters";
 
@@ -46,13 +49,13 @@ export default function OrderDetailScreen() {
   const getActionTitle = () => {
     switch (currentOrder.status) {
       case "pending":
-        return "Confirm";
+        return "Xác nhận";
 
       case "preparing":
-        return "Deliver";
+        return "Giao hàng";
 
       case "delivering":
-        return "Complete";
+        return "Hoàn thành";
 
       default:
         return null;
@@ -79,18 +82,30 @@ export default function OrderDetailScreen() {
     try {
       setActionLoading(true);
       await updateOrderStatus(currentOrder.id, nextStatus);
+      const paymentData = await getPaymentStatus(currentOrder.id);
       setCurrentOrder((prev) => ({
         ...prev,
         status: nextStatus,
+        payment: {
+          ...prev.payment,
+          status: paymentData.status,
+          amount: Number(paymentData.amount),
+          type: paymentData.type,
+        },
       }));
+      if (nextStatus === "delivering") {
+        navigation.replace("Tracking", {
+          orderId: currentOrder.id,
+        });
+      }
     } catch (error) {
-      Alert.alert("Error", "Unable to update order status", [
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
         {
-          text: "Retry",
+          text: "Thử lại",
           onPress: () => handleNextState(),
         },
         {
-          text: "Close",
+          text: "Đóng",
           style: "cancel",
         },
       ]);
@@ -103,24 +118,76 @@ export default function OrderDetailScreen() {
   const handleCancelOrder = async () => {
     try {
       setActionLoading(true);
-      await updateOrderStatus(currentOrder.id, "cancelled");
+      const paymentData = await getPaymentStatus(currentOrder.id);
+
       setCurrentOrder((prev) => ({
         ...prev,
         status: "cancelled",
+        payment: {
+          ...prev.payment,
+          status: paymentData.status,
+          amount: Number(paymentData.amount),
+          type: paymentData.type,
+        },
       }));
     } catch (error) {
-      Alert.alert("Error", "Unable to update order status", [
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
         {
-          text: "Retry",
+          text: "Thử lại",
           onPress: () => handleCancelOrder(),
         },
         {
-          text: "Close",
+          text: "Đóng",
           style: "cancel",
         },
       ]);
     } finally {
       setActionLoading(false);
+    }
+  };
+  const getStatusLabel = () => {
+    switch (currentOrder.status) {
+      case "pending":
+        return "Chờ xác nhận";
+
+      case "preparing":
+        return "Đang chuẩn bị";
+
+      case "delivering":
+        return "Đang giao";
+      case "completed":
+        return "Hoàn thành";
+      case "cancelled":
+        return "Đã hủy";
+      default:
+        return null;
+    }
+  };
+  const getPaymentStatusLabel = () => {
+    switch (currentOrder.payment.status) {
+      case "paid":
+        return "Đã thanh toán";
+
+      case "unpaid":
+        return "Chưa thanh toán";
+
+      case "pending":
+        return "Đang xử lý";
+
+      default:
+        return currentOrder.payment.status;
+    }
+  };
+  const getPaymentTypeLabel = () => {
+    switch (currentOrder.payment.type) {
+      case "cash":
+        return "Tiền mặt";
+
+      case "vnpay":
+        return "VNPay";
+
+      default:
+        return currentOrder.payment.type;
     }
   };
   return (
@@ -133,13 +200,13 @@ export default function OrderDetailScreen() {
       <View style={styles.header}>
         <BackButton />
 
-        <Text style={styles.title}>Order Details</Text>
+        <Text style={styles.title}>Chi Tiết Đơn Hàng</Text>
       </View>
 
       {/* status */}
       <View style={styles.statusCard}>
         <View>
-          <Text style={styles.orderId}>Order #{currentOrder.id}</Text>
+          <Text style={styles.orderId}>Đơn hàng #{currentOrder.id}</Text>
 
           <Text style={styles.label}>
             {formatRelativeTime(currentOrder.created_at, true)}
@@ -147,36 +214,29 @@ export default function OrderDetailScreen() {
         </View>
 
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>
-            {currentOrder.status.toUpperCase()}
-          </Text>
+          <Text style={styles.badgeText}>{getStatusLabel()}</Text>
         </View>
       </View>
 
       {/* customer */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Customer Information</Text>
-        <InfoRow label="Name" value={currentOrder.customer.fullname} />
-        <InfoRow label="Phone" value={currentOrder.customer.phone_number} />
+        <Text style={styles.sectionTitle}>Thông tin khách hàng</Text>
+        <InfoRow label="Tên" value={currentOrder.customer.fullname} />
+        <InfoRow
+          label="Số điện thoại"
+          value={currentOrder.customer.phone_number}
+        />
       </View>
 
       {/* address */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Delivery Address</Text>
+        <Text style={styles.sectionTitle}>Địa chỉ giao hàng</Text>
         <Text style={styles.address}>{currentOrder.address}</Text>
       </View>
 
-      {/* note */}
-      {currentOrder.note ? (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Order Note</Text>
-          <Text style={styles.note}>{currentOrder.note}</Text>
-        </View>
-      ) : null}
-
       {/* items */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Ordered Items</Text>
+        <Text style={styles.sectionTitle}>Món ăn</Text>
 
         {currentOrder.items.map((item, index) => (
           <FoodItem
@@ -191,19 +251,26 @@ export default function OrderDetailScreen() {
         {actionLoading && (
           <View style={styles.center}>
             <ActivityIndicator size="large" color="#FF7622" />
-            <Text style={styles.loadingText}>Loading orders...</Text>
+            <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
           </View>
         )}
       </View>
-
+      {/* not */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Ghi chú</Text>
+        <Text style={styles.address}>
+          {currentOrder.note?.trim() || "Không có"}
+        </Text>
+      </View>
       {/* payment */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Payment Summary</Text>
-        <InfoRow label="Payment Type" value={currentOrder.payment.type} />
-        <InfoRow label="Payment Status" value={currentOrder.payment.status} />
+        <Text style={styles.sectionTitle}>Thánh toán</Text>
+        <InfoRow label="Phương thức" value={getPaymentTypeLabel()} />
+        <View style={styles.divider} />
+        <InfoRow label="Trạng thái" value={getPaymentStatusLabel()} />
         <View style={styles.divider} />
         <InfoRow
-          label="Total"
+          label="Thành tiền"
           value={formatCurrency(currentOrder.payment.amount, "VND")}
           bold
         />
@@ -219,7 +286,7 @@ export default function OrderDetailScreen() {
             />
 
             <CustomButton
-              title="Cancel"
+              title="Hủy"
               buttonStyle={styles.cancelButton}
               onPress={handleCancelOrder}
               disabled={actionLoading}
@@ -257,7 +324,7 @@ function FoodItem({ name, quantity, price }: FoodItem) {
         <View style={styles.foodInfo}>
           <Text style={styles.foodName}>{name}</Text>
 
-          <Text style={styles.foodQty}>Quantity: {quantity}</Text>
+          <Text style={styles.foodQty}>Số lượng: {quantity}</Text>
         </View>
 
         <Text style={styles.foodPrice}>{formatCurrency(price, "VND")}</Text>
@@ -313,7 +380,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: "#FF7A1A",
     fontWeight: "700",
-    fontSize: 12,
+    fontSize: 11,
   },
 
   section: {
@@ -324,7 +391,7 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: "#222222",
     marginBottom: 18,
@@ -338,12 +405,12 @@ const styles = StyleSheet.create({
 
   label: {
     color: "#8E8E8E",
-    fontSize: 15,
+    fontSize: 12,
   },
 
   value: {
     color: "#222222",
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: "500",
   },
 

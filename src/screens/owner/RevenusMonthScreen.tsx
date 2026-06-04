@@ -28,18 +28,18 @@ export default function RevenusMonthScreen() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "Tháng 1",
+    "Tháng 2",
+    "Tháng 3",
+    "Tháng 4",
+    "Tháng 5",
+    "Tháng 6",
+    "Tháng 7",
+    "Tháng 8",
+    "Tháng 9",
+    "Tháng 10",
+    "Tháng 11",
+    "Tháng 12",
   ];
   const loadRevenus = async () => {
     try {
@@ -55,7 +55,7 @@ export default function RevenusMonthScreen() {
         buildRevenueChart(month.revenue_by_date, "month", daysInMonth),
       );
     } catch (error) {
-      Alert.alert("Error", "Failed to load dashboard");
+      Alert.alert("Lỗi", "Không thể tải");
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export default function RevenusMonthScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <BackButton />
-        <Text style={styles.headerTitle}>Revenus</Text>
+        <Text style={styles.headerTitle}>Doanh Thu</Text>
       </View>
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -92,7 +92,7 @@ export default function RevenusMonthScreen() {
         <View style={styles.revenueCard}>
           <View style={styles.revenueHeader}>
             <View>
-              <Text style={styles.revenueTitle}>This Week</Text>
+              <Text style={styles.revenueTitle}>Tuần này</Text>
               <Text style={styles.revenueAmount}>
                 {formatCurrency(weekRevenue, "VND").toLocaleString()}
               </Text>
@@ -141,7 +141,7 @@ export default function RevenusMonthScreen() {
         <View style={styles.revenueCard}>
           <View style={styles.revenueHeader}>
             <View>
-              <Text style={styles.revenueTitle}>Monthly Revenue</Text>
+              <Text style={styles.revenueTitle}>Doanh thu tháng</Text>
               <Text style={styles.revenueAmount}>
                 {formatCurrency(monthRevenue, "VND").toLocaleString()}
               </Text>
