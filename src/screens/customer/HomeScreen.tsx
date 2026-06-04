@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  ImageBackground,
   ActivityIndicator,
   Animated,
   Dimensions,
@@ -13,7 +14,7 @@ import {
   FlatList,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useCartStore } from "../../store/useCartStore";
 import { getFoods, getCategories } from "../../services/food.service";
 import { getValidPromotions, applyPromotion } from "../../services/promotion.service";
@@ -27,15 +28,15 @@ const { width } = Dimensions.get("window");
 
 const getCategoryIcon = (name: string) => {
   const lowerName = name.toLowerCase();
-  if (lowerName.includes("pizza")) return { name: "pizza-outline", color: "#FF7622", bgColor: "#FFF0E6" };
-  if (lowerName.includes("burger")) return { name: "fast-food-outline", color: "#FF9800", bgColor: "#FFF3E0" };
-  if (lowerName.includes("drink") || lowerName.includes("nước") || lowerName.includes("uống")) return { name: "beer-outline", color: "#00BCD4", bgColor: "#E0F7FA" };
-  if (lowerName.includes("chicken") || lowerName.includes("gà")) return { name: "restaurant-outline", color: "#E91E63", bgColor: "#FCE4EC" };
-  if (lowerName.includes("cơm")) return { name: "nutrition-outline", color: "#4CAF50", bgColor: "#E8F5E9" };
-  if (lowerName.includes("phở") || lowerName.includes("bún")) return { name: "cafe-outline", color: "#795548", bgColor: "#EFEBE9" };
-  if (lowerName.includes("tráng miệng") || lowerName.includes("bánh")) return { name: "ice-cream-outline", color: "#9C27B0", bgColor: "#F3E5F5" };
-  if (lowerName.includes("tất cả") || lowerName.includes("all")) return { name: "grid-outline", color: "#32343E", bgColor: "#F0F0F0" };
-  return { name: "restaurant-outline", color: "#607D8B", bgColor: "#ECEFF1" };
+  if (lowerName.includes("pizza")) return { name: "pizza", color: "#FF7622", bgColor: "#FFF0E6" };
+  if (lowerName.includes("cơm")) return { name: "rice", color: "#FF9800", bgColor: "#FFF3E0" };
+  if (lowerName.includes("trà") || lowerName.includes("cà phê") || lowerName.includes("coffee") || lowerName.includes("tea")) return { name: "coffee", color: "#795548", bgColor: "#EFEBE9" };
+  if (lowerName.includes("soda") || lowerName.includes("cocktail") || lowerName.includes("nước") || lowerName.includes("drink")) return { name: "glass-cocktail", color: "#00BCD4", bgColor: "#E0F7FA" };
+  if (lowerName.includes("chicken") || lowerName.includes("gà")) return { name: "food-drumstick", color: "#E91E63", bgColor: "#FCE4EC" };
+  if (lowerName.includes("phở") || lowerName.includes("bún") || lowerName.includes("mì") || lowerName.includes("noodle")) return { name: "noodles", color: "#8BC34A", bgColor: "#F1F8E9" };
+  if (lowerName.includes("tráng miệng") || lowerName.includes("bánh") || lowerName.includes("dessert")) return { name: "cupcake", color: "#9C27B0", bgColor: "#F3E5F5" };
+  if (lowerName.includes("tất cả") || lowerName.includes("all")) return { name: "view-grid", color: "#32343E", bgColor: "#F0F0F0" };
+  return { name: "silverware-fork-knife", color: "#607D8B", bgColor: "#ECEFF1" };
 };
 
 const HomeScreen = ({ navigation }: any) => {
@@ -156,14 +157,33 @@ const HomeScreen = ({ navigation }: any) => {
   }
 
   const renderPromoItem = ({ item }: { item: any }) => (
-    <View style={styles.promoBanner}>
-      <View style={styles.promoContent}>
-        <Text style={styles.promoTitle}>KHUYẾN MÃI HOT 🔥</Text>
-        <Text style={styles.promoDesc}>{item.name}</Text>
-        <Text style={styles.promoDiscount}>
-          Giảm {item.discount_type === 'percent' ? `${item.discount_value}%` : `${item.discount_value.toLocaleString()}đ`}
-        </Text>
-      </View>
+    <View style={styles.promoBannerContainer}>
+      {item.image_url ? (
+        <ImageBackground 
+          source={{ uri: item.image_url }} 
+          style={styles.promoBanner} 
+          imageStyle={{ borderRadius: 12 }}
+        >
+          <View style={styles.promoOverlay} />
+          <View style={styles.promoContent}>
+            <Text style={styles.promoTitle}>KHUYẾN MÃI HOT 🔥</Text>
+            <Text style={styles.promoDesc}>{item.name}</Text>
+            <Text style={styles.promoDiscount}>
+              Giảm {item.discount_type === 'percent' ? `${item.discount_value}%` : `${item.discount_value.toLocaleString()}đ`}
+            </Text>
+          </View>
+        </ImageBackground>
+      ) : (
+        <View style={[styles.promoBanner, { backgroundColor: "#FF7622" }]}>
+          <View style={styles.promoContent}>
+            <Text style={styles.promoTitle}>KHUYẾN MÃI HOT 🔥</Text>
+            <Text style={styles.promoDesc}>{item.name}</Text>
+            <Text style={styles.promoDiscount}>
+              Giảm {item.discount_type === 'percent' ? `${item.discount_value}%` : `${item.discount_value.toLocaleString()}đ`}
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 
@@ -260,7 +280,7 @@ const HomeScreen = ({ navigation }: any) => {
                   ]}
                 >
                   <View style={[styles.categoryPillIcon, { backgroundColor: iconData.bgColor }]}>
-                    <Ionicons name={iconData.name as any} size={18} color={iconData.color} />
+                    <MaterialCommunityIcons name={iconData.name as any} size={20} color={iconData.color} />
                   </View>
                   <Text style={styles.categoryPillText}>{item.category_name}</Text>
                 </Pressable>
@@ -338,14 +358,22 @@ const styles = StyleSheet.create({
 
   // Promo Banner
   promoSection: { marginTop: 15 },
+  promoBannerContainer: {
+    width: width,
+    alignItems: 'center',
+  },
   promoBanner: {
     width: width - 30, // Chiều rộng bằng khung hình trừ lề
-    marginHorizontal: 15,
     height: 120,
     backgroundColor: "#FF7622",
     borderRadius: 12,
     justifyContent: "center",
     padding: 20,
+  },
+  promoOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 12,
   },
   promoContent: { zIndex: 2 },
   promoTitle: { color: "#FFF", fontSize: 12, fontWeight: "bold", opacity: 0.9 },

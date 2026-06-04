@@ -17,7 +17,7 @@ export const getMyOrders = async () => {
                 quantity,
                 price,
                 subtotal,
-                foods(name)
+                foods(name, image_url)
             ),
             payments(
                 amount,
@@ -38,6 +38,7 @@ export const getMyOrders = async () => {
     note: order.note,
     items: (order.order_details ?? []).map((item: any) => ({
       name: item.foods?.name,
+      image_url: item.foods?.image_url,
       quantity: item.quantity,
       price: item.price,
       subtotal: Number(item.subtotal),

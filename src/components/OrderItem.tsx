@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import CustomButton from "./CustomButton";
 
 type OrderItemProps = {
@@ -9,7 +9,7 @@ type OrderItemProps = {
     created_at: Date | string;
     updated_at?: Date | string;
     status: "pending" | "delivering" | "preparing" | "completed" | "cancelled" | string;
-    items: { name: string; quantity: number }[];
+    items: { name: string; quantity: number; image_url?: string }[];
     total: number;
   };
   onViewDetail?: () => void;
@@ -87,7 +87,11 @@ export default function OrderItem({
       {/* --- BODY --- */}
       <View style={styles.body}>
         {/* Hình ảnh đại diện */}
-        <View style={styles.thumbnail} />
+        {order.items && order.items.length > 0 && order.items[0].image_url ? (
+          <Image source={{ uri: order.items[0].image_url }} style={styles.thumbnail} />
+        ) : (
+          <View style={styles.thumbnail} />
+        )}
 
         {/* Thông tin đơn hàng */}
         <View style={styles.infoContainer}>

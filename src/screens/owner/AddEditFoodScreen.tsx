@@ -22,6 +22,7 @@ import {
   createFood,
   updateFood,
   uploadImage,
+  uploadImageBase64,
   deleteFood,
   getCategories,
   createCategory,
@@ -39,6 +40,7 @@ export default function AddEditFoodScreen() {
   const [price, setPrice] = useState("");
   const [details, setDetails] = useState("");
   const [image, setImage] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [isAvailable, setIsAvailable] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const allowExitRef = useRef(false);
@@ -152,11 +154,16 @@ export default function AddEditFoodScreen() {
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
+        base64: true,
       });
       if (!result.canceled) {
         setImage(result.assets[0].uri);
+        if (result.assets[0].base64) {
+          setImageBase64(result.assets[0].base64);
+        }
       }
     } catch (error) {
+      console.error("pickImage error:", error);
       Alert.alert("Lỗi", "Không thể chọn ảnh");
     }
   };
@@ -218,7 +225,9 @@ export default function AddEditFoodScreen() {
     try {
       setIsSaving(true);
       let imageUrl = image;
-      if (image && image.startsWith("file")) {
+      if (imageBase64) {
+        imageUrl = await uploadImageBase64(imageBase64);
+      } else if (image && image.startsWith("file")) {
         const response = await fetch(image);
         const blob = await response.blob();
         imageUrl = await uploadImage(blob);
@@ -242,6 +251,7 @@ export default function AddEditFoodScreen() {
       );
       return true;
     } catch (error) {
+      console.error("handleSave error:", error);
       Alert.alert(
         "Error",
         isEditMode ? "Không thể cập nhật món ăn" : "Không thể thêm món ăn",
