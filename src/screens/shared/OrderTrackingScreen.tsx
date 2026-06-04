@@ -113,7 +113,15 @@ export default function OrderTrackingScreen({ navigation, route }: any) {
         }
 
         const deliveryAddress = orderData.delivery_address;
-        if (deliveryAddress) {
+        
+        // 1. Ưu tiên lấy toạ độ chính xác đã được nhúng trong lúc đặt đơn (Cách mới)
+        if ((orderData as any).latitude && (orderData as any).longitude) {
+          targetLoc = {
+            latitude: (orderData as any).latitude,
+            longitude: (orderData as any).longitude,
+          };
+        } else if (deliveryAddress) {
+          // 2. Fallback: Thử tìm trong sổ địa chỉ (Dành cho các đơn hàng cũ trước khi có tính năng nhúng toạ độ)
           const addrRes = await AddressService.getAddresses();
           const matchedAddr = addrRes.data?.find(
             (a) => a.address === deliveryAddress,
@@ -323,12 +331,18 @@ export default function OrderTrackingScreen({ navigation, route }: any) {
 
             {remainingDistance > 0 && remainingDistance < 1 && (
               <Text style={styles.arrivingSoonText}>
-                Đơn hàng sắp đến, vui lòng chú ý điện thoại
+                {role === "owner"
+                  ? "Shipper sắp giao đến nơi"
+                  : "Đơn hàng sắp đến, vui lòng chú ý điện thoại"}
               </Text>
             )}
 
             {remainingDistance === 0 && (
-              <Text style={styles.arrivedText}>Đơn hàng của bạn đã đến</Text>
+              <Text style={styles.arrivedText}>
+                {role === "owner"
+                  ? "Shipper đã giao xong đơn hàng"
+                  : "Đơn hàng của bạn đã đến"}
+              </Text>
             )}
 
             <View style={styles.lottieWrapper}>

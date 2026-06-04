@@ -95,8 +95,10 @@ export default function CheckoutScreen({ navigation, route }: any) {
       return;
     }
     setIsOrdering(true);
+    const addressWithCoords = `${selectedAddress.address}|coords:${selectedAddress.latitude || 0},${selectedAddress.longitude || 0}`;
+
     const res = await CheckoutService.processOrder(
-      selectedAddress.address,
+      addressWithCoords,
       paymentMethod,
       checkedItemIds,
       selectedPromo?.id,

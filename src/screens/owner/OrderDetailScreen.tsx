@@ -96,6 +96,7 @@ export default function OrderDetailScreen() {
       if (nextStatus === "delivering") {
         navigation.replace("Tracking", {
           orderId: currentOrder.id,
+          role: "owner",
         });
       }
     } catch (error) {

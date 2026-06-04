@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { parseDeliveryAddress } from "../utils/formatters";
 
 // Khách hàng lấy danh sách đơn
 export const getMyOrders = async () => {
@@ -33,7 +34,7 @@ export const getMyOrders = async () => {
     created_at: order.created_at,
     updated_at: order.updated_at || order.created_at,
     status: order.status,
-    address: order.delivery_address,
+    address: parseDeliveryAddress(order.delivery_address).address,
     note: order.note,
     items: (order.order_details ?? []).map((item: any) => ({
       name: item.foods?.name,
@@ -53,6 +54,7 @@ type User = {
   id: string;
   fullname: string;
   phone_number: string;
+  image_url?: string;
   avatarUrl?: string;
 };
 
@@ -105,13 +107,13 @@ export const getOwnerOrders = async () => {
       created_at: order.created_at,
       updated_at: order.updated_at || order.created_at,
       status: order.status,
-      address: order.delivery_address,
+      address: parseDeliveryAddress(order.delivery_address).address,
       note: order.note,
       customer: {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
         phone_number: user?.phone_number ?? "",
-        avatarUrl: user?.avatarUrl ?? "",
+        avatarUrl: user?.image_url ?? undefined,
       },
       items,
       payment: {
@@ -180,6 +182,14 @@ export const getOrderAddress = async (orderId: number) => {
     .single();
 
   if (error) throw error;
+  
+  if (data) {
+    const parsed = parseDeliveryAddress(data.delivery_address);
+    data.delivery_address = parsed.address;
+    (data as any).latitude = parsed.latitude;
+    (data as any).longitude = parsed.longitude;
+  }
+  
   return data;
 };
 

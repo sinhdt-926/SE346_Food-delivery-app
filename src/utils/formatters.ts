@@ -59,3 +59,17 @@ export const formatDate = (dateString: string) => {
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
 };
+
+export const parseDeliveryAddress = (rawAddress: string | null) => {
+  if (!rawAddress) return { address: "", latitude: null, longitude: null };
+  const parts = rawAddress.split("|coords:");
+  if (parts.length === 2) {
+    const coordsStr = parts[1].split(",");
+    return {
+      address: parts[0],
+      latitude: parseFloat(coordsStr[0]),
+      longitude: parseFloat(coordsStr[1]),
+    };
+  }
+  return { address: rawAddress, latitude: null, longitude: null };
+};
