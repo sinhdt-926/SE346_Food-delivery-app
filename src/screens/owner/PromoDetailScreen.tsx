@@ -430,7 +430,7 @@ export default function AddEditPromotionScreen() {
             <Text style={styles.label}>Ngày kết thúc</Text>
             <TouchableOpacity
               style={styles.dateInput}
-              onPress={() => setShowStartPicker(true)}
+              onPress={() => setShowEndPicker(true)}
             >
               <Ionicons name="calendar-outline" size={20} color="#666" />
               <Text>{endDate}</Text>
