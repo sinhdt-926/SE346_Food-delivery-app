@@ -17,11 +17,6 @@
     },
     "android": {
       "package": "com.fooddelivery.app",
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyDoX6PAyUmmyREawSdvHqzc4pqkYRZS0eA"
-        }
-      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
