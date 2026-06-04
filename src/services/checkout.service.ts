@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import { CheckoutResponse } from '../types/checkout';
 
-const DEFAULT_APP_SCHEME = process.env.EXPO_PUBLIC_DEFAULT_APP_SCHEME || 'exp://192.168.100.97:8081/--';
+// appScheme luôn được truyền động từ UI qua Linking.createURL() — không dùng fallback cứng nữa
 
 export const CheckoutService = {
   async processOrder(
@@ -42,7 +42,7 @@ export const CheckoutService = {
           body: {
             orderId: orderId,
             amount: paymentInfo.amount,
-            appScheme: appScheme || DEFAULT_APP_SCHEME,
+            appScheme: appScheme,
           },
         });
 
