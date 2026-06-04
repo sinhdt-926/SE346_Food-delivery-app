@@ -93,6 +93,11 @@ export default function OrderDetailScreen() {
           type: paymentData.type,
         },
       }));
+      if (nextStatus === "delivering") {
+        navigation.replace("Tracking", {
+          orderId: currentOrder.id,
+        });
+      }
     } catch (error) {
       Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
         {
