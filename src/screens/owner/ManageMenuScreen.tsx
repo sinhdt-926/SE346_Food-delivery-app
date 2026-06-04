@@ -80,7 +80,7 @@ export default function ManagerMenuScreen() {
         is_available: item.is_available,
         description: item.description,
         category_id: item.category_id,
-        category_name: item.categories?.category_name ?? "Unknown",
+        category_name: item.categories?.category_name ?? "Không có",
       }));
 
       if (isFlag.current) {
@@ -88,7 +88,7 @@ export default function ManagerMenuScreen() {
       }
     } catch (error) {
       if (isFlag.current) {
-        setError("Unable to load the menu");
+        setError("Không thể tải menu");
       }
       throw error;
     }
@@ -100,14 +100,14 @@ export default function ManagerMenuScreen() {
         setCategories([
           {
             id: 0,
-            category_name: "All",
+            category_name: "Tất cả",
           },
           ...data,
         ]);
       }
     } catch (error) {
       if (isFlag.current) {
-        setError("Unable to load the menu");
+        setError("Không thể tải menu");
       }
       throw error;
     }
@@ -138,7 +138,7 @@ export default function ManagerMenuScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#FF7622" />
-        <Text>Loading menu...</Text>
+        <Text>Đang tải...</Text>
       </View>
     );
   }
@@ -171,15 +171,15 @@ export default function ManagerMenuScreen() {
         is_available: item.is_available,
         description: item.description,
         category_id: item.category_id,
-        category_name: item.categories?.category_name ?? "Unknown",
+        category_name: item.categories?.category_name ?? "Không có",
       }));
       if (isFlag.current) {
         setFoods(formattedFoods);
       }
     } catch (error) {
-      Alert.alert("Error", "Unable to reload", [
+      Alert.alert("Lỗi", "Không thể tải lại", [
         {
-          text: "Retry",
+          text: "Thử lại",
           onPress: () => handleRefresh(),
         },
       ]);
@@ -192,7 +192,7 @@ export default function ManagerMenuScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Menu</Text>
+        <Text style={styles.title}>Danh Mục</Text>
         <LogoutButton />
       </View>
       {/* search */}
@@ -200,7 +200,7 @@ export default function ManagerMenuScreen() {
         <Ionicons name="search" size={20} color="#999" />
 
         <TextInput
-          placeholder="Search food..."
+          placeholder="Tìm kiếm món ăn..."
           value={searchText}
           onChangeText={setSearchText}
           style={styles.searchInput}
@@ -236,10 +236,10 @@ export default function ManagerMenuScreen() {
         >
           <Text style={styles.sortText}>
             {sortType === "price_asc"
-              ? "Increase"
+              ? "Tăng dần"
               : sortType === "price_desc"
-                ? "Decrease"
-                : "Default"}
+                ? "Giảm dần"
+                : "Mặc định"}
           </Text>
         </TouchableOpacity>
         {/* modal category */}
@@ -293,7 +293,7 @@ export default function ManagerMenuScreen() {
                 setShowSortModal(false);
               }}
             >
-              <Text style={styles.categoryItemText}>Default</Text>
+              <Text style={styles.categoryItemText}>Mặc định</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.categoryItem}
@@ -302,7 +302,7 @@ export default function ManagerMenuScreen() {
                 setShowSortModal(false);
               }}
             >
-              <Text style={styles.categoryItemText}>Increase</Text>
+              <Text style={styles.categoryItemText}>Tăng dần</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.categoryItem}
@@ -311,14 +311,14 @@ export default function ManagerMenuScreen() {
                 setShowSortModal(false);
               }}
             >
-              <Text style={styles.categoryItemText}>Decrease</Text>
+              <Text style={styles.categoryItemText}>Giảm dần</Text>
             </TouchableOpacity>
           </View>
         </Modal>
       </View>
       {/* tính tổng số món ăn cho từng loại */}
       <View style={styles.subContainer}>
-        <Text style={styles.countText}>{filteredFood.length} items</Text>
+        <Text style={styles.countText}>{filteredFood.length} món ăn</Text>
         {/* add */}
         <View style={styles.actionButtons}>
           {/* add */}

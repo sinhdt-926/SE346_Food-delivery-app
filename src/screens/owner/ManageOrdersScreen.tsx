@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import TopTabButton from "../../components/TopTabButton";
 import OrderCard from "../../components/OrderCard";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import {
   getOwnerOrders,
   updateOrderStatus,
@@ -42,7 +42,7 @@ export default function ManagerOrdersScreen() {
         setOrders(data);
       }
     } catch (error) {
-      if (isFlag.current) setError("Unable to load the order list");
+      if (isFlag.current) setError("Không thể tải danh sách đơn hàng");
     } finally {
       if (isFlag.current) setLoading(false);
     }
@@ -53,6 +53,11 @@ export default function ManagerOrdersScreen() {
       isFlag.current = false;
     };
   }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchOrders();
+    }, []),
+  );
   //chuyển trạng thái đơn hàng
   const handleNextState = async (id: number, currentStatus: OrderStatus) => {
     let nextStatus: OrderStatus = currentStatus;
@@ -76,13 +81,13 @@ export default function ManagerOrdersScreen() {
       await updateOrderStatus(id, nextStatus);
       await fetchOrders();
     } catch (error) {
-      Alert.alert("Error", "Unable to update order status", [
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
         {
-          text: "Retry",
+          text: "Thử lại",
           onPress: () => handleNextState(id, currentStatus),
         },
         {
-          text: "Close",
+          text: "Đóng",
           style: "cancel",
         },
       ]);
@@ -95,7 +100,7 @@ export default function ManagerOrdersScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#FF7622" />
-        <Text style={styles.loadingText}>Loading orders...</Text>
+        <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
       </View>
     );
   }
@@ -121,13 +126,13 @@ export default function ManagerOrdersScreen() {
       await updateOrderStatus(id, "cancelled");
       await fetchOrders();
     } catch (error) {
-      Alert.alert("Error", "Unable to update order status", [
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái đơn hàng", [
         {
-          text: "Retry",
+          text: "Thử lại",
           onPress: () => handleCancelOrder(id),
         },
         {
-          text: "Close",
+          text: "Đóng",
           style: "cancel",
         },
       ]);
@@ -139,33 +144,38 @@ export default function ManagerOrdersScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Menu</Text>
+        <Text style={styles.title}>Đơn Hàng</Text>
         <LogoutButton />
       </View>
 
       {/* tab */}
       <View style={styles.tabs}>
         <TopTabButton
+          title="Chờ xác nhận"
           iconName="time-outline"
           active={activeTab === "pending"}
           onPress={() => setActiveTab("pending")}
         />
         <TopTabButton
+          title="Đang chuẩn bị"
           iconName="restaurant-outline"
           active={activeTab === "preparing"}
           onPress={() => setActiveTab("preparing")}
         />
         <TopTabButton
+          title="Đang giao"
           iconName="bicycle-outline"
           active={activeTab === "delivering"}
           onPress={() => setActiveTab("delivering")}
         />
         <TopTabButton
+          title="Hoàn thành"
           iconName="checkmark-done-outline"
           active={activeTab === "completed"}
           onPress={() => setActiveTab("completed")}
         />
         <TopTabButton
+          title="Đã hủy"
           iconName="close-circle-outline"
           active={activeTab === "cancelled"}
           onPress={() => setActiveTab("cancelled")}
@@ -179,31 +189,43 @@ export default function ManagerOrdersScreen() {
           paddingBottom: 120,
         }}
       >
-        {filteredOrders.map((item) => (
-          <OrderCard
-            key={item.id}
-            status={item.status}
-            customerName={item.customer.fullname}
-            customerId={item.customer.id}
-            totalPrice={item.payment.amount}
-            avatarUrl={item.items?.[0]?.image_url}
-            time={new Date(item.created_at)}
-            onPress={() =>
-              navigation.getParent()?.navigate("OrderDetail", {
-                order: item,
-              })
-            }
-            onActionPress={() => handleNextState(item.id, item.status)}
-            onCancelPress={() => handleCancelOrder(item.id)}
-            actionLoading={actionLoading}
-          />
-        ))}
+        {filteredOrders.length === 0 ? (
+          <Text style={{ textAlign: "center", marginTop: 20 }}>
+            Chưa có đơn hàng
+          </Text>
+        ) : (
+          filteredOrders.map((item) => (
+            <OrderCard
+              key={item.id}
+              status={item.status}
+              customerName={item.customer.fullname}
+              customerId={item.customer.id}
+              totalPrice={item.payment.amount}
+              avatarUrl={item.customer?.avatarUrl}
+              time={new Date(item.created_at)}
+              onPress={() => {
+                if (item.status === "delivering") {
+                  navigation.getParent()?.navigate("Tracking", {
+                    orderId: item.id,
+                  });
+                } else {
+                  navigation.getParent()?.navigate("OrderDetail", {
+                    order: item,
+                  });
+                }
+              }}
+              onActionPress={() => handleNextState(item.id, item.status)}
+              onCancelPress={() => handleCancelOrder(item.id)}
+              actionLoading={actionLoading}
+            />
+          ))
+        )}
       </ScrollView>
       {actionLoading && (
         <View style={styles.overlay}>
           <View style={styles.loadingBox}>
             <ActivityIndicator size="large" color="#FF7622" />
-            <Text style={styles.loadingText}>Updating the order...</Text>
+            <Text style={styles.loadingText}>Cập nhật đơn hàng...</Text>
           </View>
         </View>
       )}

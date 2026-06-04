@@ -53,6 +53,7 @@ type User = {
   id: string;
   fullname: string;
   phone_number: string;
+  avatarUrl?: string;
 };
 
 // Admin/Owner lấy toàn bộ danh sách đơn
@@ -67,7 +68,7 @@ export const getOwnerOrders = async () => {
             status,
             delivery_address,
             note,
-            users(id, fullname, phone_number),
+            users(id, fullname, phone_number, image_url),
             order_details(
                 quantity,
                 price,
@@ -83,7 +84,6 @@ export const getOwnerOrders = async () => {
         `,
     )
     .order("created_at", { ascending: false });
-
   if (error) throw error;
   return (data ?? []).map((order) => {
     const user = order.users as unknown as User;
@@ -111,6 +111,7 @@ export const getOwnerOrders = async () => {
         id: user?.id ?? "",
         fullname: user?.fullname ?? "",
         phone_number: user?.phone_number ?? "",
+        avatarUrl: user?.avatarUrl ?? "",
       },
       items,
       payment: {
@@ -182,15 +183,23 @@ export const getOrderAddress = async (orderId: number) => {
   return data;
 };
 
-export const subscribeToOrderUpdates = (orderId: number, onUpdate: (payload: any) => void) => {
+export const subscribeToOrderUpdates = (
+  orderId: number,
+  onUpdate: (payload: any) => void,
+) => {
   const channel = supabase
     .channel(`public:orders:${orderId}`)
     .on(
-      'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` },
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "orders",
+        filter: `id=eq.${orderId}`,
+      },
       (payload) => {
         onUpdate(payload.new);
-      }
+      },
     )
     .subscribe();
 
@@ -204,11 +213,16 @@ export const subscribeToUserOrders = (userId: string, onUpdate: (payload?: any) 
   const channel = supabase
     .channel(`public:orders:user:${userId}-${Math.random()}`)
     .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${userId}` },
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "orders",
+        filter: `user_id=eq.${userId}`,
+      },
       (payload) => {
         onUpdate(payload);
-      }
+      },
     )
     .subscribe();
 
@@ -222,11 +236,11 @@ export const subscribeToNewGlobalOrders = (onInsert: (payload: any) => void) => 
   const channel = supabase
     .channel(`public:new_orders-${Math.random()}`)
     .on(
-      'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'orders' },
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "orders" },
       (payload) => {
         onInsert(payload);
-      }
+      },
     )
     .subscribe();
 

@@ -47,11 +47,12 @@ export default function DashboardScreen() {
       //lấy doanh thu theo tuần
       const { startDate, endDate } = getCurrentWeekRange();
       const currentWeek = await getDashboardStats(startDate, endDate);
+      setTotalRevenue(currentWeek.total_revenue);
       setRevenueChart(buildRevenueChart(currentWeek.revenue_by_date, "week"));
       //top món ăn
       setPopularFoods(currentWeek.top_selling_foods);
     } catch (error) {
-      Alert.alert("Error", "Failed to load dashboard");
+      Alert.alert("Lỗi", "Không thể tải trang chủ");
     } finally {
       setLoading(false);
     }
@@ -75,7 +76,7 @@ export default function DashboardScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Dashboard</Text>
+        <Text style={styles.title}>Trang Chủ</Text>
         <LogoutButton />
       </View>
       <ScrollView
@@ -88,24 +89,24 @@ export default function DashboardScreen() {
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>Today</Text>
+              <Text style={styles.badgeText}>Hôm nay</Text>
             </View>
             <Text style={styles.statNumber}>{runningOrders}</Text>
-            <Text style={styles.statLabel}>RUNNING ORDERS</Text>
+            <Text style={styles.statLabel}>Đơn hàng đang xử lý</Text>
           </View>
           <View style={styles.statCard}>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>Today</Text>
+              <Text style={styles.badgeText}>Hôm nay</Text>
             </View>
             <Text style={styles.statNumber}>{requests}</Text>
-            <Text style={styles.statLabel}>ORDER REQUESTS</Text>
+            <Text style={styles.statLabel}>Đơn hàng chờ xác nhận</Text>
           </View>
         </View>
         {/* revenus */}
         <View style={styles.revenueCard}>
           <View style={styles.revenueHeader}>
             <View>
-              <Text style={styles.revenueTitle}>Total Revenue</Text>
+              <Text style={styles.revenueTitle}>Doanh Thu</Text>
               <Text style={styles.revenueAmount}>
                 {formatCurrency(totalRevenue, "VND").toLocaleString()}
               </Text>
@@ -114,10 +115,10 @@ export default function DashboardScreen() {
               <TouchableOpacity
                 onPress={() => navigation.navigate("RevenusMonth")}
               >
-                <Text style={styles.detailLink}>See Details</Text>
+                <Text style={styles.detailLink}>Chi tiết</Text>
               </TouchableOpacity>
               <View style={styles.badge}>
-                <Text style={styles.badgeText}>This Week</Text>
+                <Text style={styles.badgeText}>Tuần này</Text>
               </View>
             </View>
           </View>
@@ -162,15 +163,15 @@ export default function DashboardScreen() {
         {/* popular items */}
         <View style={styles.revenueCard}>
           <View style={styles.revenueHeader}>
-            <Text style={styles.revenueTitle}>Popular Items</Text>
+            <Text style={styles.revenueTitle}>Món Ăn Phổ Biến</Text>
             <View style={styles.rightSection}>
               <TouchableOpacity
                 onPress={() => navigation.navigate("PopularItems")}
               >
-                <Text style={styles.detailLink}>See Details</Text>
+                <Text style={styles.detailLink}>Chi tiết</Text>
               </TouchableOpacity>
               <View style={styles.badge}>
-                <Text style={styles.badgeText}>This Week</Text>
+                <Text style={styles.badgeText}>Tuần này</Text>
               </View>
             </View>
           </View>

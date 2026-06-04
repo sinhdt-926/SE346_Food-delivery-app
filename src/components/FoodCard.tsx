@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
 
   name: {
     flex: 1,
-    fontSize: 22,
+    fontSize: 16,
     fontWeight: "700",
     color: "#222",
     marginRight: 12,
@@ -122,20 +122,20 @@ const styles = StyleSheet.create({
 
   badgeText: {
     color: "#FF7622",
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: "600",
     textTransform: "capitalize",
   },
 
   price: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "700",
     color: "#222",
   },
 
   statusDot: {
-    width: 14,
-    height: 14,
+    width: 10,
+    height: 10,
     borderRadius: 999,
     marginTop: 6,
   },
