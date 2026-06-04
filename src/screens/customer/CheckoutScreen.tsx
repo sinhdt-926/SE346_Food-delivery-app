@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
 import RBSheet from "react-native-raw-bottom-sheet";
 
 // Components
@@ -95,12 +96,15 @@ export default function CheckoutScreen({ navigation, route }: any) {
       return;
     }
     setIsOrdering(true);
+    // Tạo deep link động theo IP/port của máy đang chạy Expo
+    const redirectUrl = Linking.createURL("payment-result");
     const res = await CheckoutService.processOrder(
       selectedAddress.address,
       paymentMethod,
       checkedItemIds,
       selectedPromo?.id,
-      orderNote.trim() || undefined
+      orderNote.trim() || undefined,
+      redirectUrl  // truyền scheme động để VNPAY redirect đúng về thiết bị này
     );
     setIsOrdering(false);
 
@@ -112,12 +116,17 @@ export default function CheckoutScreen({ navigation, route }: any) {
     await fetchCart();
 
     if (paymentMethod === "vnpay" && res.data?.paymentUrl) {
-      const result = await WebBrowser.openAuthSessionAsync(res.data.paymentUrl);
+      // redirectUrl phải khớp với scheme được gửi lên server để WebBrowser nhận được callback
+      const redirectUrl = Linking.createURL("payment-result");
+      const result = await WebBrowser.openAuthSessionAsync(
+        res.data.paymentUrl,
+        redirectUrl
+      );
       let isSuccess = false;
 
-      // 1. Kiểm tra mã phản hồi từ URL (VNPay trả về vnp_ResponseCode=00 là thành công)
+      // 1. Kiểm tra status từ URL
       if (result.type === "success" && result.url) {
-        if (result.url.includes("vnp_ResponseCode=00")) {
+        if (result.url.includes("status=success")) {
           isSuccess = true;
         }
       }
