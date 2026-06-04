@@ -21,7 +21,7 @@ import {
   updatePromotion,
   deletePromotion,
 } from "../../services/promotion.service";
-import { uploadImage } from "../../services/food.service";
+import { uploadImage, uploadImageBase64 } from "../../services/food.service";
 import { Promotion } from "../../types/promotion";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
@@ -47,6 +47,7 @@ export default function AddEditPromotionScreen() {
   const [startDate, setStartDate] = useState(getLocalDateString());
   const [endDate, setEndDate] = useState(getLocalDateString());
   const [image, setImage] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
 
   useEffect(() => {
     if (!editingPromotion) return;
@@ -170,7 +171,9 @@ export default function AddEditPromotionScreen() {
       setIsSaving(true);
       
       let imageUrl = image;
-      if (image && image.startsWith("file")) {
+      if (imageBase64) {
+        imageUrl = await uploadImageBase64(imageBase64);
+      } else if (image && image.startsWith("file")) {
         const response = await fetch(image);
         const blob = await response.blob();
         imageUrl = await uploadImage(blob);
@@ -201,6 +204,7 @@ export default function AddEditPromotionScreen() {
       );
       return true;
     } catch (error) {
+      console.error("handleSave promo error:", error);
       Alert.alert(
         "Thất bại",
         isEditMode ? "Cập nhật thất bại" : "Tạo thất bại",
@@ -313,9 +317,13 @@ export default function AddEditPromotionScreen() {
         allowsEditing: true,
         aspect: [3, 1],
         quality: 0.8,
+        base64: true,
       });
       if (!result.canceled) {
         setImage(result.assets[0].uri);
+        if (result.assets[0].base64) {
+          setImageBase64(result.assets[0].base64);
+        }
       }
     } catch (error) {
       Alert.alert("Lỗi", "Không thể chọn ảnh");

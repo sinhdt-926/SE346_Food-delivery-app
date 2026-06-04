@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { decode } from "base64-arraybuffer";
 
 //Category
 export const getCategories = async () => {
@@ -165,6 +166,22 @@ export const uploadImage = async (file: any) => {
   const { data } = await supabase.storage.from("images").getPublicUrl(fileName);
   return data.publicUrl;
 };
+
+export const uploadImageBase64 = async (base64Str: string) => {
+  const fileName = `foods/food-${Date.now()}.jpg`;
+  const arrayBuffer = decode(base64Str);
+  const { error } = await supabase.storage
+    .from("images")
+    .upload(fileName, arrayBuffer, {
+      contentType: "image/jpeg",
+    });
+  if (error) {
+    throw error;
+  }
+  const { data } = await supabase.storage.from("images").getPublicUrl(fileName);
+  return data.publicUrl;
+};
+
 //lấy tất cả món
 export const getAllFoods = async () => {
   const { data, error } = await supabase
