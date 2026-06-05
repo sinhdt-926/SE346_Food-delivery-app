@@ -83,7 +83,7 @@
 
 ### Tải file APK
 
-File APK bản mới nhất được đính kèm tại mục **[Releases](https://github.com/sinhdt-926/SE346_Food-delivery-app/releases/tag/v1.0.0)** trên GitHub.
+File APK bản mới nhất được đính kèm tại mục **[Releases](https://github.com/sinhdt-926/SE346_Food-delivery-app/releases/tag/v1.0.1)** trên GitHub.
 
 ### Các bước cài đặt
 
