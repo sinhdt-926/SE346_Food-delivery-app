@@ -22,7 +22,7 @@
 | Điều hướng | React Navigation (Stack & Bottom Tabs) |
 | Quản lý trạng thái | Zustand |
 | Backend-as-a-Service | Supabase (PostgreSQL, Auth, Storage, Edge Functions) |
-| Bản đồ & Định vị | expo-location, react-native-maps, Nominatim API |
+| Bản đồ & Định vị | expo-location, react-native-maps, Nominatim API, Google Maps API |
 | Thanh toán | VNPay (qua Supabase Edge Function) |
 | Animation | Lottie React Native |
 | Biểu đồ | react-native-chart-kit |
